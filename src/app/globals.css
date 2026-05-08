@@ -126,13 +126,4 @@
   font-family: var(--font-syne), var(--font-space-grotesk), sans-serif;
 }
 
-/* Glowing pulse animation for CTA button — brand accent #4ADE80 */
-@keyframes glow-pulse {
-  0%,
-  100% {
-    box-shadow: 0 0 20px rgba(74, 222, 128, 0.3);
-  }
-  50% {
-    box-shadow: 0 0 40px rgba(74, 222, 128, 0.45), 0 0 80px rgba(74, 222, 128, 0.12);
-  }
-}
+
