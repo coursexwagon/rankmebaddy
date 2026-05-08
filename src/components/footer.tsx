@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Image from "next/image";
 
 /* ─── Color System ───────────────────────────────────────────── */
 // Background: #0A0A0B  |  Surface: #18181B  |  Border: #27272A
@@ -67,13 +66,11 @@ export default function FooterSection() {
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
             >
-              <Image
-                src="/logo-icon.png"
-                alt="RankMeBaddy"
-                width={28}
-                height={28}
-                className="rounded-lg"
-              />
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#6EE7B7]/10">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6EE7B7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
               <span className="text-sm font-semibold text-[#FAFAFA]">
                 RankMeBaddy
               </span>

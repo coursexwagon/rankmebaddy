@@ -4,7 +4,6 @@ import { useRef, useMemo } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { motion, useScroll, useTransform } from "framer-motion";
 import * as THREE from "three";
-import Image from "next/image";
 
 /* ─── Color System ───────────────────────────────────────────── */
 // Background: #0A0A0B  |  Surface: #18181B  |  Border: #27272A
@@ -203,28 +202,6 @@ export default function HeroSection() {
           }}
         />
       </div>
-
-      {/* Baddy peeking from behind the globe */}
-      <motion.div
-        className="pointer-events-none absolute bottom-[18%] right-[8%] sm:bottom-[20%] sm:right-[15%] md:right-[20%]"
-        initial={{ opacity: 0, y: 40, scale: 0.8 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.8, delay: 1.2, ease: [0.21, 0.47, 0.32, 0.98] }}
-      >
-        <motion.div
-          animate={{ y: [0, -8, 0], rotate: [0, 2, 0] }}
-          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-        >
-          <Image
-            src="/mascot-wave.png"
-            alt="Baddy — your SEO sidekick"
-            width={90}
-            height={90}
-            className="drop-shadow-[0_8px_32px_rgba(110,231,183,0.2)] md:w-[110px] md:h-[110px]"
-            priority
-          />
-        </motion.div>
-      </motion.div>
 
       <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[#0A0A0B]/60 to-transparent" />
 
