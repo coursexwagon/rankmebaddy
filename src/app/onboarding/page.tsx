@@ -11,34 +11,33 @@ import Image from "next/image";
 
 const TOTAL_STEPS = 5;
 
-/* ─── Mascot Component ──────────────────────────────────────── */
+/* ─── Mascot Component — Different poses for different moods ─── */
+const mascotImages: Record<string, string> = {
+  wave: "/mascot-wave.png",
+  excited: "/mascot-excited.png",
+  thinking: "/mascot-thinking.png",
+  default: "/mascot.png",
+};
+
 function Mascot({ mood = "wave", size = 80 }: { mood?: string; size?: number }) {
-  const bounce = mood === "wave" ? [0, -6, 0] : mood === "excited" ? [0, -12, 0, -8, 0] : [0];
-  const rotate = mood === "wave" ? [0, 5, 0, -5, 0] : mood === "excited" ? [0, -3, 0, 3, 0] : [0];
+  const src = mascotImages[mood] || mascotImages.default;
+  const bounce = mood === "wave" ? [0, -6, 0] : mood === "excited" ? [0, -10, 0, -6, 0] : [0];
+  const rotate = mood === "wave" ? [0, 3, 0, -3, 0] : mood === "excited" ? [0, -2, 0, 2, 0] : [0];
 
   return (
     <motion.div
       className="relative"
       animate={{ y: bounce, rotate }}
-      transition={{ duration: mood === "excited" ? 0.6 : 2, repeat: Infinity, ease: "easeInOut" }}
+      transition={{ duration: mood === "excited" ? 0.6 : 2.5, repeat: Infinity, ease: "easeInOut" }}
     >
       <Image
-        src="/mascot.png"
-        alt="RankMeBaddy mascot"
+        src={src}
+        alt="Baddy — your SEO sidekick"
         width={size}
         height={size}
-        className="drop-shadow-lg"
+        className="drop-shadow-[0_8px_24px_rgba(110,231,183,0.15)]"
         priority
       />
-      {/* Speech bubble tail — only shown when mascot is "talking" */}
-      {(mood === "wave" || mood === "excited") && (
-        <motion.div
-          className="absolute -bottom-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 bg-[#18181B] border-b border-r border-[#27272A]"
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.3 }}
-        />
-      )}
     </motion.div>
   );
 }
@@ -472,7 +471,7 @@ function StepWebsite({
       className="mx-auto max-w-sm"
     >
       <div className="mb-6 flex justify-center">
-        <Mascot mood={isScanning ? "excited" : "wave"} size={64} />
+        <Mascot mood="thinking" size={64} />
       </div>
 
       <SpeechBubble delay={0}>
