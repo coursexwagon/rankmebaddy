@@ -53,7 +53,7 @@ export default function Navbar() {
         {/* CTA */}
         <div className="flex items-center gap-3">
           <a
-            href="/onboarding"
+            href="/dashboard"
             className="hidden rounded-full border border-[#27272A] bg-[#18181B] px-4 py-2 text-[12px] font-medium text-[#A1A1AA] transition-colors hover:border-[#3F3F46] hover:text-[#FAFAFA] sm:inline-flex"
           >
             Log in

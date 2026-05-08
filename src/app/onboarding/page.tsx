@@ -462,12 +462,12 @@ function StepScanner({
 
               {/* Quick stats row */}
               <div className="flex flex-wrap gap-2 pt-1">
-                {siteData.h1 && (
+                {siteData.h1 && siteData.h1.trim() && (
                   <span className="rounded-full border border-[#27272A] bg-[#18181B] px-2.5 py-1 text-[10px] text-[#71717A]">
                     H1: {siteData.h1.length > 30 ? siteData.h1.slice(0, 30) + "..." : siteData.h1}
                   </span>
                 )}
-                {siteData.lang && (
+                {siteData.lang && siteData.lang.trim() && (
                   <span className="rounded-full border border-[#27272A] bg-[#18181B] px-2.5 py-1 text-[10px] text-[#71717A]">
                     Lang: {siteData.lang}
                   </span>
@@ -716,10 +716,11 @@ function StepKeyword({
   }, []);
 
   // Smart hints based on what they type or their site data
+  const shortName = siteData?.domain?.split(".")[0] || "tool";
   const baseHints = siteData?.domain
     ? [
         `"${siteData.domain} alternative"`,
-        `"best ${siteData.h1 || siteData.title?.split(" ")[0] || "tool"}"`,
+        `"best ${shortName}"`,
         `"${siteData.domain} reviews"`,
       ]
     : ['"best protein powder"', '"vegan meal delivery"', '"project management tool"'];
@@ -830,7 +831,7 @@ function StepKeyword({
 }
 
 /* ─── Step 5: Done ───────────────────────────────────────────── */
-function StepDone({ name, keyword, siteData }: { name: string; keyword: string; siteData: SiteData | null }) {
+function StepDone({ name, keyword, siteData, website, platforms, context }: { name: string; keyword: string; siteData: SiteData | null; website: string; platforms: string[]; context: string }) {
   const [phase, setPhase] = useState(0);
 
   useEffect(() => {
@@ -962,7 +963,27 @@ function StepDone({ name, keyword, siteData }: { name: string; keyword: string; 
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7 }}
             >
-              <CtaButton onClick={() => (window.location.href = "/")}>
+              <CtaButton
+                onClick={() => {
+                  // Save onboarding data for the dashboard
+                  try {
+                    localStorage.setItem(
+                      "rankmebaddy_onboarding",
+                      JSON.stringify({
+                        name: name,
+                        website: website,
+                        siteData: siteData,
+                        platforms: platforms,
+                        keyword: keyword,
+                        context: context,
+                      })
+                    );
+                  } catch {
+                    // Storage might be full or blocked
+                  }
+                  window.location.href = "/dashboard";
+                }}
+              >
                 Open my dashboard
               </CtaButton>
             </motion.div>
@@ -1108,7 +1129,7 @@ export default function OnboardingPage() {
             />
           )}
           {step === 5 && (
-            <StepDone name={name} keyword={keyword} siteData={siteData} />
+            <StepDone name={name} keyword={keyword} siteData={siteData} website={website} platforms={selectedPlatforms} context={context} />
           )}
         </AnimatePresence>
       </div>
