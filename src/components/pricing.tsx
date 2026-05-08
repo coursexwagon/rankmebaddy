@@ -1,0 +1,297 @@
+"use client";
+
+import { useRef } from "react";
+import { motion, useScroll, useTransform, useInView } from "framer-motion";
+
+/* ─── Color System ───────────────────────────────────────────── */
+// Background: #0A0A0B  |  Surface: #18181B  |  Border: #27272A
+// Text: #FAFAFA  |  Secondary: #A1A1AA  |  Muted: #71717A
+
+/* ─── Underline for headings ─────────────────────────────────── */
+function UnderlinedWord({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="relative inline-block">
+      {children}
+      <svg
+        className="absolute -bottom-1 left-0 w-full overflow-visible"
+        viewBox="0 0 200 12"
+        preserveAspectRatio="none"
+        style={{ height: "0.12em" }}
+      >
+        <motion.path
+          d="M2,8 C40,3 80,11 120,6 C150,2 175,9 198,5"
+          stroke="#6EE7B7"
+          strokeWidth="3"
+          strokeLinecap="round"
+          fill="none"
+          initial={{ pathLength: 0 }}
+          whileInView={{ pathLength: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1, ease: "easeOut" }}
+        />
+      </svg>
+    </span>
+  );
+}
+
+/* ─── Plan Data ──────────────────────────────────────────────── */
+const plans = [
+  {
+    name: "Starter",
+    price: "0",
+    period: "forever",
+    description: "Try it out. See what RankMeBaddy actually suggests.",
+    cta: "Start free",
+    highlighted: false,
+    features: [
+      { text: "1 campaign", included: true },
+      { text: "Google keyword suggestions", included: true },
+      { text: "Content optimization tips", included: true },
+      { text: "Basic ranking reports", included: true },
+      { text: "YouTube & Amazon", included: false },
+      { text: "TikTok & AI Search", included: false },
+      { text: "Priority content delivery", included: false },
+    ],
+  },
+  {
+    name: "Pro",
+    price: "49",
+    period: "/month",
+    description: "Full platform coverage. The words and strategy you need to rank everywhere.",
+    cta: "Get Pro",
+    highlighted: true,
+    features: [
+      { text: "10 campaigns", included: true },
+      { text: "Google keyword suggestions", included: true },
+      { text: "Content optimization tips", included: true },
+      { text: "Full ranking reports", included: true },
+      { text: "YouTube & Amazon", included: true },
+      { text: "TikTok & AI Search", included: true },
+      { text: "Priority content delivery", included: false },
+    ],
+  },
+  {
+    name: "Scale",
+    price: "149",
+    period: "/month",
+    description: "Unlimited campaigns. Priority strategy. For teams that ship content fast.",
+    cta: "Go Scale",
+    highlighted: false,
+    features: [
+      { text: "Unlimited campaigns", included: true },
+      { text: "Google keyword suggestions", included: true },
+      { text: "Content optimization tips", included: true },
+      { text: "Full ranking reports", included: true },
+      { text: "YouTube & Amazon", included: true },
+      { text: "TikTok & AI Search", included: true },
+      { text: "Priority content delivery", included: true },
+    ],
+  },
+];
+
+/* ─── Pricing Card ───────────────────────────────────────────── */
+function PricingCard({
+  plan,
+  index,
+}: {
+  plan: (typeof plans)[0];
+  index: number;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-60px" });
+
+  // Staggered reveal — cards slide in from below with offset
+  const yOffset = index === 1 ? 0 : 24; // middle card sits higher
+
+  return (
+    <motion.div
+      ref={ref}
+      className={`relative overflow-hidden rounded-2xl border ${
+        plan.highlighted
+          ? "border-[#6EE7B7]/30 bg-[#18181B]/80"
+          : "border-[#27272A] bg-[#18181B]/40"
+      }`}
+      style={{ marginTop: yOffset }}
+      initial={{ opacity: 0, y: 60, rotateX: 8 }}
+      whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{
+        duration: 0.7,
+        delay: index * 0.15,
+        ease: [0.21, 0.47, 0.32, 0.98],
+      }}
+    >
+      {/* Highlighted glow */}
+      {plan.highlighted && (
+        <div className="absolute inset-0 overflow-hidden">
+          <div
+            className="absolute -top-20 -right-20 h-40 w-40 rounded-full"
+            style={{
+              background:
+                "radial-gradient(circle, rgba(110,231,183,0.08) 0%, transparent 70%)",
+            }}
+          />
+          <div
+            className="absolute -bottom-20 -left-20 h-40 w-40 rounded-full"
+            style={{
+              background:
+                "radial-gradient(circle, rgba(110,231,183,0.05) 0%, transparent 70%)",
+            }}
+          />
+        </div>
+      )}
+
+      <div className="relative p-6 sm:p-8">
+        {/* Plan name */}
+        <div className="mb-1 flex items-center justify-between">
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-[#A1A1AA]">
+            {plan.name}
+          </h3>
+          {plan.highlighted && (
+            <span className="rounded-full bg-[#6EE7B7]/10 px-2.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-[#6EE7B7]">
+              Popular
+            </span>
+          )}
+        </div>
+
+        {/* Price */}
+        <div className="mt-3 flex items-baseline gap-1">
+          <span className="text-4xl font-bold text-[#FAFAFA] sm:text-5xl">
+            ${plan.price}
+          </span>
+          <span className="text-sm text-[#71717A]">{plan.period}</span>
+        </div>
+
+        {/* Description */}
+        <p className="mt-3 text-[13px] leading-relaxed text-[#71717A]">
+          {plan.description}
+        </p>
+
+        {/* CTA */}
+        <motion.button
+          className={`mt-6 w-full rounded-full py-3 text-sm font-semibold transition-all ${
+            plan.highlighted
+              ? "bg-[#6EE7B7] text-[#0A0A0B] hover:bg-[#6EE7B7]/90"
+              : "border border-[#27272A] bg-transparent text-[#FAFAFA] hover:border-[#3F3F46] hover:bg-[#18181B]"
+          }`}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          {plan.cta}
+        </motion.button>
+
+        {/* Features */}
+        <ul className="mt-6 space-y-3 border-t border-[#27272A]/40 pt-6">
+          {plan.features.map((feature, i) => (
+            <motion.li
+              key={feature.text}
+              className="flex items-center gap-3 text-[13px]"
+              initial={{ opacity: 0, x: -10 }}
+              animate={isInView ? { opacity: 1, x: 0 } : {}}
+              transition={{ duration: 0.3, delay: 0.5 + i * 0.06 }}
+            >
+              {feature.included ? (
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#6EE7B7"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="shrink-0"
+                >
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              ) : (
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#3F3F46"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="shrink-0"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              )}
+              <span
+                className={
+                  feature.included ? "text-[#A1A1AA]" : "text-[#52525B]"
+                }
+              >
+                {feature.text}
+              </span>
+            </motion.li>
+          ))}
+        </ul>
+      </div>
+    </motion.div>
+  );
+}
+
+/* ─── Pricing Section ────────────────────────────────────────── */
+export default function PricingSection() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"],
+  });
+
+  // Parallax for the section label
+  const labelY = useTransform(scrollYProgress, [0, 1], [40, -20]);
+
+  return (
+    <section
+      id="pricing"
+      ref={sectionRef}
+      className="relative px-4 py-20 sm:px-6 sm:py-28"
+      style={{ backgroundColor: "#0A0A0B" }}
+    >
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#27272A] to-transparent" />
+
+      <div className="mx-auto max-w-5xl">
+        {/* Section header with parallax */}
+        <motion.div
+          className="mb-14 flex flex-col items-center gap-3 text-center"
+          style={{ y: labelY }}
+        >
+          <span className="inline-flex items-center gap-2 rounded-full border border-[#27272A] bg-[#18181B] px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-[#A1A1AA]">
+            Pricing
+          </span>
+          <h2 className="font-heading text-2xl font-bold text-[#FAFAFA] sm:text-3xl md:text-4xl">
+            <UnderlinedWord>Simple</UnderlinedWord> pricing. No surprises.
+          </h2>
+          <p className="max-w-lg text-sm text-[#71717A]">
+            Get the keywords, content strategy, and implementation guidance you
+            need — across every platform. Start free, upgrade when you&apos;re ready.
+          </p>
+        </motion.div>
+
+        {/* Pricing cards */}
+        <div className="grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-3">
+          {plans.map((plan, i) => (
+            <PricingCard key={plan.name} plan={plan} index={i} />
+          ))}
+        </div>
+
+        {/* Bottom trust line */}
+        <motion.p
+          className="mt-10 text-center text-xs text-[#52525B]"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+        >
+          All plans include weekly ranking reports · Cancel anytime ·
+          No credit card required for Starter
+        </motion.p>
+      </div>
+    </section>
+  );
+}

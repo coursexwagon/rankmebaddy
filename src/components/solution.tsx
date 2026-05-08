@@ -1,14 +1,14 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 /* ─── Color System ───────────────────────────────────────────── */
 // Background: #0A0A0B  |  Surface: #18181B  |  Border: #27272A
 // Text: #FAFAFA  |  Secondary: #A1A1AA  |  Muted: #71717A
 
-/* ─── Animated Card ──────────────────────────────────────────── */
+/* ─── Animated Card with scroll-triggered 3D tilt ────────────── */
 interface CardProps {
   children: React.ReactNode;
   className?: string;
@@ -22,10 +22,15 @@ function Card({ children, className, delay = 0 }: CardProps) {
         "relative overflow-hidden rounded-2xl border border-[#27272A] bg-[#18181B]/40",
         className
       )}
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y: 30, rotateX: 5 }}
+      whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
       viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: 0.6, delay, ease: [0.21, 0.47, 0.32, 0.98] }}
+      transition={{ duration: 0.7, delay, ease: [0.21, 0.47, 0.32, 0.98] }}
+      whileHover={{
+        y: -3,
+        borderColor: "rgba(110,231,183,0.15)",
+        transition: { duration: 0.2 },
+      }}
     >
       {children}
     </motion.div>
@@ -90,7 +95,6 @@ function ChatInterfaceBox() {
 
             {/* Chat messages */}
             <div className="flex-1 space-y-4 p-4 sm:p-5">
-              {/* User message */}
               <motion.div
                 className="flex justify-end"
                 initial={{ opacity: 0, y: 10 }}
@@ -102,7 +106,6 @@ function ChatInterfaceBox() {
                 </div>
               </motion.div>
 
-              {/* AI response with inline platform cards */}
               <motion.div
                 className="flex justify-start"
                 initial={{ opacity: 0, y: 10 }}
@@ -114,76 +117,38 @@ function ChatInterfaceBox() {
                     On it. Three campaigns launched in parallel:
                   </p>
 
-                  {/* Inline platform status cards */}
                   <div className="mt-3 grid grid-cols-3 gap-2">
-                    <motion.div
-                      className="rounded-lg border border-[#4285F4]/20 bg-[#4285F4]/5 p-2.5"
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={isInView ? { opacity: 1, scale: 1 } : {}}
-                      transition={{ duration: 0.3, delay: 1.2 }}
-                    >
-                      <div className="flex items-center gap-1.5">
-                        <span className="flex h-4 w-4 items-center justify-center rounded bg-[#4285F4]/20 text-[7px] font-bold text-[#4285F4]">G</span>
-                        <span className="text-[9px] font-medium text-[#FAFAFA]">Google</span>
-                      </div>
-                      <div className="mt-2">
-                        <div className="h-1 rounded-full bg-[#27272A]">
-                          <motion.div
-                            className="h-1 rounded-full bg-[#4285F4]"
-                            initial={{ width: 0 }}
-                            animate={isInView ? { width: "87%" } : {}}
-                            transition={{ duration: 1, delay: 1.4 }}
-                          />
+                    {[
+                      { letter: "G", color: "#4285F4", name: "Google", pct: "87%", detail: "8 keyword gaps found", delay: 1.2 },
+                      { letter: "YT", color: "#FF0000", name: "YouTube", pct: "64%", detail: "Optimizing title & desc", delay: 1.4 },
+                      { letter: "A", color: "#FF9900", name: "Amazon", pct: "31%", detail: "Rewriting listing copy", delay: 1.6 },
+                    ].map((p) => (
+                      <motion.div
+                        key={p.letter}
+                        className="rounded-lg border p-2.5"
+                        style={{ borderColor: `${p.color}20`, backgroundColor: `${p.color}05` }}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={isInView ? { opacity: 1, scale: 1 } : {}}
+                        transition={{ duration: 0.3, delay: p.delay }}
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <span className="flex h-4 w-4 items-center justify-center rounded text-[7px] font-bold" style={{ color: p.color, backgroundColor: `${p.color}20` }}>{p.letter}</span>
+                          <span className="text-[9px] font-medium text-[#FAFAFA]">{p.name}</span>
                         </div>
-                        <p className="mt-1 text-[8px] text-[#A1A1AA]">8 keyword gaps found</p>
-                      </div>
-                    </motion.div>
-
-                    <motion.div
-                      className="rounded-lg border border-[#FF0000]/20 bg-[#FF0000]/5 p-2.5"
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={isInView ? { opacity: 1, scale: 1 } : {}}
-                      transition={{ duration: 0.3, delay: 1.4 }}
-                    >
-                      <div className="flex items-center gap-1.5">
-                        <span className="flex h-4 w-4 items-center justify-center rounded bg-[#FF0000]/20 text-[7px] font-bold text-[#FF0000]">YT</span>
-                        <span className="text-[9px] font-medium text-[#FAFAFA]">YouTube</span>
-                      </div>
-                      <div className="mt-2">
-                        <div className="h-1 rounded-full bg-[#27272A]">
-                          <motion.div
-                            className="h-1 rounded-full bg-[#FF0000]"
-                            initial={{ width: 0 }}
-                            animate={isInView ? { width: "64%" } : {}}
-                            transition={{ duration: 1, delay: 1.6 }}
-                          />
+                        <div className="mt-2">
+                          <div className="h-1 rounded-full bg-[#27272A]">
+                            <motion.div
+                              className="h-1 rounded-full"
+                              style={{ backgroundColor: p.color }}
+                              initial={{ width: 0 }}
+                              animate={isInView ? { width: p.pct } : {}}
+                              transition={{ duration: 1, delay: p.delay + 0.2 }}
+                            />
+                          </div>
+                          <p className="mt-1 text-[8px] text-[#A1A1AA]">{p.detail}</p>
                         </div>
-                        <p className="mt-1 text-[8px] text-[#A1A1AA]">Optimizing title & desc</p>
-                      </div>
-                    </motion.div>
-
-                    <motion.div
-                      className="rounded-lg border border-[#FF9900]/20 bg-[#FF9900]/5 p-2.5"
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={isInView ? { opacity: 1, scale: 1 } : {}}
-                      transition={{ duration: 0.3, delay: 1.6 }}
-                    >
-                      <div className="flex items-center gap-1.5">
-                        <span className="flex h-4 w-4 items-center justify-center rounded bg-[#FF9900]/20 text-[7px] font-bold text-[#FF9900]">A</span>
-                        <span className="text-[9px] font-medium text-[#FAFAFA]">Amazon</span>
-                      </div>
-                      <div className="mt-2">
-                        <div className="h-1 rounded-full bg-[#27272A]">
-                          <motion.div
-                            className="h-1 rounded-full bg-[#FF9900]"
-                            initial={{ width: 0 }}
-                            animate={isInView ? { width: "31%" } : {}}
-                            transition={{ duration: 1, delay: 1.8 }}
-                          />
-                        </div>
-                        <p className="mt-1 text-[8px] text-[#A1A1AA]">Rewriting listing copy</p>
-                      </div>
-                    </motion.div>
+                      </motion.div>
+                    ))}
                   </div>
 
                   <p className="mt-3 text-[11px] text-[#71717A]">
@@ -192,7 +157,6 @@ function ChatInterfaceBox() {
                 </div>
               </motion.div>
 
-              {/* Second user message */}
               <motion.div
                 className="flex justify-end"
                 initial={{ opacity: 0, y: 10 }}
@@ -204,7 +168,6 @@ function ChatInterfaceBox() {
                 </div>
               </motion.div>
 
-              {/* AI quick reply */}
               <motion.div
                 className="flex justify-start"
                 initial={{ opacity: 0, y: 10 }}
@@ -249,16 +212,15 @@ function RankingsCard() {
   const isInView = useInView(ref, { once: true, margin: "-80px" });
 
   const rankings = [
-    { platform: "Google", icon: "G", color: "#4285F4", keyword: "best protein powder", before: "#38", after: "#3", change: "+35" },
-    { platform: "YouTube", icon: "YT", color: "#FF0000", keyword: "protein review 2025", before: "#47", after: "#12", change: "+35" },
-    { platform: "Amazon", icon: "A", color: "#FF9900", keyword: "whey isolate", before: "—", after: "#28", change: "New" },
-    { platform: "TikTok", icon: "TT", color: "#FE2C55", keyword: "protein tok", before: "—", after: "#15", change: "New" },
+    { platform: "Google", icon: "G", color: "#4285F4", keyword: "best protein powder", before: "#38", after: "#3" },
+    { platform: "YouTube", icon: "YT", color: "#FF0000", keyword: "protein review 2025", before: "#47", after: "#12" },
+    { platform: "Amazon", icon: "A", color: "#FF9900", keyword: "whey isolate", before: "—", after: "#28" },
+    { platform: "TikTok", icon: "TT", color: "#FE2C55", keyword: "protein tok", before: "—", after: "#15" },
   ];
 
   return (
     <Card className="col-span-1" delay={0.15}>
       <div ref={ref} className="flex flex-col p-5 sm:p-6">
-        {/* Header */}
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="flex h-6 w-6 items-center justify-center rounded-md bg-[#6EE7B7]/10">
@@ -271,7 +233,6 @@ function RankingsCard() {
           <span className="rounded bg-[#6EE7B7]/10 px-1.5 py-0.5 text-[9px] font-medium text-[#6EE7B7]">14 days</span>
         </div>
 
-        {/* Ranking rows */}
         <div className="flex-1 space-y-2.5">
           {rankings.map((r, i) => (
             <motion.div
@@ -301,7 +262,6 @@ function RankingsCard() {
           ))}
         </div>
 
-        {/* Bottom summary */}
         <div className="mt-4 border-t border-[#27272A]/40 pt-3">
           <div className="flex items-center justify-between text-[10px]">
             <span className="text-[#71717A]">Average improvement</span>
@@ -313,7 +273,7 @@ function RankingsCard() {
   );
 }
 
-/* ─── Score Ring Card (replaces boring line chart) ───────────── */
+/* ─── Score Ring Card ────────────────────────────────────────── */
 function ScoreRingCard() {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-80px" });
@@ -327,7 +287,6 @@ function ScoreRingCard() {
   return (
     <Card className="col-span-1" delay={0.3}>
       <div ref={ref} className="flex flex-col p-5 sm:p-6">
-        {/* Header */}
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="flex h-6 w-6 items-center justify-center rounded-md bg-[#6EE7B7]/10">
@@ -341,7 +300,6 @@ function ScoreRingCard() {
           <span className="rounded bg-[#6EE7B7]/10 px-1.5 py-0.5 text-[9px] font-medium text-[#6EE7B7]">Excellent</span>
         </div>
 
-        {/* Large score ring */}
         <div className="flex items-center justify-center py-2">
           <div className="relative flex h-28 w-28 items-center justify-center">
             <svg className="absolute h-28 w-28 -rotate-90" viewBox="0 0 112 112">
@@ -372,7 +330,6 @@ function ScoreRingCard() {
           </div>
         </div>
 
-        {/* Metric rows */}
         <div className="mt-3 space-y-2.5">
           {metrics.map((m, i) => (
             <motion.div
@@ -407,13 +364,18 @@ function ScoreRingCard() {
 
 /* ─── Section Title ─────────────────────────────────────────── */
 function SectionTitle() {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"],
+  });
+  const y = useTransform(scrollYProgress, [0, 1], [40, -20]);
+
   return (
     <motion.div
+      ref={ref}
       className="mb-12 flex flex-col items-center gap-4 text-center"
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: 0.5 }}
+      style={{ y }}
     >
       <span className="inline-flex items-center gap-2 rounded-full border border-[#27272A] bg-[#18181B] px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-[#A1A1AA]">
         The Solution

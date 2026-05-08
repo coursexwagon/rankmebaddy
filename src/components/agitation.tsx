@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, useScroll, useTransform } from "framer-motion";
 
 /* ─── Color System ───────────────────────────────────────────── */
 // Background: #0A0A0B  |  Surface: #18181B  |  Border: #27272A
@@ -83,6 +83,15 @@ const totalHours = 10.5;
 export default function AgitationSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"],
+  });
+
+  // Parallax for header
+  const headerY = useTransform(scrollYProgress, [0, 1], [60, -30]);
+  // Parallax for the content (slower)
+  const contentY = useTransform(scrollYProgress, [0, 1], [30, -15]);
 
   return (
     <section
@@ -94,13 +103,10 @@ export default function AgitationSection() {
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#27272A] to-transparent" />
 
       <div className="mx-auto max-w-4xl">
-        {/* Section label */}
+        {/* Section label — parallax */}
         <motion.div
           className="mb-14 flex flex-col items-center gap-3 text-center"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-60px" }}
-          transition={{ duration: 0.5 }}
+          style={{ y: headerY }}
         >
           <span className="inline-flex items-center gap-2 rounded-full border border-[#27272A] bg-[#18181B] px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-[#A1A1AA]">
             The Reality
@@ -113,9 +119,9 @@ export default function AgitationSection() {
           </p>
         </motion.div>
 
-        {/* Creative Time Blocks */}
-        <div className="relative">
-          {/* Total time callout — positioned above the blocks */}
+        {/* Content — parallax */}
+        <motion.div className="relative" style={{ y: contentY }}>
+          {/* Total time callout */}
           <motion.div
             className="mb-8 flex items-center justify-center gap-3"
             initial={{ opacity: 0, scale: 0.9 }}
@@ -149,9 +155,9 @@ export default function AgitationSection() {
                     delay: 0.3 + i * 0.1,
                     ease: [0.21, 0.47, 0.32, 0.98],
                   }}
+                  whileHover={{ x: 4, transition: { duration: 0.15 } }}
                 >
                   <div className="flex items-center gap-4">
-                    {/* Platform icon + name */}
                     <div className="flex w-24 shrink-0 items-center gap-2.5 sm:w-28">
                       <span
                         className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
@@ -164,7 +170,6 @@ export default function AgitationSection() {
                       </span>
                     </div>
 
-                    {/* Time bar */}
                     <div className="relative flex-1">
                       <div className="h-8 overflow-hidden rounded-lg bg-[#18181B]/60">
                         <motion.div
@@ -181,7 +186,6 @@ export default function AgitationSection() {
                             ease: [0.21, 0.47, 0.32, 0.98],
                           }}
                         >
-                          {/* Hours label inside bar */}
                           <span
                             className="ml-3 text-[11px] font-semibold tabular-nums"
                             style={{ color: `${p.color}CC` }}
@@ -192,7 +196,6 @@ export default function AgitationSection() {
                       </div>
                     </div>
 
-                    {/* Result badge */}
                     <motion.div
                       className="hidden w-32 shrink-0 sm:block"
                       initial={{ opacity: 0 }}
@@ -200,16 +203,7 @@ export default function AgitationSection() {
                       transition={{ duration: 0.4, delay: 0.8 + i * 0.1 }}
                     >
                       <span className="inline-flex items-center gap-1.5 text-[11px] text-[#FCA5A5]/80">
-                        <svg
-                          width="10"
-                          height="10"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                           <circle cx="12" cy="12" r="10" />
                           <line x1="15" y1="9" x2="9" y2="15" />
                           <line x1="9" y1="9" x2="15" y2="15" />
@@ -223,12 +217,13 @@ export default function AgitationSection() {
             })}
           </div>
 
-          {/* Summary bar — totals */}
+          {/* Summary bar */}
           <motion.div
             className="mt-6 flex items-center justify-between rounded-xl border border-[#27272A] bg-[#18181B]/30 px-5 py-4"
             initial={{ opacity: 0, y: 10 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.5, delay: 1.2 }}
+            whileHover={{ scale: 1.01, transition: { duration: 0.2 } }}
           >
             <div className="flex items-center gap-3">
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FCA5A5]/10">
@@ -248,7 +243,7 @@ export default function AgitationSection() {
               </div>
             </div>
           </motion.div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import Image from "next/image";
 
 /* ─── Color System ───────────────────────────────────────────── */
@@ -16,7 +16,7 @@ const testimonials = [
     company: "FitContent",
     photo: "/people/sarah.jpg",
     quote:
-      "We went from page 3 to page 1 in 2 weeks. I literally didn\u2019t touch anything after the initial setup. Our Amazon listing jumped from unranked to position 34. That\u2019s insane for zero manual work.",
+      "RankMeBaddy told us exactly which keywords to target and gave us the optimized copy to implement. We just pasted it in and two weeks later we were on page 1. It doesn\u2019t auto-rank you — it gives you the exact words and strategy so you can rank yourself.",
     metrics: [
       { label: "Google", value: "#3", before: "#38" },
       { label: "Amazon", value: "#34", before: "Unranked" },
@@ -29,7 +29,7 @@ const testimonials = [
     company: "HealthStack",
     photo: "/people/marcus.jpg",
     quote:
-      "I typed in \u201cbest protein powder\u201d and told it to rank on Google, YouTube, and Amazon. Two weeks later I was on page 1 for Google, position 12 on YouTube, and top 30 on Amazon. I didn\u2019t write a single piece of content myself.",
+      "I told it \u201crank best protein powder\u201d and it gave me a full keyword plan, optimized titles, and the exact content changes to make for Google, YouTube, and Amazon. I just implemented what it suggested. Page 1 in 14 days without writing anything from scratch.",
     metrics: [
       { label: "Google", value: "#1", before: "Page 3" },
       { label: "YouTube", value: "#12", before: "#47" },
@@ -42,7 +42,7 @@ const testimonials = [
     company: "VegaFit",
     photo: "/people/jake.jpg",
     quote:
-      "Page 3 to Page 1 while I was on vacation. The chat interface makes it feel like you\u2019re just talking to someone who happens to be really good at SEO. Our TikTok presence went from zero to 15K views in a month.",
+      "The chat gives you implementation-ready content — titles, descriptions, keyword placements — you just apply it. Our TikTok went from zero to 15K views after following its content plan. It\u2019s like having an SEO expert tell you exactly what to write.",
     metrics: [
       { label: "Google", value: "#3", before: "Page 4" },
       { label: "TikTok", value: "#15", before: "Unranked" },
@@ -89,19 +89,22 @@ function TestimonialCard({
       ref={ref}
       className="relative overflow-hidden rounded-2xl border border-[#27272A] bg-[#18181B]/60"
       style={{ transform: `rotate(${rotation}deg)` }}
-      initial={{ opacity: 0, y: 30, scale: 0.95 }}
-      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      initial={{ opacity: 0, y: 40, scale: 0.95, rotateY: -10 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1, rotateY: 0 }}
       viewport={{ once: true, margin: "-40px" }}
       transition={{
-        duration: 0.6,
+        duration: 0.7,
         delay: index * 0.15,
         ease: [0.21, 0.47, 0.32, 0.98],
+      }}
+      whileHover={{
+        y: -4,
+        transition: { duration: 0.2 },
       }}
     >
       {/* Top section — photo + name + stars */}
       <div className="border-b border-[#27272A]/60 p-5">
         <div className="flex items-start gap-3.5">
-          {/* Real photo */}
           <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-[#27272A]">
             <Image
               src={testimonial.photo}
@@ -160,9 +163,18 @@ function TestimonialCard({
 
 /* ─── Proof Section ──────────────────────────────────────────── */
 export default function ProofSection() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"],
+  });
+
+  const headerY = useTransform(scrollYProgress, [0, 1], [50, -30]);
+
   return (
     <section
       id="proof"
+      ref={sectionRef}
       className="relative px-4 py-20 sm:px-6 sm:py-28"
       style={{ backgroundColor: "#0A0A0B" }}
     >
@@ -171,10 +183,7 @@ export default function ProofSection() {
       <div className="mx-auto max-w-6xl">
         <motion.div
           className="mb-14 flex flex-col items-center gap-3 text-center"
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-60px" }}
-          transition={{ duration: 0.5 }}
+          style={{ y: headerY }}
         >
           <span className="inline-flex items-center gap-2 rounded-full border border-[#27272A] bg-[#18181B] px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-[#A1A1AA]">
             Proof
@@ -183,7 +192,7 @@ export default function ProofSection() {
             Real results. Real people.
           </h2>
           <p className="max-w-md text-sm text-[#71717A]">
-            Teams that switched to RankMeBaddy saw measurable ranking improvements in under 14 days.
+            Teams using RankMeBaddy get the exact keywords, content, and strategy they need to rank — then see results in under 14 days.
           </p>
         </motion.div>
 

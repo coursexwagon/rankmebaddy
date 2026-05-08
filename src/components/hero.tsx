@@ -1,159 +1,76 @@
 "use client";
 
-import { useRef, useMemo, useCallback } from "react";
+import { useRef, useMemo } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import * as THREE from "three";
 
 /* ─── Color System ───────────────────────────────────────────── */
 // Background: #0A0A0B  |  Surface: #18181B  |  Border: #27272A
 // Text: #FAFAFA  |  Secondary: #A1A1AA  |  Muted: #71717A
-// Accent: #6EE7B7 (emerald-300)
 
-/* ─── 3D Globe Component ────────────────────────────────────── */
+/* ─── 3D Globe — Colorless wireframe (original look) ─────────── */
 function Globe() {
   const meshRef = useRef<THREE.Mesh>(null);
   const wireRef = useRef<THREE.LineSegments>(null);
-  const pointsRef = useRef<THREE.Points>(null);
 
-  // Create wireframe sphere geometry
   const wireGeo = useMemo(() => {
     const geo = new THREE.IcosahedronGeometry(2.2, 3);
-    const edges = new THREE.EdgesGeometry(geo);
-    return edges;
+    return new THREE.EdgesGeometry(geo);
   }, []);
 
-  // City dots — random points on sphere surface
-  const { dotPositions, dotColors } = useMemo(() => {
-    const positions: number[] = [];
-    const colors: number[] = [];
-    const accentColor = new THREE.Color("#6EE7B7");
-    const dimColor = new THREE.Color("#3F3F46");
-
-    for (let i = 0; i < 60; i++) {
-      const phi = Math.acos(2 * Math.random() - 1);
-      const theta = 2 * Math.PI * Math.random();
-      const r = 2.22;
-      positions.push(
-        r * Math.sin(phi) * Math.cos(theta),
-        r * Math.sin(phi) * Math.sin(theta),
-        r * Math.cos(phi)
-      );
-      // ~20% of dots are accent color, rest are dim
-      const isAccent = Math.random() < 0.2;
-      const c = isAccent ? accentColor : dimColor;
-      colors.push(c.r, c.g, c.b);
-    }
-    return {
-      dotPositions: new Float32Array(positions),
-      dotColors: new Float32Array(colors),
-    };
-  }, []);
-
-  // Connection arcs between random points
-  const arcPositions = useMemo(() => {
-    const pos: number[] = [];
-    for (let i = 0; i < 12; i++) {
-      const phi1 = Math.acos(2 * Math.random() - 1);
-      const theta1 = 2 * Math.PI * Math.random();
-      const phi2 = Math.acos(2 * Math.random() - 1);
-      const theta2 = 2 * Math.PI * Math.random();
-      const r = 2.22;
-      const p1 = new THREE.Vector3(
-        r * Math.sin(phi1) * Math.cos(theta1),
-        r * Math.sin(phi1) * Math.sin(theta1),
-        r * Math.cos(phi1)
-      );
-      const p2 = new THREE.Vector3(
-        r * Math.sin(phi2) * Math.cos(theta2),
-        r * Math.sin(phi2) * Math.sin(theta2),
-        r * Math.cos(phi2)
-      );
-      const mid = new THREE.Vector3()
-        .addVectors(p1, p2)
-        .multiplyScalar(0.5)
-        .normalize()
-        .multiplyScalar(r * 1.3);
-      const curve = new THREE.QuadraticBezierCurve3(p1, mid, p2);
-      const points = curve.getPoints(20);
-      points.forEach((pt) => pos.push(pt.x, pt.y, pt.z));
-    }
-    return new Float32Array(pos);
+  // Latitude rings (like the original SVG)
+  const rings = useMemo(() => {
+    const r = [];
+    const latitudes = [-40, -20, 0, 20, 40];
+    latitudes.forEach((lat) => {
+      const phi = (90 - lat) * (Math.PI / 180);
+      const ringRadius = 2.2 * Math.sin(phi);
+      const y = 2.2 * Math.cos(phi);
+      r.push({ radius: ringRadius, y });
+    });
+    return r;
   }, []);
 
   useFrame((state, delta) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.y += delta * 0.08;
-    }
-    if (wireRef.current) {
-      wireRef.current.rotation.y += delta * 0.08;
-    }
-    if (pointsRef.current) {
-      pointsRef.current.rotation.y += delta * 0.08;
-    }
+    if (meshRef.current) meshRef.current.rotation.y += delta * 0.06;
+    if (wireRef.current) wireRef.current.rotation.y += delta * 0.06;
   });
 
   return (
     <group>
-      {/* Inner sphere — subtle dark fill */}
+      {/* Dark fill sphere */}
       <mesh ref={meshRef}>
         <sphereGeometry args={[2.15, 32, 32]} />
-        <meshBasicMaterial color="#0A0A0B" transparent opacity={0.9} />
+        <meshBasicMaterial color="#0A0A0B" transparent opacity={0.95} />
       </mesh>
 
-      {/* Wireframe overlay */}
+      {/* Wireframe icosahedron */}
       <lineSegments ref={wireRef} geometry={wireGeo}>
-        <lineBasicMaterial color="#27272A" transparent opacity={0.35} />
+        <lineBasicMaterial color="#FAFAFA" transparent opacity={0.07} />
       </lineSegments>
 
-      {/* City dots */}
-      <points ref={pointsRef}>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            args={[dotPositions, 3]}
+      {/* Latitude rings */}
+      {rings.map((ring, i) => (
+        <mesh key={i} rotation-x={0}>
+          <ringGeometry args={[ring.radius - 0.01, ring.radius, 64]} />
+          <meshBasicMaterial
+            color="#FAFAFA"
+            transparent
+            opacity={0.05}
+            side={THREE.DoubleSide}
           />
-          <bufferAttribute attach="attributes-color" args={[dotColors, 3]} />
-        </bufferGeometry>
-        <pointsMaterial
-          size={0.04}
-          vertexColors
-          transparent
-          opacity={0.9}
-          sizeAttenuation
-        />
-      </points>
+        </mesh>
+      ))}
 
-      {/* Connection arcs */}
-      <lineSegments rotation={[0, 0, 0]}>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            args={[arcPositions, 3]}
-          />
-        </bufferGeometry>
-        <lineBasicMaterial color="#6EE7B7" transparent opacity={0.12} />
-      </lineSegments>
-
-      {/* Outer glow ring */}
-      <mesh>
-        <ringGeometry args={[2.6, 2.65, 64]} />
+      {/* Prime meridian ring */}
+      <mesh rotation={[0, 0, Math.PI / 2]}>
+        <ringGeometry args={[2.19, 2.2, 64]} />
         <meshBasicMaterial
-          color="#6EE7B7"
+          color="#FAFAFA"
           transparent
-          opacity={0.06}
+          opacity={0.04}
           side={THREE.DoubleSide}
-        />
-      </mesh>
-
-      {/* Atmospheric halo */}
-      <mesh>
-        <sphereGeometry args={[2.5, 32, 32]} />
-        <meshBasicMaterial
-          color="#6EE7B7"
-          transparent
-          opacity={0.015}
-          side={THREE.BackSide}
         />
       </mesh>
     </group>
@@ -238,16 +155,31 @@ function GridLines() {
 
 /* ─── Hero Section ───────────────────────────────────────────── */
 export default function HeroSection() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end start"],
+  });
+
+  // Parallax: globe moves slower than text
+  const globeY = useTransform(scrollYProgress, [0, 1], [0, 150]);
+  const textY = useTransform(scrollYProgress, [0, 1], [0, 60]);
+  const globeOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
+
   return (
     <section
+      ref={sectionRef}
       className="relative overflow-hidden px-4 pt-28 pb-20 sm:px-6 sm:pt-36 sm:pb-28 md:pt-44"
       style={{ backgroundColor: "#0A0A0B" }}
     >
       <GridLines />
       <FloatingParticles />
 
-      {/* 3D Globe — positioned behind the text */}
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+      {/* 3D Globe — parallax layer */}
+      <motion.div
+        className="pointer-events-none absolute inset-0 flex items-center justify-center"
+        style={{ y: globeY, opacity: globeOpacity }}
+      >
         <div className="h-[500px] w-[500px] sm:h-[600px] sm:w-[600px] md:h-[700px] md:w-[700px]">
           <Canvas
             camera={{ position: [0, 0, 5.5], fov: 45 }}
@@ -258,24 +190,23 @@ export default function HeroSection() {
             <Globe />
           </Canvas>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Radial glow behind globe */}
-      <div
-        className="pointer-events-none absolute inset-0 flex items-center justify-center"
-      >
+      {/* Subtle radial glow */}
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
         <div
           className="h-[600px] w-[600px] rounded-full sm:h-[700px] sm:w-[700px]"
           style={{
             background:
-              "radial-gradient(circle, rgba(110,231,183,0.06) 0%, rgba(110,231,183,0.02) 40%, transparent 70%)",
+              "radial-gradient(circle, rgba(250,250,250,0.02) 0%, transparent 70%)",
           }}
         />
       </div>
 
       <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[#0A0A0B]/60 to-transparent" />
 
-      <div className="relative z-10 mx-auto max-w-3xl">
+      {/* Text — parallax layer */}
+      <motion.div className="relative z-10 mx-auto max-w-3xl" style={{ y: textY }}>
         {/* Headline */}
         <motion.h1
           className="font-heading text-center text-4xl font-bold leading-[1.08] tracking-tight text-[#FAFAFA] sm:text-5xl md:text-6xl lg:text-7xl"
@@ -299,23 +230,20 @@ export default function HeroSection() {
           Google, YouTube, Amazon, TikTok, and AI Search.
         </motion.p>
 
-        {/* CTA — Creative morphing border button */}
+        {/* CTA */}
         <motion.div
           className="mt-9 flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-4"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
         >
-          {/* Primary CTA — animated border gradient */}
           <a
-            href="#solution"
+            href="#pricing"
             className="group relative inline-flex items-center gap-2.5 overflow-hidden rounded-full px-7 py-3.5 text-sm font-semibold transition-all"
           >
-            {/* Animated gradient border */}
             <span className="absolute inset-0 rounded-full bg-[#6EE7B7] opacity-0 blur-md transition-opacity duration-500 group-hover:opacity-20" />
             <span className="absolute inset-[1px] rounded-full bg-[#0A0A0B]" />
             <span className="absolute inset-0 rounded-full border border-[#6EE7B7]/30 transition-colors duration-500 group-hover:border-[#6EE7B7]/60" />
-            {/* Corner accents */}
             <span className="absolute left-0 top-0 h-3 w-3 border-l border-t border-[#6EE7B7]/50 rounded-tl-full transition-colors group-hover:border-[#6EE7B7]" />
             <span className="absolute right-0 top-0 h-3 w-3 border-r border-t border-[#6EE7B7]/50 rounded-tr-full transition-colors group-hover:border-[#6EE7B7]" />
             <span className="absolute bottom-0 left-0 h-3 w-3 border-b border-l border-[#6EE7B7]/50 rounded-bl-full transition-colors group-hover:border-[#6EE7B7]" />
@@ -339,7 +267,6 @@ export default function HeroSection() {
             </span>
           </a>
 
-          {/* Secondary CTA */}
           <a
             href="#proof"
             className="inline-flex items-center gap-2 rounded-full border border-[#27272A] bg-transparent px-6 py-3.5 text-sm font-medium text-[#A1A1AA] transition-colors hover:border-[#3F3F46] hover:text-[#FAFAFA]"
@@ -376,7 +303,7 @@ export default function HeroSection() {
             )
           )}
         </motion.div>
-      </div>
+      </motion.div>
     </section>
   );
 }

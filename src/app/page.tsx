@@ -4,6 +4,8 @@ import HeroSection from "@/components/hero";
 import AgitationSection from "@/components/agitation";
 import SolutionSection from "@/components/solution";
 import ProofSection from "@/components/proof";
+import PricingSection from "@/components/pricing";
+import FooterSection from "@/components/footer";
 
 export default function Home() {
   return (
@@ -12,6 +14,8 @@ export default function Home() {
       <AgitationSection />
       <SolutionSection />
       <ProofSection />
+      <PricingSection />
+      <FooterSection />
     </main>
   );
 }
