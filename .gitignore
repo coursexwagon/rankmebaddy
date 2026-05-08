@@ -52,3 +52,12 @@ prompt
 server.log
 # Skills directory
 /skills/
+# Non-project files
+skills/
+.zscripts/
+mini-services/
+examples/
+db/
+download/
+worklog.md
+agent-ctx/
