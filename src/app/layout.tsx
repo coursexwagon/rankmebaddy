@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Syne, Space_Grotesk, JetBrains_Mono } from "next/font/google";
+import { Syne, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 
@@ -15,23 +15,17 @@ const spaceGrotesk = Space_Grotesk({
   weight: ["300", "400", "500", "600", "700"],
 });
 
-const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-jetbrains-mono",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-});
-
 export const metadata: Metadata = {
   title: "RankMeBaddy — Rank Everywhere. Autonomously.",
   description:
-    "AI agent that ranks content everywhere — Google, YouTube, Amazon, TikTok, AI Search. Powered by Nemotron 3 Super.",
+    "AI SEO partner that ranks content everywhere — Google, YouTube, Amazon, TikTok, AI Search. Just tell it what to rank.",
   keywords: [
     "RankMeBaddy",
-    "AI agent",
+    "AI SEO",
     "content ranking",
     "SEO",
-    "Nemotron",
     "autonomous ranking",
+    "multi-platform SEO",
   ],
   authors: [{ name: "RankMeBaddy" }],
   icons: {
@@ -47,7 +41,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${syne.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} antialiased bg-background text-foreground`}
+        className={`${syne.variable} ${spaceGrotesk.variable} antialiased bg-background text-foreground`}
       >
         {children}
         <Toaster />
