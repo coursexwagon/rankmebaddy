@@ -238,7 +238,7 @@ export default function HeroSection() {
           transition={{ duration: 0.5, delay: 0.4 }}
         >
           <a
-            href="#pricing"
+            href="/onboarding"
             className="group relative inline-flex items-center gap-2.5 overflow-hidden rounded-full px-7 py-3.5 text-sm font-semibold transition-all"
           >
             <span className="absolute inset-0 rounded-full bg-[#6EE7B7] opacity-0 blur-md transition-opacity duration-500 group-hover:opacity-20" />

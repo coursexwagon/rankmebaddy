@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 /* ─── Color System ───────────────────────────────────────────── */
 // Background: #0A0A0B  |  Surface: #18181B  |  Border: #27272A
@@ -66,9 +67,13 @@ export default function FooterSection() {
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
             >
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#6EE7B7]/10">
-                <span className="text-[11px] font-bold text-[#6EE7B7]">R</span>
-              </div>
+              <Image
+                src="/logo-icon.png"
+                alt="RankMeBaddy"
+                width={28}
+                height={28}
+                className="rounded-lg"
+              />
               <span className="text-sm font-semibold text-[#FAFAFA]">
                 RankMeBaddy
               </span>

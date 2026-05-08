@@ -1,92 +1,153 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { motion, AnimatePresence, useInView } from "framer-motion";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { motion, AnimatePresence, useMotionValue, useSpring } from "framer-motion";
+import Image from "next/image";
 
 /* ─── Color System ───────────────────────────────────────────── */
 // Background: #0A0A0B  |  Surface: #18181B  |  Border: #27272A
 // Text: #FAFAFA  |  Secondary: #A1A1AA  |  Muted: #71717A
 // Accent: #6EE7B7 (emerald-300)
 
-/* ─── Shared Vars ────────────────────────────────────────────── */
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 5;
 
-/* ─── Underline for headings ─────────────────────────────────── */
-function UnderlinedWord({ children }: { children: React.ReactNode }) {
+/* ─── Mascot Component ──────────────────────────────────────── */
+function Mascot({ mood = "wave", size = 80 }: { mood?: string; size?: number }) {
+  const bounce = mood === "wave" ? [0, -6, 0] : mood === "excited" ? [0, -12, 0, -8, 0] : [0];
+  const rotate = mood === "wave" ? [0, 5, 0, -5, 0] : mood === "excited" ? [0, -3, 0, 3, 0] : [0];
+
   return (
-    <span className="relative inline-block">
-      {children}
-      <svg
-        className="absolute -bottom-1 left-0 w-full overflow-visible"
-        viewBox="0 0 200 12"
-        preserveAspectRatio="none"
-        style={{ height: "0.12em" }}
-      >
-        <motion.path
-          d="M2,8 C40,3 80,11 120,6 C150,2 175,9 198,5"
-          stroke="#6EE7B7"
-          strokeWidth="3"
-          strokeLinecap="round"
-          fill="none"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+    <motion.div
+      className="relative"
+      animate={{ y: bounce, rotate }}
+      transition={{ duration: mood === "excited" ? 0.6 : 2, repeat: Infinity, ease: "easeInOut" }}
+    >
+      <Image
+        src="/mascot.png"
+        alt="RankMeBaddy mascot"
+        width={size}
+        height={size}
+        className="drop-shadow-lg"
+        priority
+      />
+      {/* Speech bubble tail — only shown when mascot is "talking" */}
+      {(mood === "wave" || mood === "excited") && (
+        <motion.div
+          className="absolute -bottom-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 bg-[#18181B] border-b border-r border-[#27272A]"
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.3 }}
         />
-      </svg>
-    </span>
+      )}
+    </motion.div>
   );
 }
 
-/* ─── Progress Bar ───────────────────────────────────────────── */
-function ProgressBar({ step }: { step: number }) {
-  const pct = (step / TOTAL_STEPS) * 100;
+/* ─── Speech Bubble ─────────────────────────────────────────── */
+function SpeechBubble({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
   return (
-    <div className="mx-auto mb-12 flex items-center gap-3 sm:mb-16">
-      <div className="h-[2px] flex-1 rounded-full bg-[#27272A]">
-        <motion.div
-          className="h-[2px] rounded-full bg-[#6EE7B7]"
-          initial={{ width: 0 }}
-          animate={{ width: `${pct}%` }}
-          transition={{ duration: 0.5, ease: [0.21, 0.47, 0.32, 0.98] }}
+    <motion.div
+      className="relative rounded-2xl border border-[#27272A] bg-[#18181B] px-5 py-4"
+      initial={{ opacity: 0, y: 8, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.4, delay, ease: [0.21, 0.47, 0.32, 0.98] }}
+    >
+      <p className="text-sm leading-relaxed text-[#A1A1AA]">{children}</p>
+    </motion.div>
+  );
+}
+
+/* ─── Typing Indicator ──────────────────────────────────────── */
+function TypingIndicator() {
+  return (
+    <div className="flex items-center gap-1 px-1">
+      {[0, 1, 2].map((i) => (
+        <motion.span
+          key={i}
+          className="inline-block h-1.5 w-1.5 rounded-full bg-[#6EE7B7]"
+          animate={{ opacity: [0.3, 1, 0.3], y: [0, -3, 0] }}
+          transition={{ duration: 0.8, delay: i * 0.15, repeat: Infinity }}
         />
-      </div>
-      <span className="text-[11px] tabular-nums text-[#52525B]">
-        {step}/{TOTAL_STEPS}
-      </span>
+      ))}
+    </div>
+  );
+}
+
+/* ─── Progress Dots ─────────────────────────────────────────── */
+function ProgressDots({ step }: { step: number }) {
+  return (
+    <div className="mx-auto mb-8 flex items-center gap-2">
+      {Array.from({ length: TOTAL_STEPS }, (_, i) => {
+        const idx = i + 1;
+        const isActive = idx === step;
+        const isDone = idx < step;
+        return (
+          <motion.div
+            key={idx}
+            className="relative flex items-center justify-center"
+            animate={{ width: isActive ? 28 : 8, height: 8 }}
+            transition={{ duration: 0.3, ease: [0.21, 0.47, 0.32, 0.98] }}
+          >
+            <div
+              className={`h-full w-full rounded-full transition-colors duration-300 ${
+                isDone
+                  ? "bg-[#6EE7B7]"
+                  : isActive
+                  ? "bg-[#6EE7B7]/40"
+                  : "bg-[#27272A]"
+              }`}
+            />
+            {isDone && (
+              <motion.svg
+                className="absolute inset-0 m-auto"
+                width="10"
+                height="10"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#0A0A0B"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 500, damping: 20 }}
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </motion.svg>
+            )}
+          </motion.div>
+        );
+      })}
     </div>
   );
 }
 
 /* ─── Custom Input ───────────────────────────────────────────── */
 function Input({
-  label,
   placeholder,
   value,
   onChange,
   type = "text",
   autoFocus = false,
+  onKeyDown,
 }: {
-  label: string;
   placeholder: string;
   value: string;
   onChange: (v: string) => void;
   type?: string;
   autoFocus?: boolean;
+  onKeyDown?: (e: React.KeyboardEvent) => void;
 }) {
   return (
-    <div className="space-y-2">
-      <label className="text-[11px] font-semibold uppercase tracking-wider text-[#71717A]">
-        {label}
-      </label>
-      <input
-        type={type}
-        placeholder={placeholder}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        autoFocus={autoFocus}
-        className="w-full rounded-xl border border-[#27272A] bg-[#18181B]/60 px-4 py-3.5 text-sm text-[#FAFAFA] placeholder:text-[#52525B] outline-none transition-colors focus:border-[#6EE7B7]/40 focus:bg-[#18181B]"
-      />
-    </div>
+    <input
+      type={type}
+      placeholder={placeholder}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      onKeyDown={onKeyDown}
+      autoFocus={autoFocus}
+      className="w-full rounded-xl border border-[#27272A] bg-[#18181B]/60 px-4 py-3.5 text-sm text-[#FAFAFA] placeholder:text-[#52525B] outline-none transition-all focus:border-[#6EE7B7]/40 focus:bg-[#18181B] focus:shadow-[0_0_20px_-5px_rgba(110,231,183,0.1)]"
+    />
   );
 }
 
@@ -96,31 +157,33 @@ function CtaButton({
   onClick,
   disabled = false,
   variant = "primary",
+  className = "",
 }: {
   children: React.ReactNode;
   onClick: () => void;
   disabled?: boolean;
-  variant?: "primary" | "secondary";
+  variant?: "primary" | "ghost";
+  className?: string;
 }) {
   const isPrimary = variant === "primary";
   return (
     <motion.button
       onClick={onClick}
       disabled={disabled}
-      className={`relative w-full rounded-full py-3.5 text-sm font-semibold transition-all ${
+      className={`relative rounded-full text-sm font-semibold transition-all ${isPrimary ? "w-full py-3.5" : "py-2 px-4"} ${className} ${
         isPrimary
-          ? "bg-[#6EE7B7] text-[#0A0A0B] hover:bg-[#6EE7B7]/90 disabled:opacity-40 disabled:hover:bg-[#6EE7B7]"
-          : "border border-[#27272A] bg-transparent text-[#A1A1AA] hover:border-[#3F3F46] hover:text-[#FAFAFA]"
+          ? "bg-[#6EE7B7] text-[#0A0A0B] hover:bg-[#6EE7B7]/90 disabled:opacity-30 disabled:hover:bg-[#6EE7B7]"
+          : "text-[#52525B] hover:text-[#A1A1AA]"
       }`}
-      whileHover={!disabled ? { scale: 1.01 } : {}}
-      whileTap={!disabled ? { scale: 0.98 } : {}}
+      whileHover={!disabled && isPrimary ? { scale: 1.01 } : {}}
+      whileTap={!disabled && isPrimary ? { scale: 0.98 } : {}}
     >
       {children}
     </motion.button>
   );
 }
 
-/* ─── Platform Card ──────────────────────────────────────────── */
+/* ─── Platform Data ──────────────────────────────────────────── */
 const platforms = [
   {
     id: "google",
@@ -134,7 +197,7 @@ const platforms = [
       </svg>
     ),
     color: "#4285F4",
-    desc: "Search & Maps rankings",
+    desc: "Search & Maps",
   },
   {
     id: "youtube",
@@ -146,7 +209,7 @@ const platforms = [
       </svg>
     ),
     color: "#FF0000",
-    desc: "Video SEO & thumbnails",
+    desc: "Video SEO",
   },
   {
     id: "amazon",
@@ -159,7 +222,7 @@ const platforms = [
       </svg>
     ),
     color: "#FF9900",
-    desc: "Product listing optimization",
+    desc: "Product listings",
   },
   {
     id: "tiktok",
@@ -170,16 +233,15 @@ const platforms = [
       </svg>
     ),
     color: "#FE2C55",
-    desc: "Video content strategy",
+    desc: "Content strategy",
   },
   {
     id: "aisearch",
     name: "AI Search",
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#A1A1AA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10" />
-        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-        <path d="M12 17h.01" />
+        <circle cx="11" cy="11" r="8" />
+        <path d="m21 21-4.35-4.35" />
       </svg>
     ),
     color: "#A1A1AA",
@@ -187,65 +249,172 @@ const platforms = [
   },
 ];
 
-/* ─── Step 1: Welcome ────────────────────────────────────────── */
-function StepWelcome({
-  name,
-  website,
-  setName,
-  setWebsite,
-  onNext,
-}: {
-  name: string;
-  website: string;
-  setName: (v: string) => void;
-  setWebsite: (v: string) => void;
-  onNext: () => void;
-}) {
-  const canContinue = name.trim().length > 0;
+/* ─── Fake "Scanning" Animation ─────────────────────────────── */
+function ScanLine() {
+  return (
+    <motion.div
+      className="absolute left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#6EE7B7]/40 to-transparent"
+      initial={{ top: "0%" }}
+      animate={{ top: "100%" }}
+      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+    />
+  );
+}
+
+/* ─── Step 0: Welcome ───────────────────────────────────────── */
+function StepWelcome({ onNext }: { onNext: () => void }) {
+  const [showBubble, setShowBubble] = useState(false);
+  const [showButton, setShowButton] = useState(false);
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setShowBubble(true), 600);
+    const t2 = setTimeout(() => setShowButton(true), 1800);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, []);
 
   return (
     <motion.div
       key="welcome"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.5 }}
+      className="mx-auto max-w-sm text-center"
+    >
+      {/* Mascot entrance */}
+      <motion.div
+        className="mb-6 flex justify-center"
+        initial={{ scale: 0, rotate: -20 }}
+        animate={{ scale: 1, rotate: 0 }}
+        transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 }}
+      >
+        <Mascot mood="wave" size={100} />
+      </motion.div>
+
+      {/* Brand name */}
+      <motion.h1
+        className="font-heading text-3xl font-bold text-[#FAFAFA] sm:text-4xl"
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.3 }}
+      >
+        Hey, I&apos;m Baddy.
+      </motion.h1>
+
+      <motion.p
+        className="mt-2 text-sm text-[#71717A]"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5 }}
+      >
+        Your SEO ranking sidekick.
+      </motion.p>
+
+      {/* Speech bubble */}
+      {showBubble && (
+        <SpeechBubble delay={0}>
+          I figure out exactly what keywords, content, and strategy you need to rank across
+          Google, YouTube, Amazon, TikTok, and AI Search. You just tell me what to rank — I handle the thinking.
+        </SpeechBubble>
+      )}
+
+      {/* CTA */}
+      <AnimatePresence>
+        {showButton && (
+          <motion.div
+            className="mt-8"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            <CtaButton onClick={onNext}>
+              Let&apos;s get you ranking
+            </CtaButton>
+            <p className="mt-3 text-[11px] text-[#3F3F46]">
+              Takes 60 seconds · No credit card
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
+/* ─── Step 1: Name ──────────────────────────────────────────── */
+function StepName({
+  name,
+  setName,
+  onNext,
+  onBack,
+}: {
+  name: string;
+  setName: (v: string) => void;
+  onNext: () => void;
+  onBack: () => void;
+}) {
+  const [typedGreeting, setTypedGreeting] = useState("");
+  const canContinue = name.trim().length > 0;
+
+  // Mascot "reacts" as you type your name
+  useEffect(() => {
+    if (name.trim().length > 0) {
+      setTypedGreeting(`Nice to meet you, ${name.trim()}!`);
+    } else {
+      setTypedGreeting("");
+    }
+  }, [name]);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && canContinue) onNext();
+  };
+
+  return (
+    <motion.div
+      key="name"
       initial={{ opacity: 0, x: 40 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -40 }}
       transition={{ duration: 0.4, ease: [0.21, 0.47, 0.32, 0.98] }}
-      className="mx-auto max-w-md"
+      className="mx-auto max-w-sm"
     >
-      <div className="mb-8 text-center">
-        <motion.div
-          className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#6EE7B7]/10"
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          <span className="text-lg font-bold text-[#6EE7B7]">R</span>
-        </motion.div>
-        <h1 className="font-heading text-3xl font-bold text-[#FAFAFA] sm:text-4xl">
-          Let&apos;s get you <UnderlinedWord>ranking</UnderlinedWord>
-        </h1>
-        <p className="mt-3 text-sm text-[#71717A]">
-          First, tell us a bit about you and your site.
-        </p>
+      <div className="mb-6 flex justify-center">
+        <Mascot mood="wave" size={64} />
       </div>
 
-      <div className="space-y-5">
+      <SpeechBubble delay={0}>
+        What should I call you?
+      </SpeechBubble>
+
+      <div className="mt-5">
         <Input
-          label="Your name"
-          placeholder="e.g. Alex"
+          placeholder="Your first name"
           value={name}
           onChange={setName}
           autoFocus
+          onKeyDown={handleKeyDown}
         />
-        <Input
-          label="Website URL"
-          placeholder="e.g. mysite.com"
-          value={website}
-          onChange={setWebsite}
-          type="url"
-        />
+      </div>
 
-        <div className="pt-2">
+      {/* Live reaction */}
+      <AnimatePresence>
+        {typedGreeting && (
+          <motion.p
+            className="mt-3 text-center text-sm text-[#6EE7B7]"
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {typedGreeting} 👋
+          </motion.p>
+        )}
+      </AnimatePresence>
+
+      <div className="mt-6 flex gap-3">
+        <CtaButton onClick={onBack} variant="ghost">
+          Back
+        </CtaButton>
+        <div className="flex-1">
           <CtaButton onClick={onNext} disabled={!canContinue}>
             Continue
           </CtaButton>
@@ -255,13 +424,128 @@ function StepWelcome({
   );
 }
 
-/* ─── Step 2: Platform Selection ─────────────────────────────── */
+/* ─── Step 2: Website ───────────────────────────────────────── */
+function StepWebsite({
+  name,
+  website,
+  setWebsite,
+  onNext,
+  onBack,
+}: {
+  name: string;
+  website: string;
+  setWebsite: (v: string) => void;
+  onNext: () => void;
+  onBack: () => void;
+}) {
+  const [isScanning, setIsScanning] = useState(false);
+  const [scanResult, setScanResult] = useState("");
+  const canContinue = website.trim().length > 0;
+
+  // Fake "scan" animation when you type a URL
+  useEffect(() => {
+    if (website.trim().length > 3 && website.includes(".")) {
+      setIsScanning(true);
+      const timer = setTimeout(() => {
+        setIsScanning(false);
+        const domain = website.replace(/https?:\/\//, "").replace(/\/.*/, "").replace("www.", "");
+        setScanResult(`${domain} — looks good. I can work with this.`);
+      }, 1500);
+      return () => clearTimeout(timer);
+    } else {
+      setIsScanning(false);
+      setScanResult("");
+    }
+  }, [website]);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && canContinue) onNext();
+  };
+
+  return (
+    <motion.div
+      key="website"
+      initial={{ opacity: 0, x: 40 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -40 }}
+      transition={{ duration: 0.4, ease: [0.21, 0.47, 0.32, 0.98] }}
+      className="mx-auto max-w-sm"
+    >
+      <div className="mb-6 flex justify-center">
+        <Mascot mood={isScanning ? "excited" : "wave"} size={64} />
+      </div>
+
+      <SpeechBubble delay={0}>
+        {name}, drop your website URL. I need to know what we&apos;re working with.
+      </SpeechBubble>
+
+      <div className="mt-5 relative">
+        <Input
+          placeholder="yoursite.com"
+          value={website}
+          onChange={setWebsite}
+          type="url"
+          autoFocus
+          onKeyDown={handleKeyDown}
+        />
+        {/* Scan overlay */}
+        {isScanning && (
+          <div className="absolute inset-0 overflow-hidden rounded-xl">
+            <ScanLine />
+          </div>
+        )}
+      </div>
+
+      {/* Scan result */}
+      <AnimatePresence>
+        {isScanning && (
+          <motion.div
+            className="mt-3 flex items-center gap-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <TypingIndicator />
+            <span className="text-[11px] text-[#52525B]">Scanning your site...</span>
+          </motion.div>
+        )}
+        {scanResult && !isScanning && (
+          <motion.div
+            className="mt-3 flex items-center gap-2"
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6EE7B7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            <span className="text-[12px] text-[#6EE7B7]">{scanResult}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="mt-6 flex gap-3">
+        <CtaButton onClick={onBack} variant="ghost">
+          Back
+        </CtaButton>
+        <div className="flex-1">
+          <CtaButton onClick={onNext} disabled={!canContinue}>
+            Continue
+          </CtaButton>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+/* ─── Step 3: Platform Selection ─────────────────────────────── */
 function StepPlatforms({
+  name,
   selected,
   onToggle,
   onNext,
   onBack,
 }: {
+  name: string;
   selected: string[];
   onToggle: (id: string) => void;
   onNext: () => void;
@@ -278,46 +562,44 @@ function StepPlatforms({
       transition={{ duration: 0.4, ease: [0.21, 0.47, 0.32, 0.98] }}
       className="mx-auto max-w-lg"
     >
-      <div className="mb-8 text-center">
-        <h1 className="font-heading text-3xl font-bold text-[#FAFAFA] sm:text-4xl">
-          Where do you want to <UnderlinedWord>rank</UnderlinedWord>?
-        </h1>
-        <p className="mt-3 text-sm text-[#71717A]">
-          Pick the platforms you care about. You can add more later.
-        </p>
+      <div className="mb-6 flex justify-center">
+        <Mascot mood="excited" size={64} />
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <SpeechBubble delay={0}>
+        Where do you want to show up, {name}? Pick your battlegrounds.
+      </SpeechBubble>
+
+      <div className="mt-6 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
         {platforms.map((p, i) => {
           const isActive = selected.includes(p.id);
           return (
             <motion.button
               key={p.id}
               onClick={() => onToggle(p.id)}
-              className={`group relative flex items-center gap-3.5 rounded-xl border px-4 py-4 text-left transition-all ${
+              className={`group relative flex items-center gap-3 rounded-xl border px-4 py-3.5 text-left transition-all ${
                 isActive
-                  ? "border-[#6EE7B7]/30 bg-[#6EE7B7]/5"
+                  ? "border-[#6EE7B7]/30 bg-[#6EE7B7]/[0.04]"
                   : "border-[#27272A] bg-[#18181B]/40 hover:border-[#3F3F46]"
               }`}
-              initial={{ opacity: 0, y: 12 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: i * 0.06 }}
-              whileHover={{ y: -1 }}
+              transition={{ duration: 0.25, delay: 0.1 + i * 0.05 }}
               whileTap={{ scale: 0.98 }}
             >
               <div
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
-                style={{ backgroundColor: `${p.color}12` }}
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
+                style={{ backgroundColor: `${p.color}10` }}
               >
                 {p.icon}
               </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-[#FAFAFA]">{p.name}</p>
-                <p className="text-[11px] text-[#71717A]">{p.desc}</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-[13px] font-medium text-[#FAFAFA]">{p.name}</p>
+                <p className="text-[10px] text-[#71717A]">{p.desc}</p>
               </div>
-              {/* Checkbox indicator */}
+              {/* Selection indicator */}
               <div
-                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-all ${
+                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-all duration-200 ${
                   isActive
                     ? "border-[#6EE7B7] bg-[#6EE7B7]"
                     : "border-[#27272A] bg-transparent"
@@ -325,8 +607,8 @@ function StepPlatforms({
               >
                 {isActive && (
                   <motion.svg
-                    width="10"
-                    height="10"
+                    width="8"
+                    height="8"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="#0A0A0B"
@@ -346,20 +628,37 @@ function StepPlatforms({
         })}
       </div>
 
-      <div className="mt-6 flex gap-3">
-        <CtaButton onClick={onBack} variant="secondary">
+      {/* Selection count */}
+      <motion.p
+        className="mt-4 text-center text-[11px] text-[#52525B]"
+        key={selected.length}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+      >
+        {selected.length === 0
+          ? "Pick at least one platform"
+          : selected.length === 1
+          ? "1 platform selected — solid start"
+          : `${selected.length} platforms — we're going wide`}
+      </motion.p>
+
+      <div className="mt-5 flex gap-3">
+        <CtaButton onClick={onBack} variant="ghost">
           Back
         </CtaButton>
-        <CtaButton onClick={onNext} disabled={!canContinue}>
-          Continue
-        </CtaButton>
+        <div className="flex-1">
+          <CtaButton onClick={onNext} disabled={!canContinue}>
+            Continue
+          </CtaButton>
+        </div>
       </div>
     </motion.div>
   );
 }
 
-/* ─── Step 3: First Campaign ─────────────────────────────────── */
-function StepCampaign({
+/* ─── Step 4: First Keyword ─────────────────────────────────── */
+function StepKeyword({
+  name,
   keyword,
   setKeyword,
   context,
@@ -367,6 +666,7 @@ function StepCampaign({
   onNext,
   onBack,
 }: {
+  name: string;
   keyword: string;
   setKeyword: (v: string) => void;
   context: string;
@@ -375,167 +675,263 @@ function StepCampaign({
   onBack: () => void;
 }) {
   const canContinue = keyword.trim().length > 0;
+  const [showHints, setShowHints] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setShowHints(true), 1200);
+    return () => clearTimeout(t);
+  }, []);
+
+  // Generate smart hints based on what they type
+  const hints = keyword.trim().length > 2
+    ? [
+        `"best ${keyword.trim()}"`,
+        `"${keyword.trim()} near me"`,
+        `"${keyword.trim()} reviews"`,
+      ]
+    : ['"best protein powder"', '"vegan meal delivery"', '"project management tool"'];
 
   return (
     <motion.div
-      key="campaign"
+      key="keyword"
       initial={{ opacity: 0, x: 40 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -40 }}
       transition={{ duration: 0.4, ease: [0.21, 0.47, 0.32, 0.98] }}
       className="mx-auto max-w-md"
     >
-      <div className="mb-8 text-center">
-        <h1 className="font-heading text-3xl font-bold text-[#FAFAFA] sm:text-4xl">
-          Your first <UnderlinedWord>campaign</UnderlinedWord>
-        </h1>
-        <p className="mt-3 text-sm text-[#71717A]">
-          What keyword or topic do you want to rank for? We&apos;ll generate the
-          strategy and content to get you there.
-        </p>
+      <div className="mb-6 flex justify-center">
+        <Mascot mood="excited" size={64} />
       </div>
 
-      <div className="space-y-5">
-        <Input
-          label="Keyword or topic"
-          placeholder='e.g. "best protein powder"'
-          value={keyword}
-          onChange={setKeyword}
-          autoFocus
-        />
+      <SpeechBubble delay={0}>
+        This is the fun part, {name}. What do you want to rank for?
+      </SpeechBubble>
 
-        <div className="space-y-2">
-          <label className="text-[11px] font-semibold uppercase tracking-wider text-[#71717A]">
-            Anything else?{" "}
-            <span className="normal-case tracking-normal font-normal text-[#52525B]">
-              (optional)
-            </span>
-          </label>
+      <div className="mt-5 space-y-4">
+        <div>
+          <Input
+            placeholder="e.g. best protein powder"
+            value={keyword}
+            onChange={setKeyword}
+            autoFocus
+            onKeyDown={(e) => { if (e.key === "Enter" && canContinue) onNext(); }}
+          />
+          {/* Quick-fill hints */}
+          <AnimatePresence>
+            {showHints && keyword.trim().length <= 2 && (
+              <motion.div
+                className="mt-2.5 flex flex-wrap gap-2"
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                {hints.map((h) => (
+                  <button
+                    key={h}
+                    onClick={() => setKeyword(h.replace(/"/g, ""))}
+                    className="rounded-full border border-[#27272A] bg-[#18181B]/40 px-3 py-1.5 text-[11px] text-[#71717A] transition-colors hover:border-[#3F3F46] hover:text-[#A1A1AA]"
+                  >
+                    {h}
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        <div>
           <textarea
-            placeholder="e.g. We're a new brand, competing against big names..."
+            placeholder="Anything else I should know? (optional)"
             value={context}
             onChange={(e) => setContext(e.target.value)}
-            rows={3}
-            className="w-full resize-none rounded-xl border border-[#27272A] bg-[#18181B]/60 px-4 py-3.5 text-sm text-[#FAFAFA] placeholder:text-[#52525B] outline-none transition-colors focus:border-[#6EE7B7]/40 focus:bg-[#18181B]"
+            rows={2}
+            className="w-full resize-none rounded-xl border border-[#27272A] bg-[#18181B]/60 px-4 py-3 text-sm text-[#FAFAFA] placeholder:text-[#52525B] outline-none transition-colors focus:border-[#6EE7B7]/40 focus:bg-[#18181B]"
           />
         </div>
 
-        {/* Quick hint */}
+        {/* What Baddy will do */}
         <motion.div
           className="rounded-xl border border-[#27272A]/60 bg-[#18181B]/30 px-4 py-3"
-          initial={{ opacity: 0, y: 8 }}
+          initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.3 }}
+          transition={{ delay: 0.6 }}
         >
-          <p className="text-[11px] text-[#71717A]">
-            <span className="font-medium text-[#A1A1AA]">How it works:</span>{" "}
-            Tell us what to rank, and we&apos;ll give you the keywords, optimized
-            titles, content suggestions, and implementation steps for each
-            platform you selected.
+          <p className="text-[11px] text-[#52525B]">
+            <span className="font-medium text-[#71717A]">Here&apos;s what I&apos;ll do:</span>{" "}
+            Scan your keyword across every platform you picked, find gaps &amp; opportunities, then give you
+            the exact titles, descriptions, content, and implementation steps to rank.
           </p>
         </motion.div>
 
-        <div className="flex gap-3 pt-2">
-          <CtaButton onClick={onBack} variant="secondary">
+        <div className="flex gap-3 pt-1">
+          <CtaButton onClick={onBack} variant="ghost">
             Back
           </CtaButton>
-          <CtaButton onClick={onNext} disabled={!canContinue}>
-            Launch campaign
-          </CtaButton>
+          <div className="flex-1">
+            <CtaButton onClick={onNext} disabled={!canContinue}>
+              Launch my campaign
+            </CtaButton>
+          </div>
         </div>
       </div>
     </motion.div>
   );
 }
 
-/* ─── Step 4: All Set ────────────────────────────────────────── */
+/* ─── Step 5: Done — The "Wow" Moment ───────────────────────── */
 function StepDone({ name, keyword }: { name: string; keyword: string }) {
+  const [phase, setPhase] = useState(0); // 0=loading, 1=results
+
+  useEffect(() => {
+    const t = setTimeout(() => setPhase(1), 2000);
+    return () => clearTimeout(t);
+  }, []);
+
   return (
     <motion.div
       key="done"
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.5, ease: [0.21, 0.47, 0.32, 0.98] }}
       className="mx-auto max-w-md text-center"
     >
-      {/* Success ring */}
-      <motion.div
-        className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full border border-[#6EE7B7]/30 bg-[#6EE7B7]/5"
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 }}
-      >
-        <motion.svg
-          width="32"
-          height="32"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="#6EE7B7"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <motion.path
-            d="M20 6L9 17l-5-5"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 0.6, delay: 0.5, ease: "easeOut" }}
-          />
-        </motion.svg>
-      </motion.div>
-
-      <h1 className="font-heading text-3xl font-bold text-[#FAFAFA] sm:text-4xl">
-        You&apos;re all set, {name.split(" ")[0]}
-      </h1>
-      <p className="mt-3 text-sm text-[#71717A]">
-        We&apos;re building your strategy for &ldquo;{keyword}&rdquo;. You&apos;ll have
-        keywords, content, and implementation steps ready in a few minutes.
-      </p>
-
-      <div className="mt-8">
-        <CtaButton onClick={() => (window.location.href = "/")}>
-          Go to dashboard
-        </CtaButton>
-      </div>
-
-      {/* What happens next */}
-      <motion.div
-        className="mt-8 space-y-3 text-left"
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.8 }}
-      >
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-[#52525B]">
-          What happens next
-        </p>
-        {[
-          "We scan your keyword across all selected platforms",
-          "You get a full keyword map with gaps and opportunities",
-          "Optimized titles, descriptions, and content are generated",
-          "Implementation steps — just follow and rank",
-        ].map((item, i) => (
+      <AnimatePresence mode="wait">
+        {phase === 0 ? (
           <motion.div
-            key={i}
-            className="flex items-center gap-3 rounded-lg border border-[#27272A]/40 bg-[#18181B]/30 px-4 py-3"
-            initial={{ opacity: 0, x: -8 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3, delay: 1 + i * 0.1 }}
+            key="loading"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="space-y-4"
           >
-            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#6EE7B7]/10 text-[10px] font-bold text-[#6EE7B7]">
-              {i + 1}
-            </span>
-            <span className="text-[12px] text-[#A1A1AA]">{item}</span>
+            <div className="flex justify-center">
+              <Mascot mood="excited" size={80} />
+            </div>
+            <SpeechBubble delay={0}>
+              Analyzing &ldquo;{keyword}&rdquo; across your platforms...
+            </SpeechBubble>
+            <div className="space-y-2">
+              {["Scanning search volume...", "Finding keyword gaps...", "Building strategy..."].map((text, i) => (
+                <motion.div
+                  key={text}
+                  className="flex items-center gap-2.5 rounded-lg border border-[#27272A]/40 bg-[#18181B]/30 px-4 py-2.5"
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 + i * 0.5 }}
+                >
+                  <motion.div
+                    className="h-1.5 w-1.5 rounded-full bg-[#6EE7B7]"
+                    animate={{ scale: [1, 1.4, 1], opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.2 }}
+                  />
+                  <span className="text-[12px] text-[#71717A]">{text}</span>
+                </motion.div>
+              ))}
+            </div>
           </motion.div>
-        ))}
-      </motion.div>
+        ) : (
+          <motion.div
+            key="results"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            {/* Success mascot */}
+            <motion.div
+              className="mx-auto mb-5 flex justify-center"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 200, damping: 15 }}
+            >
+              <Mascot mood="excited" size={80} />
+            </motion.div>
+
+            <h1 className="font-heading text-3xl font-bold text-[#FAFAFA] sm:text-4xl">
+              You&apos;re live, {name.split(" ")[0]}!
+            </h1>
+            <p className="mt-3 text-sm text-[#71717A]">
+              Your campaign for &ldquo;{keyword}&rdquo; is ready. Keywords, content, and implementation
+              steps are waiting for you.
+            </p>
+
+            {/* Quick stats preview */}
+            <motion.div
+              className="mt-6 grid grid-cols-3 gap-2"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              {[
+                { label: "Keywords", value: "147" },
+                { label: "Gaps found", value: "23" },
+                { label: "Content pieces", value: "12" },
+              ].map((stat, i) => (
+                <motion.div
+                  key={stat.label}
+                  className="rounded-xl border border-[#27272A]/60 bg-[#18181B]/40 px-3 py-3"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 + i * 0.1 }}
+                >
+                  <p className="font-heading text-xl font-bold text-[#6EE7B7]">{stat.value}</p>
+                  <p className="text-[10px] text-[#52525B]">{stat.label}</p>
+                </motion.div>
+              ))}
+            </motion.div>
+
+            {/* CTA to dashboard */}
+            <motion.div
+              className="mt-8"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7 }}
+            >
+              <CtaButton onClick={() => (window.location.href = "/")}>
+                Open my dashboard
+              </CtaButton>
+            </motion.div>
+
+            {/* What's next */}
+            <motion.div
+              className="mt-6 space-y-2 text-left"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1 }}
+            >
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-[#3F3F46]">
+                What happens next
+              </p>
+              {[
+                "Review your keyword map and competitor gaps",
+                "Apply the optimized titles & descriptions I wrote for you",
+                "Follow the step-by-step implementation guide",
+                "Watch your rankings climb",
+              ].map((item, i) => (
+                <motion.div
+                  key={i}
+                  className="flex items-start gap-2.5 rounded-lg border border-[#27272A]/30 bg-[#18181B]/20 px-3 py-2.5"
+                  initial={{ opacity: 0, x: -6 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 1.1 + i * 0.08 }}
+                >
+                  <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#6EE7B7]/10 text-[9px] font-bold text-[#6EE7B7] mt-0.5">
+                    {i + 1}
+                  </span>
+                  <span className="text-[11px] text-[#71717A]">{item}</span>
+                </motion.div>
+              ))}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
 
 /* ─── Main Onboarding Page ───────────────────────────────────── */
 export default function OnboardingPage() {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0);
   const [name, setName] = useState("");
   const [website, setWebsite] = useState("");
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(["google"]);
@@ -547,6 +943,9 @@ export default function OnboardingPage() {
       prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
     );
   };
+
+  // Current step number for progress (step 0 is welcome, doesn't count)
+  const progressStep = step === 0 ? 1 : step;
 
   return (
     <section
@@ -563,38 +962,81 @@ export default function OnboardingPage() {
         }}
       />
 
-      <div className="relative z-10 w-full">
-        <ProgressBar step={step} />
+      {/* Corner accent */}
+      <div className="pointer-events-none absolute top-0 right-0 h-[300px] w-[300px]">
+        <div
+          className="h-full w-full rounded-full"
+          style={{
+            background: "radial-gradient(circle at top right, rgba(110,231,183,0.03) 0%, transparent 70%)",
+          }}
+        />
+      </div>
+
+      <div className="relative z-10 w-full max-w-lg">
+        {/* Back to home link */}
+        {step > 0 && (
+          <motion.div
+            className="mb-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            <a
+              href="/"
+              className="inline-flex items-center gap-1.5 text-[11px] text-[#52525B] transition-colors hover:text-[#71717A]"
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m15 18-6-6 6-6" />
+              </svg>
+              Back to home
+            </a>
+          </motion.div>
+        )}
+
+        {/* Progress dots */}
+        {step > 0 && <ProgressDots step={progressStep} />}
 
         <AnimatePresence mode="wait">
+          {step === 0 && (
+            <StepWelcome onNext={() => setStep(1)} />
+          )}
           {step === 1 && (
-            <StepWelcome
+            <StepName
               name={name}
-              website={website}
               setName={setName}
-              setWebsite={setWebsite}
               onNext={() => setStep(2)}
+              onBack={() => setStep(0)}
             />
           )}
           {step === 2 && (
-            <StepPlatforms
-              selected={selectedPlatforms}
-              onToggle={togglePlatform}
+            <StepWebsite
+              name={name.split(" ")[0] || "there"}
+              website={website}
+              setWebsite={setWebsite}
               onNext={() => setStep(3)}
               onBack={() => setStep(1)}
             />
           )}
           {step === 3 && (
-            <StepCampaign
-              keyword={keyword}
-              setKeyword={setKeyword}
-              context={context}
-              setContext={setContext}
+            <StepPlatforms
+              name={name.split(" ")[0] || "there"}
+              selected={selectedPlatforms}
+              onToggle={togglePlatform}
               onNext={() => setStep(4)}
               onBack={() => setStep(2)}
             />
           )}
           {step === 4 && (
+            <StepKeyword
+              name={name.split(" ")[0] || "there"}
+              keyword={keyword}
+              setKeyword={setKeyword}
+              context={context}
+              setContext={setContext}
+              onNext={() => setStep(5)}
+              onBack={() => setStep(3)}
+            />
+          )}
+          {step === 5 && (
             <StepDone name={name} keyword={keyword} />
           )}
         </AnimatePresence>

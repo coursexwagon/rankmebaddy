@@ -168,17 +168,16 @@ function PricingCard({
         </p>
 
         {/* CTA */}
-        <motion.button
-          className={`mt-6 w-full rounded-full py-3 text-sm font-semibold transition-all ${
+        <a
+          href="/onboarding"
+          className={`mt-6 block w-full rounded-full py-3 text-center text-sm font-semibold transition-all ${
             plan.highlighted
               ? "bg-[#6EE7B7] text-[#0A0A0B] hover:bg-[#6EE7B7]/90"
               : "border border-[#27272A] bg-transparent text-[#FAFAFA] hover:border-[#3F3F46] hover:bg-[#18181B]"
           }`}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
         >
           {plan.cta}
-        </motion.button>
+        </a>
 
         {/* Features */}
         <ul className="mt-6 space-y-3 border-t border-[#27272A]/40 pt-6">
