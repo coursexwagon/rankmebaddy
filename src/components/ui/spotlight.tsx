@@ -4,6 +4,9 @@ import { useEffect, useRef } from "react";
 import { motion, useAnimationFrame } from "framer-motion";
 import { cn } from "@/lib/utils";
 
+/* ─── Brand Palette ──────────────────────────────────────────── */
+// Accent: #4ADE80  |  Violet: #A78BFA  |  Background: #0A0A0B
+
 interface SpotlightProps {
   className?: string;
   fill?: string;
@@ -65,7 +68,7 @@ interface SpotlightLayerProps {
 export function SpotlightLayer({ className }: SpotlightLayerProps) {
   return (
     <div className={cn("absolute inset-0 overflow-hidden", className)}>
-      {/* Primary green spotlight */}
+      {/* Primary accent spotlight */}
       <motion.div
         className="absolute"
         animate={{
@@ -83,10 +86,10 @@ export function SpotlightLayer({ className }: SpotlightLayerProps) {
           left: "20%",
         }}
       >
-        <Spotlight fill="#22c55e" className="opacity-30" />
+        <Spotlight fill="#4ADE80" className="opacity-30" />
       </motion.div>
 
-      {/* Secondary white/green spotlight */}
+      {/* Secondary lighter accent spotlight */}
       <motion.div
         className="absolute"
         animate={{
@@ -105,7 +108,7 @@ export function SpotlightLayer({ className }: SpotlightLayerProps) {
           right: "10%",
         }}
       >
-        <Spotlight fill="#86efac" className="opacity-20" />
+        <Spotlight fill="#bbf7d0" className="opacity-20" />
       </motion.div>
 
       {/* Tertiary subtle white spotlight */}
@@ -135,7 +138,8 @@ export function SpotlightLayer({ className }: SpotlightLayerProps) {
 
 /**
  * Animated radial gradient spotlight that follows a slow automated path
- * behind the hero text. Pure CSS + Framer Motion — no static backgrounds.
+ * behind the hero text. Uses the brand palette accent (#4ADE80) and
+ * secondary accent (#A78BFA). Pure CSS + Framer Motion.
  */
 export function MovingSpotlight({ className }: { className?: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -145,17 +149,17 @@ export function MovingSpotlight({ className }: { className?: string }) {
       ref={containerRef}
       className={cn("pointer-events-none absolute inset-0 overflow-hidden", className)}
     >
-      {/* Main moving radial gradient */}
+      {/* Main moving radial gradient — brand accent */}
       <motion.div
         className="absolute inset-0"
         animate={{
           background: [
-            "radial-gradient(600px circle at 30% 20%, rgba(34,197,94,0.15), rgba(34,197,94,0.05) 40%, transparent 70%)",
-            "radial-gradient(600px circle at 70% 30%, rgba(134,239,172,0.12), rgba(34,197,94,0.04) 40%, transparent 70%)",
-            "radial-gradient(700px circle at 50% 10%, rgba(255,255,255,0.08), rgba(34,197,94,0.06) 40%, transparent 70%)",
-            "radial-gradient(600px circle at 20% 40%, rgba(34,197,94,0.18), rgba(34,197,94,0.05) 40%, transparent 70%)",
-            "radial-gradient(600px circle at 80% 15%, rgba(134,239,172,0.10), rgba(34,197,94,0.03) 40%, transparent 70%)",
-            "radial-gradient(600px circle at 30% 20%, rgba(34,197,94,0.15), rgba(34,197,94,0.05) 40%, transparent 70%)",
+            "radial-gradient(600px circle at 30% 20%, rgba(74,222,128,0.12), rgba(74,222,128,0.04) 40%, transparent 70%)",
+            "radial-gradient(600px circle at 70% 30%, rgba(187,247,208,0.10), rgba(74,222,128,0.03) 40%, transparent 70%)",
+            "radial-gradient(700px circle at 50% 10%, rgba(228,228,231,0.06), rgba(74,222,128,0.05) 40%, transparent 70%)",
+            "radial-gradient(600px circle at 20% 40%, rgba(74,222,128,0.15), rgba(74,222,128,0.04) 40%, transparent 70%)",
+            "radial-gradient(600px circle at 80% 15%, rgba(187,247,208,0.08), rgba(74,222,128,0.03) 40%, transparent 70%)",
+            "radial-gradient(600px circle at 30% 20%, rgba(74,222,128,0.12), rgba(74,222,128,0.04) 40%, transparent 70%)",
           ],
         }}
         transition={{
@@ -165,16 +169,16 @@ export function MovingSpotlight({ className }: { className?: string }) {
         }}
       />
 
-      {/* Secondary slower gradient layer */}
+      {/* Secondary slower gradient layer — brand violet */}
       <motion.div
         className="absolute inset-0"
         animate={{
           background: [
-            "radial-gradient(500px circle at 60% 60%, rgba(139,92,246,0.06), transparent 60%)",
-            "radial-gradient(500px circle at 40% 40%, rgba(139,92,246,0.04), transparent 60%)",
-            "radial-gradient(500px circle at 20% 70%, rgba(34,197,94,0.06), transparent 60%)",
-            "radial-gradient(500px circle at 80% 30%, rgba(139,92,246,0.06), transparent 60%)",
-            "radial-gradient(500px circle at 60% 60%, rgba(139,92,246,0.06), transparent 60%)",
+            "radial-gradient(500px circle at 60% 60%, rgba(167,139,250,0.05), transparent 60%)",
+            "radial-gradient(500px circle at 40% 40%, rgba(167,139,250,0.03), transparent 60%)",
+            "radial-gradient(500px circle at 20% 70%, rgba(74,222,128,0.05), transparent 60%)",
+            "radial-gradient(500px circle at 80% 30%, rgba(167,139,250,0.05), transparent 60%)",
+            "radial-gradient(500px circle at 60% 60%, rgba(167,139,250,0.05), transparent 60%)",
           ],
         }}
         transition={{

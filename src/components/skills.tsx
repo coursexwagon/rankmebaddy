@@ -4,6 +4,9 @@ import { useEffect, useState, useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { cn } from "@/lib/utils";
 
+/* ─── Brand Palette ──────────────────────────────────────────── */
+// Background: #0A0A0B  |  Surface: #1A1A1F  |  Accent: #4ADE80  |  Violet: #A78BFA  |  Text: #E4E4E7
+
 /* ─── Shared Bento Card Wrapper ─────────────────────────────── */
 interface BentoCardProps {
   children: React.ReactNode;
@@ -15,9 +18,9 @@ function BentoCard({ children, className, delay = 0 }: BentoCardProps) {
   return (
     <motion.div
       className={cn(
-        "relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03]",
+        "relative overflow-hidden rounded-2xl border border-[#1A1A1F] bg-[#1A1A1F]/50",
         "backdrop-blur-xl",
-        "transition-colors duration-300 hover:border-white/[0.15] hover:bg-white/[0.05]",
+        "transition-colors duration-300 hover:border-[#1A1A1F]/80 hover:bg-[#1A1A1F]/70",
         className
       )}
       initial={{ opacity: 0, scale: 0.92, y: 30 }}
@@ -30,7 +33,7 @@ function BentoCard({ children, className, delay = 0 }: BentoCardProps) {
       }}
     >
       {/* Inner glow at top edge */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E4E4E7]/8 to-transparent" />
       {children}
     </motion.div>
   );
@@ -86,13 +89,13 @@ function KeywordScoutBox() {
       <div ref={ref} className="flex h-full flex-col p-6 sm:p-8">
         {/* Header */}
         <div className="mb-4 flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-500/10">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#4ADE80]/10">
             <svg
               width="18"
               height="18"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="#22c55e"
+              stroke="#4ADE80"
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -102,22 +105,22 @@ function KeywordScoutBox() {
             </svg>
           </div>
           <div>
-            <h3 className="font-heading text-lg font-semibold text-white">
+            <h3 className="font-heading text-lg font-semibold text-[#E4E4E7]">
               Keyword Scout
             </h3>
-            <p className="text-xs text-neutral-500">
+            <p className="text-xs text-[#71717A]">
               AI-powered keyword discovery
             </p>
           </div>
         </div>
 
         {/* Terminal */}
-        <div className="flex-1 rounded-xl border border-white/[0.06] bg-black/40 p-4 font-mono text-xs sm:text-sm">
+        <div className="flex-1 rounded-xl border border-[#1A1A1F] bg-[#0A0A0B]/60 p-4 font-mono text-xs sm:text-sm">
           {/* Terminal header dots */}
           <div className="mb-3 flex gap-1.5">
             <span className="h-2.5 w-2.5 rounded-full bg-red-500/60" />
             <span className="h-2.5 w-2.5 rounded-full bg-yellow-500/60" />
-            <span className="h-2.5 w-2.5 rounded-full bg-green-500/60" />
+            <span className="h-2.5 w-2.5 rounded-full bg-[#4ADE80]/60" />
           </div>
 
           {/* Terminal lines */}
@@ -129,9 +132,9 @@ function KeywordScoutBox() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.3 }}
                 className={cn(
-                  line.type === "input" && "text-green-400/90",
-                  line.type === "output" && "text-neutral-500",
-                  line.type === "success" && "text-emerald-400 font-medium"
+                  line.type === "input" && "text-[#4ADE80]/90",
+                  line.type === "output" && "text-[#52525B]",
+                  line.type === "success" && "text-[#4ADE80] font-medium"
                 )}
               >
                 {line.text}
@@ -139,7 +142,7 @@ function KeywordScoutBox() {
             ))}
             {/* Blinking cursor */}
             {isInView && (
-              <span className="inline-block h-4 w-2 animate-pulse bg-green-400/70" />
+              <span className="inline-block h-4 w-2 animate-pulse bg-[#4ADE80]/70" />
             )}
           </div>
         </div>
@@ -158,13 +161,13 @@ function ContentOptimizerBox() {
       <div ref={ref} className="flex h-full flex-col p-6 sm:p-8">
         {/* Header */}
         <div className="mb-5 flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-500/10">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#A78BFA]/10">
             <svg
               width="18"
               height="18"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="#8b5cf6"
+              stroke="#A78BFA"
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -174,10 +177,10 @@ function ContentOptimizerBox() {
             </svg>
           </div>
           <div>
-            <h3 className="font-heading text-lg font-semibold text-white">
+            <h3 className="font-heading text-lg font-semibold text-[#E4E4E7]">
               Content Optimizer
             </h3>
-            <p className="text-xs text-neutral-500">Real-time SEO scoring</p>
+            <p className="text-xs text-[#71717A]">Real-time SEO scoring</p>
           </div>
         </div>
 
@@ -185,7 +188,7 @@ function ContentOptimizerBox() {
         <div className="flex flex-1 flex-col items-center justify-center gap-4">
           <div className="relative flex items-end gap-1">
             <motion.span
-              className="font-heading text-6xl font-bold text-white sm:text-7xl"
+              className="font-heading text-6xl font-bold text-[#E4E4E7] sm:text-7xl"
               initial={{ opacity: 0, scale: 0.5 }}
               animate={isInView ? { opacity: 1, scale: 1 } : {}}
               transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
@@ -193,7 +196,7 @@ function ContentOptimizerBox() {
               98
             </motion.span>
             <motion.span
-              className="mb-2 text-lg font-medium text-green-400"
+              className="mb-2 text-lg font-medium text-[#4ADE80]"
               initial={{ opacity: 0 }}
               animate={isInView ? { opacity: 1 } : {}}
               transition={{ duration: 0.5, delay: 0.9 }}
@@ -201,13 +204,13 @@ function ContentOptimizerBox() {
               %
             </motion.span>
           </div>
-          <p className="text-sm font-medium text-green-400">SEO Score</p>
+          <p className="text-sm font-medium text-[#4ADE80]">SEO Score</p>
 
           {/* Progress bar */}
           <div className="w-full max-w-[200px]">
-            <div className="h-2 overflow-hidden rounded-full bg-white/[0.06]">
+            <div className="h-2 overflow-hidden rounded-full bg-[#1A1A1F]">
               <motion.div
-                className="h-full rounded-full bg-gradient-to-r from-green-500 to-emerald-400"
+                className="h-full rounded-full bg-gradient-to-r from-[#4ADE80] to-[#86efac]"
                 initial={{ width: "0%" }}
                 animate={isInView ? { width: "98%" } : {}}
                 transition={{ duration: 1.5, delay: 0.6, ease: "easeOut" }}
@@ -216,14 +219,14 @@ function ContentOptimizerBox() {
           </div>
 
           {/* Mini stats */}
-          <div className="mt-2 flex gap-4 text-[11px] text-neutral-500">
+          <div className="mt-2 flex gap-4 text-[11px] text-[#71717A]">
             <span>
               Keywords:{" "}
-              <span className="text-neutral-300">12/12</span>
+              <span className="text-[#A1A1AA]">12/12</span>
             </span>
             <span>
               Links:{" "}
-              <span className="text-neutral-300">8/8</span>
+              <span className="text-[#A1A1AA]">8/8</span>
             </span>
           </div>
         </div>
@@ -242,13 +245,13 @@ function RankTrackerBox() {
       <div ref={ref} className="flex h-full flex-col p-6 sm:p-8">
         {/* Header */}
         <div className="mb-4 flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-500/10">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#4ADE80]/10">
             <svg
               width="18"
               height="18"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="#22c55e"
+              stroke="#4ADE80"
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -258,10 +261,10 @@ function RankTrackerBox() {
             </svg>
           </div>
           <div>
-            <h3 className="font-heading text-lg font-semibold text-white">
+            <h3 className="font-heading text-lg font-semibold text-[#E4E4E7]">
               Rank Tracker
             </h3>
-            <p className="text-xs text-neutral-500">Live ranking monitor</p>
+            <p className="text-xs text-[#71717A]">Live ranking monitor</p>
           </div>
         </div>
 
@@ -271,7 +274,7 @@ function RankTrackerBox() {
             {/* Glow layers behind the text */}
             <div className="absolute inset-0 flex items-center justify-center">
               <motion.div
-                className="h-24 w-24 rounded-full bg-green-500/20 blur-3xl"
+                className="h-24 w-24 rounded-full bg-[#4ADE80]/20 blur-3xl"
                 animate={{
                   scale: [1, 1.3, 1],
                   opacity: [0.3, 0.5, 0.3],
@@ -285,10 +288,10 @@ function RankTrackerBox() {
             </div>
 
             <motion.span
-              className="relative font-heading text-8xl font-extrabold text-green-400 sm:text-9xl"
+              className="relative font-heading text-8xl font-extrabold text-[#4ADE80] sm:text-9xl"
               style={{
                 textShadow:
-                  "0 0 40px rgba(34,197,94,0.5), 0 0 80px rgba(34,197,94,0.25), 0 0 120px rgba(34,197,94,0.1)",
+                  "0 0 40px rgba(74,222,128,0.4), 0 0 80px rgba(74,222,128,0.2), 0 0 120px rgba(74,222,128,0.08)",
               }}
               initial={{ opacity: 0, scale: 0.3 }}
               animate={isInView ? { opacity: 1, scale: 1 } : {}}
@@ -311,7 +314,7 @@ function RankTrackerBox() {
               repeat: Infinity,
               ease: "easeInOut",
             }}
-            className="flex items-center gap-1.5 text-sm font-medium text-green-400"
+            className="flex items-center gap-1.5 text-sm font-medium text-[#4ADE80]"
           >
             <svg
               width="16"
@@ -375,7 +378,7 @@ function MultiPlatformBox() {
             d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.38.55A3.02 3.02 0 0 0 .5 6.19 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.81 3.02 3.02 0 0 0 2.12 2.14c1.88.55 9.38.55 9.38.55s7.5 0 9.38-.55a3.02 3.02 0 0 0 2.12-2.14A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.81z"
             fill="#FF0000"
           />
-          <path d="M9.75 15.02 15.75 12 9.75 8.98v6.04z" fill="white" />
+          <path d="M9.75 15.02 15.75 12 9.75 8.98v6.04z" fill="#E4E4E7" />
         </svg>
       ),
     },
@@ -395,11 +398,11 @@ function MultiPlatformBox() {
           />
           <path
             d="M15.05 9.3c0-.94.17-1.76.5-2.44.34-.7.8-1.24 1.38-1.62.58-.38 1.24-.57 1.96-.57.58 0 1.08.12 1.5.35.42.23.74.55.96.95V2.2c0-.13.04-.24.13-.33.09-.09.2-.13.33-.13h2c.13 0 .24.04.33.13.09.09.13.2.13.33v14.73c0 .13-.04.24-.13.33-.09.09-.2.13-.33.13h-2.07c-.13 0-.24-.04-.33-.13a.45.45 0 0 1-.13-.33v-.96c-.22.4-.55.72-.97.96-.43.24-.93.36-1.52.36-.7 0-1.34-.19-1.92-.57-.58-.38-1.04-.92-1.38-1.62-.33-.7-.5-1.52-.5-2.46v-.47zm3.96.03c0-.64-.16-1.15-.47-1.53-.31-.38-.73-.57-1.24-.57-.52 0-.93.19-1.24.57-.31.38-.47.89-.47 1.53v.4c0 .64.16 1.15.47 1.53.31.38.72.57 1.24.57.51 0 .93-.19 1.24-.57.31-.38.47-.89.47-1.53v-.4z"
-            fill="white"
+            fill="#E4E4E7"
           />
           <path
             d="M6.75 14.5c-.12 0-.22-.04-.3-.13a.41.41 0 0 1-.12-.3V6.8c0-.12.04-.22.12-.3.08-.08.18-.12.3-.12h2.08c.12 0 .22.04.3.12.08.08.12.18.12.3v.63c.36-.55.84-.96 1.43-1.24.59-.28 1.27-.42 2.03-.42.12 0 .22.04.3.12.08.08.12.18.12.3v1.88c0 .12-.04.22-.12.3-.08.08-.18.12-.3.12h-1.03c-.74 0-1.32.2-1.73.6-.41.4-.62 1-.62 1.78v3.5c0 .12-.04.22-.12.3-.08.08-.18.13-.3.13H6.75z"
-            fill="white"
+            fill="#E4E4E7"
           />
         </svg>
       ),
@@ -412,7 +415,7 @@ function MultiPlatformBox() {
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
           <path
             d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"
-            fill="white"
+            fill="#E4E4E7"
           />
           <path
             d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"
@@ -451,13 +454,13 @@ function MultiPlatformBox() {
       <div ref={ref} className="flex h-full flex-col p-6 sm:p-8">
         {/* Header */}
         <div className="mb-4 flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500/10">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#A78BFA]/10">
             <svg
               width="18"
               height="18"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="#3b82f6"
+              stroke="#A78BFA"
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -469,10 +472,10 @@ function MultiPlatformBox() {
             </svg>
           </div>
           <div>
-            <h3 className="font-heading text-lg font-semibold text-white">
+            <h3 className="font-heading text-lg font-semibold text-[#E4E4E7]">
               Multi-Platform
             </h3>
-            <p className="text-xs text-neutral-500">
+            <p className="text-xs text-[#71717A]">
               Simultaneous ranking across platforms
             </p>
           </div>
@@ -497,7 +500,7 @@ function MultiPlatformBox() {
                     y1={from.y}
                     x2={to.x}
                     y2={to.y}
-                    stroke="rgba(34,197,94,0.15)"
+                    stroke="rgba(74,222,128,0.12)"
                     strokeWidth="1.5"
                     initial={{ pathLength: 0, opacity: 0 }}
                     animate={
@@ -514,8 +517,8 @@ function MultiPlatformBox() {
                   {/* Animated particle traveling along the line */}
                   <motion.circle
                     r="1"
-                    fill="#22c55e"
-                    filter="url(#greenGlow)"
+                    fill="#4ADE80"
+                    filter="url(#accentGlow)"
                     initial={{ opacity: 0 }}
                     animate={
                       isInView
@@ -545,7 +548,7 @@ function MultiPlatformBox() {
 
             {/* Glow filter */}
             <defs>
-              <filter id="greenGlow" x="-50%" y="-50%" width="200%" height="200%">
+              <filter id="accentGlow" x="-50%" y="-50%" width="200%" height="200%">
                 <feGaussianBlur stdDeviation="2" result="blur" />
                 <feMerge>
                   <feMergeNode in="blur" />
@@ -575,10 +578,10 @@ function MultiPlatformBox() {
                   stiffness: 200,
                 }}
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.06] backdrop-blur-sm transition-colors hover:border-white/[0.2] hover:bg-white/[0.1]">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#1A1A1F] bg-[#1A1A1F]/60 backdrop-blur-sm transition-colors hover:border-[#4ADE80]/30 hover:bg-[#1A1A1F]/80">
                   {platform.icon}
                 </div>
-                <span className="text-[10px] font-medium text-neutral-500">
+                <span className="text-[10px] font-medium text-[#71717A]">
                   {platform.name}
                 </span>
               </motion.div>
@@ -600,16 +603,16 @@ function SectionTitle() {
       viewport={{ once: true, margin: "-60px" }}
       transition={{ duration: 0.6 }}
     >
-      <span className="inline-flex items-center gap-2 rounded-full border border-green-500/30 bg-green-500/10 px-3 py-1 text-xs font-medium text-green-400">
+      <span className="inline-flex items-center gap-2 rounded-full border border-[#4ADE80]/30 bg-[#4ADE80]/10 px-3 py-1 text-xs font-medium text-[#4ADE80]">
         Core Skills
       </span>
-      <h2 className="font-heading text-3xl font-bold text-white sm:text-4xl md:text-5xl">
+      <h2 className="font-heading text-3xl font-bold text-[#E4E4E7] sm:text-4xl md:text-5xl">
         What Your Agent{" "}
-        <span className="bg-gradient-to-r from-green-400 to-violet-500 bg-clip-text text-transparent">
+        <span className="bg-gradient-to-r from-[#4ADE80] to-[#A78BFA] bg-clip-text text-transparent">
           Does
         </span>
       </h2>
-      <p className="max-w-lg text-sm text-neutral-500 sm:text-base">
+      <p className="max-w-lg text-sm text-[#71717A] sm:text-base">
         Four autonomous capabilities working in parallel across every platform
         that matters.
       </p>
@@ -622,7 +625,7 @@ export default function SkillsSection() {
   return (
     <section
       className="relative px-4 py-24 sm:px-6 sm:py-32"
-      style={{ backgroundColor: "#050505" }}
+      style={{ backgroundColor: "#0A0A0B" }}
     >
       <SectionTitle />
 

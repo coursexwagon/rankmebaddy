@@ -63,7 +63,7 @@ export function TypewriterEffect({
       </motion.span>
       <span
         className={cn(
-          "inline-block w-[2px] translate-y-[0.05em] bg-green-400 ml-[1px]",
+          "inline-block w-[2px] translate-y-[0.05em] bg-[#4ADE80] ml-[1px]",
           showCursor ? "opacity-100" : "opacity-0",
           cursorClassName
         )}
