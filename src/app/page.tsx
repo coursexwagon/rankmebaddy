@@ -1,7 +1,13 @@
 "use client";
 
 import HeroSection from "@/components/hero";
+import SkillsSection from "@/components/skills";
 
 export default function Home() {
-  return <HeroSection />;
+  return (
+    <main>
+      <HeroSection />
+      <SkillsSection />
+    </main>
+  );
 }
