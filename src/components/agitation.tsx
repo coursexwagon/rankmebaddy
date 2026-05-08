@@ -170,10 +170,10 @@ export default function AgitationSection() {
             The Reality
           </span>
           <h2 className="font-heading text-2xl font-bold text-[#FAFAFA] sm:text-3xl md:text-4xl">
-            Your weekly SEO report
+            Your SEO workload this week
           </h2>
           <p className="text-sm text-[#71717A]">
-            Time tracked across platforms — manual effort, minimal return
+            Hours spent. Platforms juggled. Rankings barely moved.
           </p>
         </motion.div>
 
@@ -274,9 +274,9 @@ export default function AgitationSection() {
             <p className="text-base leading-relaxed text-[#A1A1AA] sm:text-lg">
               This week, you spent{" "}
               <span className="font-semibold text-[#FAFAFA]">{totalHours} hours</span>{" "}
-              on SEO. Your results?{" "}
+              on SEO across five platforms. Your results?{" "}
               <span className="text-[#FCA5A5]">Inconsistent rankings</span>,{" "}
-              <span className="text-[#FCA5A5]">wasted effort</span>, and still{" "}
+              <span className="text-[#FCA5A5]">wasted hours</span>, and still{" "}
               <span className="text-[#FCA5A5]">no clear strategy</span>.
             </p>
           </div>

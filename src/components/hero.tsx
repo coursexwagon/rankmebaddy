@@ -1,7 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useCallback } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion } from "framer-motion";
 
 /* ─── Color System ───────────────────────────────────────────── */
 // Background: #0A0A0B  |  Surface: #18181B  |  Border: #27272A
@@ -18,34 +17,17 @@ function WireframeGlobe() {
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        {/* Outer circle */}
         <circle cx="300" cy="300" r="260" stroke="#FAFAFA" strokeWidth="0.8" />
-
-        {/* Latitude lines */}
         <ellipse cx="300" cy="180" rx="240" ry="40" stroke="#FAFAFA" strokeWidth="0.4" />
         <ellipse cx="300" cy="240" rx="255" ry="55" stroke="#FAFAFA" strokeWidth="0.4" />
         <ellipse cx="300" cy="300" rx="260" ry="70" stroke="#FAFAFA" strokeWidth="0.5" />
         <ellipse cx="300" cy="360" rx="255" ry="55" stroke="#FAFAFA" strokeWidth="0.4" />
         <ellipse cx="300" cy="420" rx="240" ry="40" stroke="#FAFAFA" strokeWidth="0.4" />
-
-        {/* Longitude lines */}
         <ellipse cx="300" cy="300" rx="70" ry="260" stroke="#FAFAFA" strokeWidth="0.4" />
         <ellipse cx="300" cy="300" rx="140" ry="260" stroke="#FAFAFA" strokeWidth="0.4" />
         <ellipse cx="300" cy="300" rx="200" ry="260" stroke="#FAFAFA" strokeWidth="0.3" />
-
-        {/* Diagonal meridians */}
-        <ellipse
-          cx="300" cy="300" rx="180" ry="260"
-          stroke="#FAFAFA" strokeWidth="0.3"
-          transform="rotate(25 300 300)"
-        />
-        <ellipse
-          cx="300" cy="300" rx="180" ry="260"
-          stroke="#FAFAFA" strokeWidth="0.3"
-          transform="rotate(-25 300 300)"
-        />
-
-        {/* Scattered dots — cities/nodes */}
+        <ellipse cx="300" cy="300" rx="180" ry="260" stroke="#FAFAFA" strokeWidth="0.3" transform="rotate(25 300 300)" />
+        <ellipse cx="300" cy="300" rx="180" ry="260" stroke="#FAFAFA" strokeWidth="0.3" transform="rotate(-25 300 300)" />
         <circle cx="220" cy="240" r="2" fill="#6EE7B7" opacity="0.6" />
         <circle cx="380" cy="260" r="2" fill="#6EE7B7" opacity="0.5" />
         <circle cx="310" cy="340" r="2" fill="#6EE7B7" opacity="0.4" />
@@ -53,20 +35,14 @@ function WireframeGlobe() {
         <circle cx="350" cy="200" r="1.5" fill="#6EE7B7" opacity="0.5" />
         <circle cx="190" cy="310" r="1.5" fill="#6EE7B7" opacity="0.4" />
         <circle cx="400" cy="350" r="1.5" fill="#6EE7B7" opacity="0.3" />
-
-        {/* Connection arcs between dots */}
         <path d="M220,240 Q290,210 380,260" stroke="#6EE7B7" strokeWidth="0.4" opacity="0.3" fill="none" />
         <path d="M380,260 Q350,310 310,340" stroke="#6EE7B7" strokeWidth="0.4" opacity="0.2" fill="none" />
         <path d="M310,340 Q280,370 260,380" stroke="#6EE7B7" strokeWidth="0.3" opacity="0.2" fill="none" />
         <path d="M350,200 Q300,230 220,240" stroke="#6EE7B7" strokeWidth="0.3" opacity="0.2" fill="none" />
       </svg>
-
-      {/* Subtle radial gradient behind globe */}
       <div
         className="absolute h-[600px] w-[600px] rounded-full opacity-[0.04]"
-        style={{
-          background: "radial-gradient(circle, #6EE7B7 0%, transparent 70%)",
-        }}
+        style={{ background: "radial-gradient(circle, #6EE7B7 0%, transparent 70%)" }}
       />
     </div>
   );
@@ -90,23 +66,9 @@ function FloatingParticles() {
         <motion.div
           key={i}
           className="absolute rounded-full bg-[#6EE7B7]"
-          style={{
-            left: p.x,
-            top: p.y,
-            width: p.size,
-            height: p.size,
-          }}
-          animate={{
-            y: [0, -20, 0, 15, 0],
-            x: [0, 10, -8, 5, 0],
-            opacity: [0.15, 0.35, 0.2, 0.4, 0.15],
-          }}
-          transition={{
-            duration: p.duration,
-            delay: p.delay,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
+          style={{ left: p.x, top: p.y, width: p.size, height: p.size }}
+          animate={{ y: [0, -20, 0, 15, 0], x: [0, 10, -8, 5, 0], opacity: [0.15, 0.35, 0.2, 0.4, 0.15] }}
+          transition={{ duration: p.duration, delay: p.delay, repeat: Infinity, ease: "easeInOut" }}
         />
       ))}
     </div>
@@ -145,8 +107,7 @@ function GridLines() {
     <div
       className="pointer-events-none absolute inset-0 opacity-[0.025]"
       style={{
-        backgroundImage:
-          "linear-gradient(#FAFAFA 1px, transparent 1px), linear-gradient(90deg, #FAFAFA 1px, transparent 1px)",
+        backgroundImage: "linear-gradient(#FAFAFA 1px, transparent 1px), linear-gradient(90deg, #FAFAFA 1px, transparent 1px)",
         backgroundSize: "60px 60px",
       }}
     />
@@ -160,12 +121,10 @@ export default function HeroSection() {
       className="relative overflow-hidden px-4 pt-28 pb-20 sm:px-6 sm:pt-36 sm:pb-28 md:pt-44"
       style={{ backgroundColor: "#0A0A0B" }}
     >
-      {/* Background layers */}
       <GridLines />
       <WireframeGlobe />
       <FloatingParticles />
 
-      {/* Top fade from globe */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[#0A0A0B]/60 to-transparent" />
 
       <div className="relative z-10 mx-auto max-w-3xl">
@@ -182,7 +141,7 @@ export default function HeroSection() {
           </span>
         </motion.div>
 
-        {/* Headline with creative underlines */}
+        {/* Headline */}
         <motion.h1
           className="font-heading text-center text-4xl font-bold leading-[1.08] tracking-tight text-[#FAFAFA] sm:text-5xl md:text-6xl lg:text-7xl"
           initial={{ opacity: 0, y: 20 }}
@@ -201,35 +160,34 @@ export default function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.25 }}
         >
-          One AI agent that learns every platform&apos;s algorithm — so you don&apos;t have to.
-          Google, YouTube, Amazon, TikTok, AI Search. All covered.
+          Your AI SEO partner. Tell it what to rank — it handles the rest across Google, YouTube, Amazon, TikTok, and AI Search.
         </motion.p>
 
-        {/* CTA */}
+        {/* CTA — pill button with inner shadow + icon */}
         <motion.div
-          className="mt-9 flex justify-center"
+          className="mt-9 flex justify-center gap-3"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
         >
+          {/* Primary CTA */}
           <a
             href="#solution"
-            className="inline-flex items-center gap-2 rounded-lg bg-[#FAFAFA] px-6 py-3 text-sm font-semibold text-[#0A0A0B] transition-colors hover:bg-white"
+            className="group inline-flex items-center gap-2.5 rounded-full border border-[#27272A] bg-[#FAFAFA] px-7 py-3.5 text-sm font-semibold text-[#0A0A0B] transition-all hover:border-[#3F3F46] hover:shadow-[0_0_0_1px_rgba(250,250,250,0.1),0_4px_20px_rgba(250,250,250,0.06)]"
           >
-            Deploy Your First Agent
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
+            Start ranking free
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform group-hover:translate-x-0.5">
               <path d="M5 12h14" />
               <path d="m12 5 7 7-7 7" />
             </svg>
+          </a>
+
+          {/* Secondary CTA */}
+          <a
+            href="#proof"
+            className="inline-flex items-center gap-2 rounded-full border border-[#27272A] bg-transparent px-6 py-3.5 text-sm font-medium text-[#A1A1AA] transition-colors hover:border-[#3F3F46] hover:text-[#FAFAFA]"
+          >
+            See results
           </a>
         </motion.div>
 
@@ -240,28 +198,19 @@ export default function HeroSection() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.6 }}
         >
-          No credit card required · Setup in under 60 seconds
+          Free to start · No credit card · Results in 2 weeks
         </motion.p>
 
-        {/* Platform logos row */}
+        {/* Platform row */}
         <motion.div
           className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-3"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.7, delay: 0.8 }}
         >
-          {[
-            { name: "Google", color: "#4285F4" },
-            { name: "YouTube", color: "#FF0000" },
-            { name: "Amazon", color: "#FF9900" },
-            { name: "TikTok", color: "#FE2C55" },
-            { name: "AI Search", color: "#6EE7B7" },
-          ].map((platform) => (
-            <span
-              key={platform.name}
-              className="text-xs font-medium tracking-wide text-[#52525B]"
-            >
-              {platform.name}
+          {["Google", "YouTube", "Amazon", "TikTok", "AI Search"].map((name) => (
+            <span key={name} className="text-xs font-medium tracking-wide text-[#52525B]">
+              {name}
             </span>
           ))}
         </motion.div>
