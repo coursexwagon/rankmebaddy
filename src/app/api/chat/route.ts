@@ -514,12 +514,60 @@ async function executeWebSearch(query: string): Promise<string> {
   }
 }
 
+const FREE_CREDITS_PER_RESET = 10;
+const RESET_INTERVAL_MS = 60 * 60 * 1000; // 1 hour
+
+interface CreditState {
+  credits_remaining: number;
+  total_used: number;
+  last_reset_at: number;
+}
+
+function getUserCredits(userId: string): CreditState {
+  // In-memory credits store (per serverless function invocation)
+  // For production, this should use a database
+  const key = `credits_${userId}`;
+  const stored = globalThis[key] as CreditState | undefined;
+
+  if (!stored) {
+    return { credits_remaining: FREE_CREDITS_PER_RESET, total_used: 0, last_reset_at: Date.now() };
+  }
+
+  // Check for reset
+  if (Date.now() - stored.last_reset_at >= RESET_INTERVAL_MS && stored.credits_remaining < FREE_CREDITS_PER_RESET) {
+    return { credits_remaining: FREE_CREDITS_PER_RESET, total_used: stored.total_used, last_reset_at: Date.now() };
+  }
+
+  return stored;
+}
+
+function setUserCredits(userId: string, credits: CreditState) {
+  globalThis[`credits_${userId}`] = credits;
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const { messages, siteData, keyword, platforms, userName } = await request.json();
+    const { messages, siteData, keyword, platforms, userName, userId } = await request.json();
 
     if (!messages || !Array.isArray(messages)) {
       return NextResponse.json({ error: "Messages array is required" }, { status: 400 });
+    }
+
+    // Check credits
+    if (userId) {
+      const credits = getUserCredits(userId);
+      if (credits.credits_remaining <= 0) {
+        const nextReset = new Date(credits.last_reset_at + RESET_INTERVAL_MS).toISOString();
+        return NextResponse.json({
+          error: "No credits remaining",
+          credits_remaining: 0,
+          next_reset: nextReset,
+        }, { status: 429 });
+      }
+      // Deduct credit
+      credits.credits_remaining -= 1;
+      credits.total_used += 1;
+      setUserCredits(userId, credits);
     }
 
     const systemPrompt = buildSystemPrompt(siteData, keyword, platforms, userName);
@@ -638,7 +686,13 @@ export async function POST(request: NextRequest) {
     // Parse actions
     const { cleanReply, actions } = parseActions(rawReply);
 
-    return NextResponse.json({ reply: cleanReply, actions });
+    const creditsData = userId ? getUserCredits(userId) : null;
+
+    return NextResponse.json({
+      reply: cleanReply,
+      actions,
+      credits_remaining: creditsData?.credits_remaining,
+    });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Unknown error";
     console.error("Chat API error:", message);

@@ -3,9 +3,7 @@
 import { useEffect, useRef, useCallback } from "react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import {
-  SendIcon,
-} from "lucide-react";
+import { SendIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import * as React from "react";
 
@@ -38,12 +36,6 @@ function useAutoResizeTextarea({ minHeight, maxHeight }: UseAutoResizeTextareaPr
     if (textarea) textarea.style.height = `${minHeight}px`;
   }, [minHeight]);
 
-  useEffect(() => {
-    const handleResize = () => adjustHeight();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [adjustHeight]);
-
   return { textareaRef, adjustHeight };
 }
 
@@ -54,10 +46,10 @@ interface AnimatedAIChatProps {
   className?: string;
 }
 
-/* ─── Animated AI Chat Component ─────────────────────────────── */
+/* ─── Glass Chat Input Component ─────────────────────────────── */
 export function AnimatedAIChat({ onSendMessage, isTyping, className }: AnimatedAIChatProps) {
   const [value, setValue] = useState("");
-  const { textareaRef, adjustHeight } = useAutoResizeTextarea({ minHeight: 44, maxHeight: 160 });
+  const { textareaRef, adjustHeight } = useAutoResizeTextarea({ minHeight: 56, maxHeight: 160 });
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -78,7 +70,7 @@ export function AnimatedAIChat({ onSendMessage, isTyping, className }: AnimatedA
 
   return (
     <div className={cn("relative w-full", className)}>
-      <div className="flex items-end gap-3 rounded-2xl border border-[#2A2A2E] bg-[#1A1A1E] px-4 py-3 transition-colors focus-within:border-[#3A3A3E] focus-within:ring-1 focus-within:ring-white/5">
+      <div className="flex items-end gap-3 rounded-2xl bg-white/[0.06] backdrop-blur-xl border border-white/[0.08] px-5 py-4 transition-all focus-within:bg-white/[0.09] focus-within:border-white/[0.15] focus-within:shadow-[0_0_30px_rgba(255,255,255,0.04)]">
         <textarea
           ref={textareaRef}
           value={value}
@@ -89,21 +81,21 @@ export function AnimatedAIChat({ onSendMessage, isTyping, className }: AnimatedA
           onKeyDown={handleKeyDown}
           placeholder="What do you want to rank for?"
           rows={1}
-          className="max-h-[120px] min-h-[20px] flex-1 resize-none bg-transparent text-[14px] text-[#E8E8E8] outline-none placeholder:text-[#4A4A4E]"
+          className="max-h-[120px] min-h-[24px] flex-1 resize-none bg-transparent text-[15px] text-white outline-none placeholder:text-white/25"
         />
         <motion.button
           onClick={handleSend}
           disabled={!value.trim() || isTyping}
           className={cn(
-            "flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all mb-0.5",
+            "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-all mb-0.5",
             value.trim()
-              ? "bg-white text-[#0A0A0B] hover:bg-[#E8E8E8]"
-              : "bg-[#2A2A2E] text-[#6B6B6B]"
+              ? "bg-white text-[#0A0A0B] hover:bg-white/90 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+              : "bg-white/[0.06] text-white/20"
           )}
           whileHover={value.trim() ? { scale: 1.05 } : {}}
           whileTap={value.trim() ? { scale: 0.95 } : {}}
         >
-          <SendIcon className="w-3.5 h-3.5" />
+          <SendIcon className="w-4 h-4" />
         </motion.button>
       </div>
     </div>

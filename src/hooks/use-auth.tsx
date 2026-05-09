@@ -52,6 +52,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+        // Store user ID for credits tracking
+        if (session?.user?.id) {
+          localStorage.setItem("rankmebaddy_user_id", session.user.id);
+        } else {
+          localStorage.removeItem("rankmebaddy_user_id");
+        }
       }
     );
 
@@ -74,28 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { error: error.message };
     }
 
-    // During beta, auto-confirm the user so they can sign in immediately
-    if (BETA_MODE && data.user && !data.user.email_confirmed_at) {
-      try {
-        const confirmRes = await fetch("/api/auth/auto-confirm", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email }),
-        });
-
-        if (confirmRes.ok) {
-          // Auto-confirm succeeded — now sign the user in
-          const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-          if (signInError) {
-            // Auto sign-in failed, but account was created and confirmed
-            return { error: null };
-          }
-        }
-      } catch {
-        // Auto-confirm API call failed, user will need to confirm via email
-      }
-    }
-
+    // Email verification is required — user must check their inbox
     return { error: null };
   }, [supabase]);
 

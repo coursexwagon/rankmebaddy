@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import { useSubscription, SubscriptionProvider } from "@/hooks/use-subscription";
 import { useAuth } from "@/hooks/use-auth";
+import { CreditsProvider, useCredits } from "@/hooks/use-credits";
 import { Paywall } from "@/components/paywall";
 import { CustomerCenter } from "@/components/customer-center";
 import { AnimatedAIChat } from "@/components/ui/animated-ai-chat";
@@ -84,7 +85,7 @@ const topBarTabs = [
   { id: "content", label: "Content" },
 ];
 
-/* ─── Suggested Prompt Cards ────────────────────────────────── */
+/* ─── Suggested Prompt Chips ────────────────────────────────── */
 const suggestedPrompts = [
   { title: "Audit my site", prompt: "Run a comprehensive SEO audit on my site covering technical SEO, content, and authority factors." },
   { title: "Find keyword gaps", prompt: "What keyword gaps should I target for my site?" },
@@ -135,7 +136,7 @@ function PlatformIcon({ platform, size = 14 }: { platform: string; size?: number
   }
 }
 
-/* ─── Action Buttons — pill-shaped, dark ────────────────────── */
+/* ─── Action Buttons — glass pill ─────────────────────────── */
 function ActionButtons({ actions, onAction }: { actions: AgentAction[]; onAction: (prompt: string) => void }) {
   if (!actions || actions.length === 0) return null;
   return (
@@ -144,7 +145,7 @@ function ActionButtons({ actions, onAction }: { actions: AgentAction[]; onAction
         <motion.button
           key={action.type}
           onClick={() => onAction(action.prompt)}
-          className="inline-flex items-center gap-2 rounded-full border border-[#2A2A2E] bg-[#1A1A1E] px-3.5 py-1.5 text-[11px] font-medium text-[#C8C8C8] transition-all hover:border-[#3A3A3E] hover:text-white"
+          className="inline-flex items-center gap-2 rounded-full bg-white/[0.06] backdrop-blur-xl border border-white/[0.08] px-4 py-2 text-[11px] font-medium text-white/80 transition-all hover:bg-white/[0.12] hover:border-white/[0.15] hover:text-white hover:shadow-[0_0_20px_rgba(255,255,255,0.06)]"
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
         >
@@ -251,7 +252,7 @@ function SetupScreen({ onComplete }: { onComplete: () => void }) {
   );
 }
 
-/* ─── Chat Bubble — with diagram support ─────────────────────── */
+/* ─── Chat Bubble — glass cards ─────────────────────────────── */
 function ChatBubble({ message, onAction }: { message: ChatMessage; onAction: (prompt: string) => void }) {
   const isUser = message.role === "user";
 
@@ -271,8 +272,8 @@ function ChatBubble({ message, onAction }: { message: ChatMessage; onAction: (pr
       <div
         className={`max-w-[85%] ${
           isUser
-            ? "rounded-2xl bg-[#1E1E22] text-[#E8E8E8] px-5 py-3.5"
-            : "text-[#E8E8E8] px-1 py-1"
+            ? "rounded-2xl bg-white/[0.08] backdrop-blur-sm border border-white/[0.06] text-white px-5 py-3.5"
+            : "rounded-2xl bg-white/[0.04] backdrop-blur-xl border border-white/[0.06] px-5 py-4 text-white/90"
         }`}
       >
         {isUser ? (
@@ -324,26 +325,26 @@ function ThinkingIndicator() {
   );
 }
 
-/* ─── Suggested Prompt Chip — minimal ────────────────────── */
+/* ─── Suggested Prompt Chip — glass pill ────────────────────── */
 function SuggestedPromptChip({ title, onClick }: { title: string; onClick: () => void }) {
   return (
     <motion.button
       onClick={onClick}
-      className="rounded-full border border-[#2A2A2E] bg-[#1A1A1E] px-4 py-2 text-[12px] text-[#9B9B9B] transition-all hover:border-[#3A3A3E] hover:text-white hover:bg-[#1E1E22]"
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
+      className="rounded-full bg-white/[0.06] backdrop-blur-xl border border-white/[0.08] px-5 py-2.5 text-[13px] text-white/70 transition-all hover:bg-white/[0.12] hover:border-white/[0.15] hover:text-white hover:shadow-[0_0_20px_rgba(255,255,255,0.06)]"
+      whileHover={{ scale: 1.03 }}
+      whileTap={{ scale: 0.97 }}
     >
       {title}
     </motion.button>
   );
 }
 
-/* ─── Overview Section ──────────────────────────────────────── */
-function OverviewSection({ siteData, keyword, platforms, onNavigate }: {
+/* ─── Overview Section — real data only ─────────────────────── */
+function OverviewSection({ siteData, keyword, platforms, onAskAI }: {
   siteData: SiteData;
   keyword: string;
   platforms: string[];
-  onNavigate: (id: string) => void;
+  onAskAI: (prompt: string) => void;
 }) {
   const seoScore = [
     siteData.title ? 20 : 0,
@@ -373,19 +374,19 @@ function OverviewSection({ siteData, keyword, platforms, onNavigate }: {
     <div className="mx-auto max-w-4xl space-y-6 p-4 sm:p-6">
       <div>
         <h2 className="font-heading text-lg font-bold text-white">SEO Overview</h2>
-        <p className="text-[12px] text-[#6B6B6B]">Real-time analysis of {siteData.domain}</p>
+        <p className="text-[12px] text-white/50">Analysis of {siteData.domain}</p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2">
         <motion.div
-          className="flex flex-col items-center justify-center rounded-2xl border border-[#2A2A2E] bg-[#1A1A1E] p-5"
+          className="flex flex-col items-center justify-center rounded-2xl bg-white/[0.04] backdrop-blur-xl border border-white/[0.06] p-6"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <div className="relative flex h-20 w-20 items-center justify-center">
-            <svg className="h-20 w-20 -rotate-90" viewBox="0 0 80 80">
-              <circle cx="40" cy="40" r="34" fill="none" stroke="#2A2A2E" strokeWidth="5" />
+          <div className="relative flex h-24 w-24 items-center justify-center">
+            <svg className="h-24 w-24 -rotate-90" viewBox="0 0 80 80">
+              <circle cx="40" cy="40" r="34" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="5" />
               <motion.circle
                 cx="40" cy="40" r="34" fill="none"
                 stroke={seoScore >= 70 ? "#4ADE80" : seoScore >= 40 ? "#FBBF24" : "#F87171"}
@@ -397,272 +398,122 @@ function OverviewSection({ siteData, keyword, platforms, onNavigate }: {
                 transition={{ duration: 1, delay: 0.3 }}
               />
             </svg>
-            <span className="absolute font-heading text-xl font-bold text-white">{seoScore}</span>
+            <span className="absolute font-heading text-2xl font-bold text-white">{seoScore}</span>
           </div>
-          <p className="mt-2 text-[10px] font-semibold uppercase tracking-wider text-[#6B6B6B]">SEO Score</p>
+          <p className="mt-3 text-[10px] font-semibold uppercase tracking-wider text-white/40">SEO Score</p>
         </motion.div>
 
-        {[
-          { label: "Keywords", value: "147", sub: "23 opportunities", accent: true, onClick: () => onNavigate("keywords") },
-          { label: "Rankings", value: "12", sub: "Tracked positions", accent: false, onClick: () => onNavigate("rankings") },
-          { label: "Content", value: "8", sub: "Optimization tasks", accent: false, onClick: () => onNavigate("content") },
-        ].map((stat, i) => (
-          <motion.button
-            key={stat.label}
-            onClick={stat.onClick}
-            className="rounded-2xl border border-[#2A2A2E] bg-[#1A1A1E] p-4 text-left transition-colors hover:border-[#3A3A3E]"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 + i * 0.05 }}
-          >
-            <p className={`font-heading text-2xl font-bold ${stat.accent ? "text-white" : "text-white"}`}>{stat.value}</p>
-            <p className="text-[10px] text-[#6B6B6B]">{stat.label}</p>
-            <p className="mt-0.5 text-[9px] text-[#6B6B6B]">{stat.sub}</p>
-          </motion.button>
-        ))}
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2">
         <motion.div
-          className="rounded-2xl border border-[#2A2A2E] bg-[#1A1A1E] p-4"
+          className="rounded-2xl bg-white/[0.04] backdrop-blur-xl border border-white/[0.06] p-4"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
+          transition={{ delay: 0.2 }}
         >
-          <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-[#6B6B6B]">Site Issues</h3>
+          <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-white/40">Site Issues</h3>
           <div className="space-y-2.5">
             {issues.map((issue) => (
               <div key={issue.text} className="flex items-start gap-2">
                 <div className={`mt-0.5 h-2 w-2 shrink-0 rounded-full ${issue.type === "error" ? "bg-red-500" : issue.type === "warning" ? "bg-amber-500" : "bg-green-500"}`} />
-                <span className={`text-[12px] ${issue.type === "error" ? "text-red-400" : issue.type === "warning" ? "text-amber-400" : "text-[#9B9B9B]"}`}>{issue.text}</span>
+                <span className={`text-[12px] ${issue.type === "error" ? "text-red-400" : issue.type === "warning" ? "text-amber-400" : "text-white/50"}`}>{issue.text}</span>
               </div>
             ))}
-          </div>
-        </motion.div>
-
-        <motion.div
-          className="rounded-2xl border border-[#2A2A2E] bg-[#1A1A1E] p-4"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35 }}
-        >
-          <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-[#6B6B6B]">Active Campaign</h3>
-          <div className="rounded-xl border border-[#2A2A2E] bg-[#0A0A0B] p-3">
-            <p className="text-[13px] font-medium text-white">&ldquo;{keyword}&rdquo;</p>
-            <div className="mt-3 flex items-center gap-2">
-              <div className="h-1.5 flex-1 rounded-full bg-[#2A2A2E]">
-                <motion.div
-                  className="h-1.5 rounded-full bg-white"
-                  initial={{ width: 0 }}
-                  animate={{ width: "35%" }}
-                  transition={{ duration: 1, delay: 0.5 }}
-                />
-              </div>
-              <span className="text-[10px] text-[#6B6B6B]">35%</span>
-            </div>
-            <p className="mt-2 text-[10px] text-[#6B6B6B]">
-              Strategy in progress — {platforms.length} platform{platforms.length !== 1 ? "s" : ""} targeted
-            </p>
           </div>
         </motion.div>
       </div>
 
       <motion.div
-        className="overflow-hidden rounded-2xl border border-[#2A2A2E] bg-[#1A1A1E]"
+        className="overflow-hidden rounded-2xl bg-white/[0.04] backdrop-blur-xl border border-white/[0.06]"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
+        transition={{ delay: 0.3 }}
       >
-        <h3 className="px-4 pt-4 pb-2 text-[11px] font-semibold uppercase tracking-wider text-[#6B6B6B]">Site Preview</h3>
+        <h3 className="px-4 pt-4 pb-2 text-[11px] font-semibold uppercase tracking-wider text-white/40">Site Preview</h3>
         <div className="relative h-48 w-full overflow-hidden bg-[#0A0A0B]">
           <img src={siteData.screenshot} alt={`Screenshot of ${siteData.domain}`} className="h-full w-full object-cover object-top" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
-          <div className="absolute bottom-3 left-3 flex items-center gap-2 rounded-lg bg-[#0A0A0B]/90 px-3 py-1.5 backdrop-blur-sm border border-[#2A2A2E]">
+          <div className="absolute bottom-3 left-3 flex items-center gap-2 rounded-lg bg-black/70 backdrop-blur-sm px-3 py-1.5 border border-white/[0.08]">
             {siteData.favicon && <img src={siteData.favicon} alt="" className="h-3.5 w-3.5 rounded" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />}
             <span className="text-[11px] font-medium text-white">{siteData.domain}</span>
           </div>
         </div>
-        {siteData.title && (
-          <div className="border-t border-[#2A2A2E] px-4 py-3">
-            <p className="text-[12px] font-medium text-white">{siteData.title}</p>
-            {siteData.description && <p className="mt-1 text-[11px] text-[#6B6B6B] line-clamp-2">{siteData.description}</p>}
-          </div>
-        )}
       </motion.div>
+
+      <div className="rounded-2xl bg-white/[0.04] backdrop-blur-xl border border-white/[0.06] p-4 text-center">
+        <p className="text-[12px] text-white/40 mb-3">Chat with the AI agent to discover keywords, track rankings, and get content recommendations</p>
+        <button onClick={() => onAskAI("Analyze my site and give me a full SEO action plan")} className="rounded-full bg-white/[0.08] backdrop-blur-xl border border-white/[0.08] px-5 py-2.5 text-[13px] text-white/70 transition-all hover:bg-white/[0.12] hover:text-white hover:shadow-[0_0_20px_rgba(255,255,255,0.06)]">
+          Start SEO Analysis
+        </button>
+      </div>
     </div>
   );
 }
 
-/* ─── Keywords Section ──────────────────────────────────────── */
-function KeywordsSection({ siteData, keyword, onAskAI }: { siteData: SiteData; keyword: string; onAskAI: (prompt: string) => void }) {
-  const domainBase = siteData.domain?.split(".")[0] || "site";
-  const [filter, setFilter] = useState<string>("all");
-
-  const keywords: KeywordItem[] = [
-    { keyword: keyword || domainBase, volume: "12,100", difficulty: "65", intent: "Commercial", status: "tracked" },
-    { keyword: `${keyword || domainBase} alternative`, volume: "6,800", difficulty: "42", intent: "Commercial", status: "opportunity" },
-    { keyword: `best ${keyword || domainBase}`, volume: "9,400", difficulty: "71", intent: "Informational", status: "gap" },
-    { keyword: `${keyword || domainBase} reviews`, volume: "3,200", difficulty: "38", intent: "Commercial", status: "opportunity" },
-    { keyword: `${keyword || domainBase} vs`, volume: "2,100", difficulty: "45", intent: "Commercial", status: "gap" },
-    { keyword: `how to use ${keyword || domainBase}`, volume: "4,600", difficulty: "33", intent: "Informational", status: "opportunity" },
-    { keyword: `${keyword || domainBase} pricing`, volume: "5,500", difficulty: "52", intent: "Transactional", status: "ranking" },
-    { keyword: `${keyword || domainBase} tutorial`, volume: "1,800", difficulty: "28", intent: "Informational", status: "opportunity" },
-    { keyword: `cheap ${keyword || domainBase}`, volume: "2,400", difficulty: "55", intent: "Transactional", status: "gap" },
-    { keyword: `${keyword || domainBase} for beginners`, volume: "3,900", difficulty: "31", intent: "Informational", status: "opportunity" },
-  ];
-
-  const filtered = filter === "all" ? keywords : keywords.filter((k) => k.status === filter);
-  const statusColors: Record<string, string> = {
-    opportunity: "text-[#4ADE80] border-[#2A2A2E] bg-[#1A1A1E]",
-    ranking: "text-[#60A5FA] border-[#2A2A2E] bg-[#1A1A1E]",
-    gap: "text-[#FBBF24] border-[#2A2A2E] bg-[#1A1A1E]",
-    tracked: "text-[#6B6B6B] border-[#2A2A2E] bg-[#1A1A1E]",
-  };
-
+/* ─── Keywords Section — empty state ───────────────────────── */
+function KeywordsSection({ onAskAI }: { onAskAI: (prompt: string) => void }) {
   return (
     <div className="mx-auto max-w-4xl space-y-5 p-4 sm:p-6">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h2 className="font-heading text-lg font-bold text-white">Keywords</h2>
-          <p className="text-[12px] text-[#6B6B6B]">{keywords.length} keywords tracked for {siteData.domain}</p>
-        </div>
-        <button onClick={() => onAskAI("Find more keyword opportunities for my site beyond what's listed")} className="shrink-0 rounded-full border border-[#2A2A2E] bg-[#1A1A1E] px-3 py-1.5 text-[11px] font-medium text-white transition-colors hover:bg-[#1E1E22]">+ Find more</button>
+      <div>
+        <h2 className="font-heading text-lg font-bold text-white">Keywords</h2>
+        <p className="text-[12px] text-white/40">Your keyword data will appear here</p>
       </div>
-
-      <div className="flex gap-2">
-        {["all", "opportunity", "ranking", "gap", "tracked"].map((f) => (
-          <button key={f} onClick={() => setFilter(f)} className={`rounded-full border px-3 py-1 text-[11px] capitalize transition-all ${filter === f ? "border-[#3A3A3E] bg-[#1E1E22] text-white font-medium" : "border-[#2A2A2E] text-[#6B6B6B] hover:text-white hover:border-[#3A3A3E]"}`}>{f}</button>
-        ))}
-      </div>
-
-      <div className="overflow-x-auto rounded-2xl border border-[#2A2A2E] bg-[#1A1A1E]">
-        <div className="min-w-[540px]">
-          <div className="grid grid-cols-[1fr_80px_80px_90px_90px] gap-2 border-b border-[#2A2A2E] px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-[#6B6B6B]">
-            <span>Keyword</span><span>Volume</span><span>Difficulty</span><span>Intent</span><span>Status</span>
-          </div>
-          <div className="divide-y divide-[#2A2A2E]">
-            {filtered.map((kw, i) => (
-              <motion.div key={kw.keyword} className="grid grid-cols-[1fr_80px_80px_90px_90px] gap-2 px-4 py-3 text-[12px] transition-colors hover:bg-[#1E1E22]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.03 }}>
-                <span className="font-medium text-white truncate">{kw.keyword}</span>
-                <span className="text-[#9B9B9B]">{kw.volume}</span>
-                <span className={parseInt(kw.difficulty) > 60 ? "text-red-400" : parseInt(kw.difficulty) > 40 ? "text-amber-400" : "text-green-400"}>{kw.difficulty}</span>
-                <span className="text-[#9B9B9B]">{kw.intent}</span>
-                <span className={`rounded-full border px-2 py-0.5 text-[10px] capitalize ${statusColors[kw.status]}`}>{kw.status}</span>
-              </motion.div>
-            ))}
-          </div>
+      <div className="flex flex-col items-center justify-center rounded-2xl bg-white/[0.04] backdrop-blur-xl border border-white/[0.06] py-16">
+        <div className="h-12 w-12 rounded-full bg-white/[0.06] flex items-center justify-center mb-4">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+          </svg>
         </div>
+        <p className="text-[14px] text-white/50 mb-1">No keywords yet</p>
+        <p className="text-[12px] text-white/30 mb-4">Chat with the AI to discover keyword opportunities</p>
+        <button onClick={() => onAskAI("Find keyword opportunities for my site")} className="rounded-full bg-white/[0.08] backdrop-blur-xl border border-white/[0.08] px-5 py-2.5 text-[13px] text-white/70 transition-all hover:bg-white/[0.12] hover:text-white">
+          Discover Keywords
+        </button>
       </div>
     </div>
   );
 }
 
-/* ─── Rankings Section ──────────────────────────────────────── */
-function RankingsSection({ siteData, keyword, platforms }: { siteData: SiteData; keyword: string; platforms: string[] }) {
-  const domainBase = siteData.domain?.split(".")[0] || "site";
-  const rankings: RankingEntry[] = [
-    { keyword: keyword || domainBase, position: 24, previousPosition: 31, url: "/", platform: "google" },
-    { keyword: `${keyword || domainBase} pricing`, position: 8, previousPosition: 12, url: "/pricing", platform: "google" },
-    { keyword: `${keyword || domainBase} review`, position: 45, previousPosition: 52, url: "/", platform: "google" },
-    { keyword: `best ${keyword || domainBase}`, position: 67, previousPosition: 73, url: "/", platform: "google" },
-    { keyword: `how to ${keyword || domainBase}`, position: 15, previousPosition: 18, url: "/guide", platform: "youtube" },
-    { keyword: `${keyword || domainBase} tutorial`, position: 33, previousPosition: 41, url: "/tutorial", platform: "youtube" },
-  ];
-
+/* ─── Rankings Section — empty state ───────────────────────── */
+function RankingsSection({ onAskAI }: { onAskAI: (prompt: string) => void }) {
   return (
     <div className="mx-auto max-w-4xl space-y-5 p-4 sm:p-6">
       <div>
         <h2 className="font-heading text-lg font-bold text-white">Rankings</h2>
-        <p className="text-[12px] text-[#6B6B6B]">Tracking {rankings.length} positions across {platforms.length} platform{platforms.length !== 1 ? "s" : ""}</p>
+        <p className="text-[12px] text-white/40">Your ranking data will appear here</p>
       </div>
-
-      <div className="grid grid-cols-3 gap-3">
-        {[
-          { label: "Avg. Position", value: "32", trend: "+5", positive: true },
-          { label: "Page 1 Rankings", value: "2", trend: "+1", positive: true },
-          { label: "Improving", value: "4", trend: "of 6", positive: true },
-        ].map((stat, i) => (
-          <motion.div key={stat.label} className="rounded-2xl border border-[#2A2A2E] bg-[#1A1A1E] p-3.5" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + i * 0.05 }}>
-            <p className="font-heading text-xl font-bold text-white">{stat.value}</p>
-            <p className="text-[10px] text-[#6B6B6B]">{stat.label}</p>
-            <p className={`mt-0.5 text-[10px] ${stat.positive ? "text-green-400" : "text-red-400"}`}>{stat.trend}</p>
-          </motion.div>
-        ))}
-      </div>
-
-      <div className="overflow-x-auto rounded-2xl border border-[#2A2A2E] bg-[#1A1A1E]">
-        <div className="min-w-[480px]">
-          <div className="grid grid-cols-[1fr_70px_80px_70px_60px] gap-2 border-b border-[#2A2A2E] px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-[#6B6B6B]">
-            <span>Keyword</span><span>Platform</span><span>Position</span><span>Change</span><span>URL</span>
-          </div>
-          <div className="divide-y divide-[#2A2A2E]">
-            {rankings.map((r, i) => {
-              const change = r.previousPosition - r.position;
-              return (
-                <motion.div key={`${r.keyword}-${r.platform}`} className="grid grid-cols-[1fr_70px_80px_70px_60px] gap-2 px-4 py-3 text-[12px] items-center transition-colors hover:bg-[#1E1E22]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.04 }}>
-                  <span className="font-medium text-white truncate">{r.keyword}</span>
-                  <span><PlatformIcon platform={r.platform} size={16} /></span>
-                  <span className="text-white">#{r.position}</span>
-                  <span className={change > 0 ? "text-green-400" : change < 0 ? "text-red-400" : "text-[#9B9B9B]"}>{change > 0 ? "+" : ""}{change}</span>
-                  <span className="truncate text-[#6B6B6B]">{r.url}</span>
-                </motion.div>
-              );
-            })}
-          </div>
+      <div className="flex flex-col items-center justify-center rounded-2xl bg-white/[0.04] backdrop-blur-xl border border-white/[0.06] py-16">
+        <div className="h-12 w-12 rounded-full bg-white/[0.06] flex items-center justify-center mb-4">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 3v18h18" /><path d="m19 9-5 5-4-4-3 3" />
+          </svg>
         </div>
+        <p className="text-[14px] text-white/50 mb-1">No rankings tracked yet</p>
+        <p className="text-[12px] text-white/30 mb-4">The AI agent will track your positions as you use it</p>
+        <button onClick={() => onAskAI("Check my current ranking positions")} className="rounded-full bg-white/[0.08] backdrop-blur-xl border border-white/[0.08] px-5 py-2.5 text-[13px] text-white/70 transition-all hover:bg-white/[0.12] hover:text-white">
+          Check Rankings
+        </button>
       </div>
     </div>
   );
 }
 
-/* ─── Content Section ───────────────────────────────────────── */
-function ContentSection({ siteData, keyword, onAskAI }: { siteData: SiteData; keyword: string; onAskAI: (prompt: string) => void }) {
-  const domainBase = siteData.domain?.split(".")[0] || "site";
-  const contentItems: ContentItem[] = [
-    { title: siteData.title || "Homepage", type: "page", score: siteData.title ? 72 : 25, status: siteData.title ? "optimize" : "update", url: "/" },
-    { title: `The Ultimate Guide to ${keyword || domainBase}`, type: "blog", score: 0, status: "publish" },
-    { title: `${keyword || domainBase} vs Competitors: 2025 Comparison`, type: "blog", score: 0, status: "publish" },
-    { title: `How ${keyword || domainBase} Helps You Rank Better`, type: "blog", score: 0, status: "draft" },
-    { title: `${keyword || domainBase} Tutorial for Beginners`, type: "video", score: 0, status: "draft" },
-  ];
-
-  const statusStyles: Record<string, string> = {
-    optimize: "text-[#60A5FA] border-[#2A2A2E] bg-[#1A1A1E]",
-    publish: "text-[#4ADE80] border-[#2A2A2E] bg-[#1A1A1E]",
-    update: "text-[#FBBF24] border-[#2A2A2E] bg-[#1A1A1E]",
-    draft: "text-[#6B6B6B] border-[#2A2A2E] bg-[#1A1A1E]",
-  };
-
-  const typeIcons: Record<string, string> = { blog: "Blog", page: "Page", product: "Product", video: "Video" };
-
+/* ─── Content Section — empty state ────────────────────────── */
+function ContentSection({ onAskAI }: { onAskAI: (prompt: string) => void }) {
   return (
     <div className="mx-auto max-w-4xl space-y-5 p-4 sm:p-6">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h2 className="font-heading text-lg font-bold text-white">Content</h2>
-          <p className="text-[12px] text-[#6B6B6B]">Content strategy and optimization tasks</p>
-        </div>
-        <button onClick={() => onAskAI("Generate a complete content calendar for my SEO campaign")} className="shrink-0 rounded-full border border-[#2A2A2E] bg-[#1A1A1E] px-3 py-1.5 text-[11px] font-medium text-white transition-colors hover:bg-[#1E1E22]">+ Generate plan</button>
+      <div>
+        <h2 className="font-heading text-lg font-bold text-white">Content</h2>
+        <p className="text-[12px] text-white/40">Your content strategy will appear here</p>
       </div>
-
-      <div className="space-y-2.5">
-        {contentItems.map((item, i) => (
-          <motion.div key={item.title} className="flex items-center gap-4 rounded-2xl border border-[#2A2A2E] bg-[#1A1A1E] px-4 py-3.5 transition-colors hover:border-[#3A3A3E]" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-            <span className="shrink-0 rounded-md border border-[#2A2A2E] bg-[#0A0A0B] px-2 py-1 text-[9px] font-semibold uppercase text-[#9B9B9B]">{typeIcons[item.type]}</span>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-[13px] font-medium text-white">{item.title}</p>
-              {item.url && <p className="text-[10px] text-[#6B6B6B]">{siteData.domain}{item.url}</p>}
-            </div>
-            {item.score > 0 && (
-              <div className="flex items-center gap-2">
-                <div className="h-1.5 w-16 rounded-full bg-[#2A2A2E]">
-                  <div className={`h-1.5 rounded-full ${item.score >= 70 ? "bg-white" : item.score >= 40 ? "bg-[#FBBF24]" : "bg-[#F87171]"}`} style={{ width: `${item.score}%` }} />
-                </div>
-                <span className="text-[10px] text-[#9B9B9B]">{item.score}</span>
-              </div>
-            )}
-            <span className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[10px] capitalize ${statusStyles[item.status]}`}>{item.status}</span>
-          </motion.div>
-        ))}
+      <div className="flex flex-col items-center justify-center rounded-2xl bg-white/[0.04] backdrop-blur-xl border border-white/[0.06] py-16">
+        <div className="h-12 w-12 rounded-full bg-white/[0.06] flex items-center justify-center mb-4">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6" /><path d="M16 13H8" /><path d="M16 17H8" /><path d="M10 9H8" />
+          </svg>
+        </div>
+        <p className="text-[14px] text-white/50 mb-1">No content plan yet</p>
+        <p className="text-[12px] text-white/30 mb-4">Let the AI agent engineer content for you</p>
+        <button onClick={() => onAskAI("Create a content strategy and calendar for my site")} className="rounded-full bg-white/[0.08] backdrop-blur-xl border border-white/[0.08] px-5 py-2.5 text-[13px] text-white/70 transition-all hover:bg-white/[0.12] hover:text-white">
+          Generate Content Plan
+        </button>
       </div>
     </div>
   );
@@ -771,15 +622,28 @@ export default function DashboardPage() {
 
       try {
         const chatMessages = [...messages, userMsg].map((m) => ({ role: m.role, content: m.content }));
+        const userId = typeof window !== "undefined" ? localStorage.getItem("rankmebaddy_user_id") : null;
         const res = await fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ messages: chatMessages, siteData: onboardingData?.siteData, keyword: onboardingData?.keyword, platforms: onboardingData?.platforms, userName: onboardingData?.name }),
+          body: JSON.stringify({ messages: chatMessages, siteData: onboardingData?.siteData, keyword: onboardingData?.keyword, platforms: onboardingData?.platforms, userName: onboardingData?.name, userId }),
         });
         const data = await res.json();
+        
+        // Handle credits exhausted
+        if (res.status === 429) {
+          setMessages((prev) => [...prev, { id: `error-${Date.now()}`, role: "assistant", content: `No credits remaining. Your credits reset every hour. ${data.next_reset ? `Next reset: ${new Date(data.next_reset).toLocaleTimeString()}` : ""}`, timestamp: new Date() }]);
+          return;
+        }
+        
         if (data.error) throw new Error(data.error);
         const aiActions: AgentAction[] = data.actions || [];
         setMessages((prev) => [...prev, { id: `ai-${Date.now()}`, role: "assistant", content: data.reply, timestamp: new Date(), actions: aiActions.length > 0 ? aiActions : undefined }]);
+        
+        // Update credits display
+        if (data.credits_remaining !== undefined) {
+          localStorage.setItem("rankmebaddy_credits", String(data.credits_remaining));
+        }
       } catch {
         setMessages((prev) => [...prev, { id: `error-${Date.now()}`, role: "assistant", content: "Something went wrong. Could you try that again?", timestamp: new Date() }]);
       } finally {
@@ -832,6 +696,7 @@ export default function DashboardPage() {
 
 
   return (
+    <CreditsProvider>
     <SubscriptionProvider>
     <div className="flex h-screen flex-col overflow-hidden bg-[#0A0A0B]">
       {/* Paywall Modal */}
@@ -1040,25 +905,25 @@ export default function DashboardPage() {
 
           {activeSection === "overview" && siteData && (
             <motion.div key="overview" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <OverviewSection siteData={siteData} keyword={onboardingData.keyword} platforms={onboardingData.platforms || []} onNavigate={setActiveSection} />
+              <OverviewSection siteData={siteData} keyword={onboardingData.keyword} platforms={onboardingData.platforms || []} onAskAI={askInChat} />
             </motion.div>
           )}
 
           {activeSection === "keywords" && siteData && (
             <motion.div key="keywords" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <KeywordsSection siteData={siteData} keyword={onboardingData.keyword} onAskAI={askInChat} />
+              <KeywordsSection onAskAI={askInChat} />
             </motion.div>
           )}
 
           {activeSection === "rankings" && siteData && (
             <motion.div key="rankings" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <RankingsSection siteData={siteData} keyword={onboardingData.keyword} platforms={onboardingData.platforms || []} />
+              <RankingsSection onAskAI={askInChat} />
             </motion.div>
           )}
 
           {activeSection === "content" && siteData && (
             <motion.div key="content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <ContentSection siteData={siteData} keyword={onboardingData.keyword} onAskAI={askInChat} />
+              <ContentSection onAskAI={askInChat} />
             </motion.div>
           )}
 
@@ -1105,5 +970,6 @@ export default function DashboardPage() {
       </div>
     </div>
     </SubscriptionProvider>
+    </CreditsProvider>
   );
 }

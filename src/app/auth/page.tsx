@@ -58,17 +58,7 @@ function AuthForm() {
             setError(err);
           }
         } else {
-          // During beta, try to auto-confirm via our API
-          try {
-            await fetch("/api/auth/auto-confirm", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ email }),
-            });
-          } catch {
-            // Auto-confirm may fail, that's ok
-          }
-          setSuccess("Account created! Redirecting...");
+          setSuccess("Account created! Check your email to verify, then sign in.");
         }
       }
     } finally {
