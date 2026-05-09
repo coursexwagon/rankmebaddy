@@ -1,8 +1,8 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { supabase } from "@/lib/supabase";
-import type { User, Session } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/client";
+import type { User, Session, SupabaseClient } from "@supabase/supabase-js";
 
 interface AuthContextType {
   user: User | null;
@@ -12,6 +12,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, name: string) => Promise<{ error: string | null }>;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
+  supabase: SupabaseClient;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -22,6 +23,7 @@ const AuthContext = createContext<AuthContextType>({
   signUp: async () => ({ error: null }),
   signInWithGoogle: async () => {},
   signOut: async () => {},
+  supabase: null as unknown as SupabaseClient,
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -29,7 +31,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Create a single Supabase client instance for the auth provider
+  const supabase = typeof window !== "undefined" ? createClient() : null as unknown as SupabaseClient;
+
   useEffect(() => {
+    if (!supabase) return;
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -47,7 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     );
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [supabase]);
 
   const signInWithEmail = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -66,7 +73,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signInWithGoogle = async () => {
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/dashboard` },
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
     });
   };
 
@@ -76,7 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, session, loading, signInWithEmail, signUp, signInWithGoogle, signOut }}
+      value={{ user, session, loading, signInWithEmail, signUp, signInWithGoogle, signOut, supabase }}
     >
       {children}
     </AuthContext.Provider>

@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/use-auth";
+import { Suspense } from "react";
 
-export default function AuthPage() {
+function AuthForm() {
   const { signInWithEmail, signUp, signInWithGoogle, user, loading: authLoading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -16,13 +18,16 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
 
-  // If already logged in, redirect to onboarding or dashboard
+  const nextPath = searchParams.get("next") || "/onboarding";
+
+  // If already logged in, redirect
   useEffect(() => {
     if (!authLoading && user) {
       const onboarding = typeof window !== "undefined" ? localStorage.getItem("rankmebaddy_onboarding") : null;
-      router.replace(onboarding ? "/dashboard" : "/onboarding");
+      const destination = onboarding ? "/dashboard" : nextPath;
+      router.replace(destination);
     }
-  }, [user, authLoading, router]);
+  }, [user, authLoading, router, nextPath]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,6 +55,28 @@ export default function AuthPage() {
       setLoading(false);
     }
   };
+
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    try {
+      await signInWithGoogle();
+    } catch {
+      setError("Google sign-in failed. Please try again.");
+      setLoading(false);
+    }
+  };
+
+  // Show loading spinner while checking auth state
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#FAFAF7] dark:bg-[#0F0F11]">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-8 w-8 rounded-full border-2 border-blue-500/30 border-t-blue-500 animate-spin" />
+          <p className="text-sm text-[#6B6B6B] dark:text-[#A1A1AA]">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#FAFAF7] dark:bg-[#0F0F11] px-4">
@@ -82,8 +109,9 @@ export default function AuthPage() {
         <div className="rounded-2xl border border-[#E8E5E0] dark:border-[#2A2A2E] bg-white dark:bg-[#1A1A1E] p-6 shadow-sm">
           {/* Google SSO */}
           <button
-            onClick={signInWithGoogle}
-            className="flex w-full items-center justify-center gap-3 rounded-xl border border-[#E8E5E0] dark:border-[#2A2A2E] bg-white dark:bg-[#252528] px-4 py-3 text-sm font-medium text-[#1A1A1A] dark:text-white transition-all hover:bg-[#F5F5F0] dark:hover:bg-[#2A2A2E]"
+            onClick={handleGoogleSignIn}
+            disabled={loading}
+            className="flex w-full items-center justify-center gap-3 rounded-xl border border-[#E8E5E0] dark:border-[#2A2A2E] bg-white dark:bg-[#252528] px-4 py-3 text-sm font-medium text-[#1A1A1A] dark:text-white transition-all hover:bg-[#F5F5F0] dark:hover:bg-[#2A2A2E] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <svg width="18" height="18" viewBox="0 0 24 24">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
@@ -186,5 +214,22 @@ export default function AuthPage() {
         </p>
       </motion.div>
     </div>
+  );
+}
+
+export default function AuthPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-[#FAFAF7] dark:bg-[#0F0F11]">
+          <div className="flex flex-col items-center gap-3">
+            <div className="h-8 w-8 rounded-full border-2 border-blue-500/30 border-t-blue-500 animate-spin" />
+            <p className="text-sm text-[#6B6B6B] dark:text-[#A1A1AA]">Loading...</p>
+          </div>
+        </div>
+      }
+    >
+      <AuthForm />
+    </Suspense>
   );
 }

@@ -20,6 +20,15 @@ export function MermaidRenderer({ chart, className, autoOpen = false }: MermaidR
   const [isDragging, setIsDragging] = useState(false);
   const dragStart = useRef({ x: 0, y: 0, posx: 0, posy: 0 });
   const renderAttempted = useRef(false);
+  const chartRef = useRef(chart);
+
+  // Track chart changes for re-render
+  useEffect(() => {
+    chartRef.current = chart;
+    renderAttempted.current = false;
+    setSvg("");
+    setError("");
+  }, [chart]);
 
   // Auto-open canvas when SVG is first rendered (if autoOpen)
   useEffect(() => {
@@ -83,49 +92,12 @@ export function MermaidRenderer({ chart, className, autoOpen = false }: MermaidR
         },
       });
 
-      // Sanitize chart — fix common syntax errors
+      // The server-side fixMermaidSyntax already handles subgraph ID conflicts.
+      // Just do basic client-side sanitization.
       let sanitized = chart.trim();
 
-      // Remove duplicate node IDs (node A used both as node and subgraph ID)
-      // If a node ID is also used as a subgraph ID, rename the node
-      const subgraphIds = new Set<string>();
-      const subgraphRegex = /subgraph\s+(\w+)\s*\[/g;
-      let m;
-      while ((m = subgraphRegex.exec(sanitized)) !== null) {
-        subgraphIds.add(m[1]);
-      }
-
-      // Also match: subgraph ID[Label]
-      const subgraphRegex2 = /subgraph\s+(\w+)\[/g;
-      while ((m = subgraphRegex2.exec(sanitized)) !== null) {
-        subgraphIds.add(m[1]);
-      }
-
-      // Also match: subgraph ID
-      const subgraphRegex3 = /subgraph\s+(\w+)\s*$/gm;
-      while ((m = subgraphRegex3.exec(sanitized)) !== null) {
-        subgraphIds.add(m[1]);
-      }
-
-      // Replace standalone node definitions that conflict with subgraph IDs
-      // e.g. A[Current State] --> B[Module 1] where A and B are also subgraph IDs
-      // We need to rename these
-      let counter = 0;
-      subgraphIds.forEach((id) => {
-        // Replace node usages in arrows: A[Label] --> becomes node_A[Label] -->
-        const nodeDefRegex = new RegExp(`(\\b)${id}(\\[[^\\]]*\\])`, "g");
-        sanitized = sanitized.replace(nodeDefRegex, (_, pre, label) => {
-          counter++;
-          return `${pre}node_${id}${label}`;
-        });
-        // Replace arrow references: --> A[ becomes --> node_A[
-        // Also replace in arrow targets without labels: --> A
-        const arrowRefRegex = new RegExp(`(->|--)\\s*${id}(?![\\w\\[])`, "g");
-        sanitized = sanitized.replace(arrowRefRegex, `$1 node_${id}`);
-        // Replace in arrow targets with labels: --> A[
-        const arrowLabelRefRegex = new RegExp(`(->|--)\\s*${id}(\\[)`, "g");
-        sanitized = sanitized.replace(arrowLabelRefRegex, `$1 node_${id}$2`);
-      });
+      // Remove any ```mermaid or ``` wrappers that might have slipped through
+      sanitized = sanitized.replace(/^```mermaid\s*\n?/i, "").replace(/\n?```\s*$/i, "");
 
       const id = `mermaid-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
       const { svg: renderedSvg } = await mermaid.render(id, sanitized);
@@ -141,10 +113,6 @@ export function MermaidRenderer({ chart, className, autoOpen = false }: MermaidR
   useEffect(() => {
     renderChart();
   }, [renderChart]);
-
-  useEffect(() => {
-    renderAttempted.current = false;
-  }, [chart]);
 
   // Zoom handlers
   const handleWheel = useCallback((e: React.WheelEvent) => {
@@ -231,8 +199,8 @@ export function MermaidRenderer({ chart, className, autoOpen = false }: MermaidR
             </div>
           </div>
 
-          {/* Mini preview — much larger */}
-          <div className="rounded-lg bg-[#0A0A0F] p-4 overflow-hidden max-h-64 relative">
+          {/* Mini preview */}
+          <div className="rounded-lg bg-[#0A0A0F] p-4 overflow-hidden max-h-72 relative">
             {svg ? (
               <div
                 className="mermaid-svg-wrapper [&_svg]:max-w-full [&_svg]:h-auto opacity-80"

@@ -14,7 +14,7 @@ export async function GET(request: Request) {
       return NextResponse.redirect(`${origin}${next}`);
     }
 
-    console.error("Auth callback exchange error:", error.message);
+    console.error("Auth confirm error:", error.message);
   }
 
   // Fallback: redirect to auth page

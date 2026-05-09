@@ -1,45 +1,8 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { type NextRequest } from "next/server";
+import { updateSession } from "@/lib/supabase/middleware";
 
-// Routes that require authentication
-const protectedRoutes = ["/dashboard", "/onboarding"];
-
-// Routes that should redirect away if already authenticated
-const authRoutes = ["/auth"];
-
-export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-
-  // Check for Supabase auth token in cookies
-  // Supabase stores the auth token in cookies like: sb-<ref>-auth-token
-  const hasAuthToken = request.cookies.getAll().some((cookie) =>
-    cookie.name.includes("auth-token")
-  );
-
-  // Also check for the common sb- prefix pattern
-  const supabaseCookies = request.cookies.getAll().filter((cookie) =>
-    cookie.name.startsWith("sb-")
-  );
-  const isAuthenticated = hasAuthToken || supabaseCookies.length > 0;
-
-  // Protected routes: redirect to /auth if not authenticated
-  if (protectedRoutes.some((route) => pathname.startsWith(route))) {
-    if (!isAuthenticated) {
-      const authUrl = new URL("/auth", request.url);
-      authUrl.searchParams.set("next", pathname);
-      return NextResponse.redirect(authUrl);
-    }
-  }
-
-  // Auth routes: redirect to /dashboard if already authenticated
-  if (authRoutes.some((route) => pathname.startsWith(route))) {
-    if (isAuthenticated) {
-      const next = request.nextUrl.searchParams.get("next") ?? "/dashboard";
-      return NextResponse.redirect(new URL(next, request.url));
-    }
-  }
-
-  return NextResponse.next();
+export async function middleware(request: NextRequest) {
+  return await updateSession(request);
 }
 
 export const config = {
