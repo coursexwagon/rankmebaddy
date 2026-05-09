@@ -4,10 +4,14 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import { useSubscription, SubscriptionProvider } from "@/hooks/use-subscription";
+import { useAuth } from "@/hooks/use-auth";
 import { Paywall } from "@/components/paywall";
 import { CustomerCenter } from "@/components/customer-center";
 import { AnimatedAIChat } from "@/components/ui/animated-ai-chat";
 import { MermaidRenderer, parseContentBlocks, type ContentBlock } from "@/components/ui/mermaid-renderer";
+
+// Beta mode — free access for everyone
+const BETA_MODE = process.env.NEXT_PUBLIC_BETA_MODE === "true";
 
 /* ─── Types ──────────────────────────────────────────────────── */
 interface SiteData {
@@ -440,7 +444,7 @@ function Sidebar({
           </div>
           <div className="min-w-0 flex-1">
             <p className="truncate text-[12px] font-medium text-[#1A1A1A] dark:text-white">{userName || "User"}</p>
-            <p className="text-[10px] text-[#9B9B9B] dark:text-[#9B9B9B]">{isPro ? "Pro plan ✦" : "Free plan"}</p>
+            <p className="text-[10px] text-[#9B9B9B] dark:text-[#9B9B9B]">{isPro ? "Pro plan ✦" : BETA_MODE ? "Beta — Free" : "Free plan"}</p>
           </div>
         </div>
       </div>
@@ -959,6 +963,10 @@ export default function DashboardPage() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const agentStepIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const { isPro } = useSubscription();
+  const { user, signOut } = useAuth();
+
+  // In beta mode, everyone is "pro"
+  const effectiveIsPro = BETA_MODE || isPro;
 
   useEffect(() => {
     try {
@@ -1081,7 +1089,7 @@ export default function DashboardPage() {
   return (
     <SubscriptionProvider>
     <div className="flex h-screen overflow-hidden bg-[#FAFAF7] dark:bg-[#0F0F11]">
-      <Sidebar siteData={siteData} activeSection={activeSection} onSectionChange={setActiveSection} userName={onboardingData.name} platforms={onboardingData.platforms || []} mobileOpen={mobileSidebar} onMobileClose={() => setMobileSidebar(false)} isPro={isPro} />
+      <Sidebar siteData={siteData} activeSection={activeSection} onSectionChange={setActiveSection} userName={user?.email?.split("@")[0] || onboardingData.name} platforms={onboardingData.platforms || []} mobileOpen={mobileSidebar} onMobileClose={() => setMobileSidebar(false)} isPro={effectiveIsPro} />
 
       {/* Paywall Modal */}
       <Paywall open={paywallOpen} onClose={() => setPaywallOpen(false)} />
@@ -1212,15 +1220,27 @@ export default function DashboardPage() {
                     </svg>
                   </div>
                   <h2 className="font-heading text-2xl font-bold text-[#1A1A1A] dark:text-white">rankmebaddy Pro</h2>
-                  <p className="text-sm text-[#6B6B6B] dark:text-[#9B9B9B] max-w-sm mx-auto">Unlock unlimited SEO campaigns, all platforms, AI optimization, and priority support.</p>
-                  <motion.button
-                    onClick={() => setPaywallOpen(true)}
-                    className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#2563EB] to-[#6A3093] px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:shadow-xl"
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.97 }}
-                  >
-                    {isPro ? "Manage Subscription" : "Upgrade to Pro"}
-                  </motion.button>
+                  {BETA_MODE ? (
+                    <>
+                      <div className="inline-flex items-center gap-2 rounded-full bg-green-50 dark:bg-green-900/20 px-4 py-2 text-sm font-medium text-green-600 dark:text-green-400">
+                        <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                        Beta — All features unlocked for free
+                      </div>
+                      <p className="text-sm text-[#6B6B6B] dark:text-[#9B9B9B] max-w-sm mx-auto">You have full access to all Pro features during the beta. Enjoy unlimited SEO campaigns, all platforms, AI optimization, and more.</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-sm text-[#6B6B6B] dark:text-[#9B9B9B] max-w-sm mx-auto">Unlock unlimited SEO campaigns, all platforms, AI optimization, and priority support.</p>
+                      <motion.button
+                        onClick={() => setPaywallOpen(true)}
+                        className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#2563EB] to-[#6A3093] px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:shadow-xl"
+                        whileHover={{ scale: 1.03 }}
+                        whileTap={{ scale: 0.97 }}
+                      >
+                        {effectiveIsPro ? "Manage Subscription" : "Upgrade to Pro"}
+                      </motion.button>
+                    </>
+                  )}
                 </div>
               </motion.div>
             )}
