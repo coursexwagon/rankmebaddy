@@ -535,7 +535,7 @@ function ChatBubble({ message, onAction }: { message: ChatMessage; onAction: (pr
           <div>
             {contentBlocks.map((block: ContentBlock, idx: number) =>
               block.type === "mermaid" ? (
-                <MermaidRenderer key={`diagram-${idx}`} chart={block.content} />
+                <MermaidRenderer key={`diagram-${idx}`} chart={block.content} autoOpen />
               ) : (
                 <div key={`text-${idx}`} className="markdown-content">
                   <ReactMarkdown>{block.content}</ReactMarkdown>

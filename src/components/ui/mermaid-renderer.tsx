@@ -15,11 +15,18 @@ export function MermaidRenderer({ chart, className, autoOpen = false }: MermaidR
   const [svg, setSvg] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [isCanvasOpen, setIsCanvasOpen] = useState(autoOpen);
-  const [scale, setScale] = useState(1);
+  const [scale, setScale] = useState(1.2);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const dragStart = useRef({ x: 0, y: 0, posx: 0, posy: 0 });
   const renderAttempted = useRef(false);
+
+  // Auto-open canvas when SVG is first rendered (if autoOpen)
+  useEffect(() => {
+    if (autoOpen && svg && !isCanvasOpen) {
+      setIsCanvasOpen(true);
+    }
+  }, [autoOpen, svg, isCanvasOpen]);
 
   const renderChart = useCallback(async () => {
     if (!chart || renderAttempted.current) return;
@@ -37,9 +44,9 @@ export function MermaidRenderer({ chart, className, autoOpen = false }: MermaidR
           useMaxWidth: false,
           htmlLabels: true,
           curve: "basis",
-          padding: 20,
-          nodeSpacing: 50,
-          rankSpacing: 60,
+          padding: 30,
+          nodeSpacing: 80,
+          rankSpacing: 100,
         },
         sequence: {
           useMaxWidth: false,
@@ -165,9 +172,20 @@ export function MermaidRenderer({ chart, className, autoOpen = false }: MermaidR
   }, []);
 
   const resetView = useCallback(() => {
-    setScale(1);
+    setScale(1.2);
     setPosition({ x: 0, y: 0 });
   }, []);
+
+  // ESC to close canvas
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isCanvasOpen) {
+        setIsCanvasOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isCanvasOpen]);
 
   if (error) {
     return (
@@ -213,15 +231,15 @@ export function MermaidRenderer({ chart, className, autoOpen = false }: MermaidR
             </div>
           </div>
 
-          {/* Mini preview */}
-          <div className="rounded-lg bg-[#0A0A0F] p-3 overflow-hidden max-h-40 relative">
+          {/* Mini preview — much larger */}
+          <div className="rounded-lg bg-[#0A0A0F] p-4 overflow-hidden max-h-64 relative">
             {svg ? (
               <div
-                className="mermaid-svg-wrapper [&_svg]:max-w-full [&_svg]:h-auto opacity-60"
+                className="mermaid-svg-wrapper [&_svg]:max-w-full [&_svg]:h-auto opacity-80"
                 dangerouslySetInnerHTML={{ __html: svg }}
               />
             ) : (
-              <div className="flex items-center justify-center py-6">
+              <div className="flex items-center justify-center py-8">
                 <div className="flex items-center gap-2 text-xs text-[#6B6B9B]">
                   <motion.div
                     className="h-2 w-2 rounded-full bg-[#2563EB]"
@@ -233,7 +251,7 @@ export function MermaidRenderer({ chart, className, autoOpen = false }: MermaidR
               </div>
             )}
             {/* Fade overlay */}
-            <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[#0A0A14] to-transparent pointer-events-none" />
+            <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-[#0A0A14] to-transparent pointer-events-none" />
           </div>
         </button>
       </motion.div>

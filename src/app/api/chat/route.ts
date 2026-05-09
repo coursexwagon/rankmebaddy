@@ -73,12 +73,89 @@ function cleanMarkdown(text: string): string {
     .replace(/^>\s+/gm, "")
     .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
 
-  // Restore diagram blocks
+  // Restore diagram blocks (with syntax fixing)
   diagramBlocks.forEach((block, i) => {
-    processed = processed.replace(`__DIAGRAM_PLACEHOLDER_${i}__`, block);
+    // Extract the mermaid content and fix syntax
+    const fixedBlock = block.replace(/\[DIAGRAM\]([\s\S]*?)\[\/DIAGRAM\]/g, (_match, content) => {
+      return `[DIAGRAM]${fixMermaidSyntax(content)}[/DIAGRAM]`;
+    });
+    processed = processed.replace(`__DIAGRAM_PLACEHOLDER_${i}__`, fixedBlock);
   });
 
   return processed;
+}
+
+/**
+ * Auto-fix common Mermaid syntax issues in diagrams:
+ * 1. Subgraph IDs that conflict with node IDs (e.g., subgraph A[...] when A[Node] exists)
+ * 2. Special characters in node labels that break parsing
+ */
+function fixMermaidSyntax(diagram: string): string {
+  const lines = diagram.split("\n");
+  const nodeIds = new Set<string>();
+  const subgraphLines: { index: number; oldId: string; newId: string }[] = [];
+
+  // First pass: collect all node IDs (e.g., A[Label] or A["Label"] or A{Label})
+  const nodeIdRegex = /^(\s*)([A-Za-z_][A-Za-z0-9_]*)\s*[\[{]/;
+  // Also catch arrow definitions: A --> B or A[Label] --> B[Label]
+  const arrowNodeRegex = /([A-Za-z_][A-Za-z0-9_]*)\s*[\[{]/g;
+
+  for (const line of lines) {
+    // Skip subgraph lines for node ID collection
+    if (/^\s*subgraph\s+/i.test(line)) continue;
+    if (/^\s*end\s*$/i.test(line)) continue;
+
+    let match;
+    while ((match = arrowNodeRegex.exec(line)) !== null) {
+      nodeIds.add(match[1]);
+    }
+  }
+
+  // Second pass: find subgraph lines with conflicting IDs
+  let sgCounter = 1;
+  const subgraphRegex = /^(\s*subgraph\s+)([A-Za-z_][A-Za-z0-9_]*)\s*(\[.*\])/i;
+
+  for (let i = 0; i < lines.length; i++) {
+    const match = lines[i].match(subgraphRegex);
+    if (match) {
+      const subgraphId = match[2];
+      if (nodeIds.has(subgraphId)) {
+        // This subgraph ID conflicts with a node ID — rename it
+        const newId = `sg${sgCounter}`;
+        subgraphLines.push({ index: i, oldId: subgraphId, newId });
+        sgCounter++;
+      }
+    }
+  }
+
+  // Apply fixes: rename conflicting subgraph IDs
+  for (const fix of subgraphLines) {
+    const match = lines[fix.index].match(subgraphRegex);
+    if (match) {
+      lines[fix.index] = `${match[1]}${fix.newId} ${match[3]}`;
+    }
+    // Also need to update any references to the old subgraph ID in subsequent lines
+    // (though subgraph IDs are rarely referenced, this is for safety)
+  }
+
+  // Fix node labels with unquoted colons (e.g., A[Module 1: Site] -> A["Module 1: Site"])
+  for (let i = 0; i < lines.length; i++) {
+    // Match node definitions with brackets that contain colons but aren't quoted
+    const nodeLabelRegex = /^(\s*[A-Za-z_][A-Za-z0-9_]*\s*\[)([^\]]*)(\]\s*)/;
+    const match = lines[i].match(nodeLabelRegex);
+    if (match) {
+      const label = match[2];
+      if (label.includes(":") && !label.startsWith('"')) {
+        lines[i] = `${match[1]}"${label}"${match[3]}`;
+      }
+      // Also fix labels with parentheses
+      if ((label.includes("(") || label.includes(")")) && !label.startsWith('"')) {
+        lines[i] = `${match[1]}"${label.replace(/[()]/g, " ")}"${match[3]}`;
+      }
+    }
+  }
+
+  return lines.join("\n");
 }
 
 function buildSystemPrompt(siteData: Record<string, unknown> | null, keyword: string | undefined, platforms: string[] | undefined, userName: string | undefined): string {
@@ -192,13 +269,14 @@ DIAGRAM RULES (CRITICAL — VIOLATION CAUSES SYNTAX ERRORS):
 - You can include text explanation BEFORE the diagram, then the diagram visualizes it
 - Do NOT use markdown inside [DIAGRAM] blocks — only valid Mermaid syntax
 
-CRITICAL SYNTAX RULES (FAILURE TO FOLLOW = BROKEN DIAGRAM):
-1. NEVER use the same ID for both a node and a subgraph. For example, if you have "A[Module 1] --> B[Module 2]" AND "subgraph B[Days 4-5]", the ID "B" is used twice and will break. Instead, use DIFFERENT IDs for subgraphs like "subgraph SG_B[Days 4-5]" or "subgraph phase1[Phase 1]".
-2. Subgraph IDs must be unique and different from any node IDs used in the flowchart.
-3. Use descriptive subgraph IDs like "phase1", "sg_intel", "week1", etc.
-4. Node labels with special characters like quotes or colons should use double quotes: A["Module 1: Site Intelligence"]
-5. Do NOT nest subgraphs — keep them flat at the same level
-6. Each subgraph must end with "end" on its own line
+CRITICAL SYNTAX RULES (FAILURE TO FOLLOW = BROKEN DIAGRAM — THIS IS THE #1 BUG):
+1. NEVER use the same ID for both a node and a subgraph. This is the most common error that breaks diagrams. If you have "A[Module 1] --> B[Module 2]", then a subgraph MUST NOT use A, B, C, D, E, F, G, H, or I as its ID. Instead, ALWAYS prefix subgraph IDs with "sg_" like: "subgraph sg1[Phase 1]", "subgraph sg2[Phase 2]", "subgraph sg_intel[Intelligence Phase]", etc.
+2. Subgraph IDs must be COMPLETELY DIFFERENT from any node IDs. Use sg1, sg2, sg3, sg4 etc. as subgraph IDs.
+3. Node labels with special characters like quotes, colons, or parentheses MUST use double quotes: A["Module 1: Site Intelligence"]
+4. Do NOT nest subgraphs — keep them flat at the same level
+5. Each subgraph must end with "end" on its own line
+6. Do NOT use parentheses () in node labels — use brackets [] instead
+7. Avoid special characters in labels: no &, %, @, #, etc.
 
 AUTONOMOUS BEHAVIOR:
 - When the user asks about SEO, DON'T just give advice — give a complete execution plan with specific steps
