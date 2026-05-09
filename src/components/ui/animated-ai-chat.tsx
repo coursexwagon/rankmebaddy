@@ -44,24 +44,26 @@ interface AnimatedAIChatProps {
   onSendMessage: (message: string) => void;
   isTyping: boolean;
   className?: string;
+  disabled?: boolean;
 }
 
-/* ─── Glass Chat Input Component ─────────────────────────────── */
-export function AnimatedAIChat({ onSendMessage, isTyping, className }: AnimatedAIChatProps) {
+/* ─── Glass Chat Input Component — larger, premium ───────────── */
+export function AnimatedAIChat({ onSendMessage, isTyping, className, disabled }: AnimatedAIChatProps) {
   const [value, setValue] = useState("");
-  const { textareaRef, adjustHeight } = useAutoResizeTextarea({ minHeight: 56, maxHeight: 160 });
+  const [isFocused, setIsFocused] = useState(false);
+  const { textareaRef, adjustHeight } = useAutoResizeTextarea({ minHeight: 64, maxHeight: 200 });
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      if (value.trim()) {
+      if (value.trim() && !disabled) {
         handleSend();
       }
     }
   };
 
   const handleSend = () => {
-    if (value.trim()) {
+    if (value.trim() && !disabled) {
       onSendMessage(value.trim());
       setValue("");
       adjustHeight(true);
@@ -70,7 +72,25 @@ export function AnimatedAIChat({ onSendMessage, isTyping, className }: AnimatedA
 
   return (
     <div className={cn("relative w-full", className)}>
-      <div className="flex items-end gap-3 rounded-2xl bg-white/[0.06] backdrop-blur-xl border border-white/[0.08] px-5 py-4 transition-all focus-within:bg-white/[0.09] focus-within:border-white/[0.15] focus-within:shadow-[0_0_30px_rgba(255,255,255,0.04)]">
+      {/* Gradient glow border effect on focus */}
+      <div
+        className={cn(
+          "absolute -inset-[1px] rounded-2xl transition-all duration-500",
+          isFocused && !disabled
+            ? "bg-gradient-to-r from-white/20 via-white/10 to-white/20 opacity-100"
+            : "opacity-0"
+        )}
+      />
+
+      <div
+        className={cn(
+          "relative flex items-end gap-3 rounded-2xl bg-white/[0.06] backdrop-blur-xl border px-5 py-4 transition-all duration-300",
+          isFocused && !disabled
+            ? "bg-white/[0.09] border-white/[0.15] shadow-[0_0_40px_rgba(255,255,255,0.06)]"
+            : "border-white/[0.08]",
+          disabled && "opacity-50 cursor-not-allowed"
+        )}
+      >
         <textarea
           ref={textareaRef}
           value={value}
@@ -78,25 +98,35 @@ export function AnimatedAIChat({ onSendMessage, isTyping, className }: AnimatedA
             setValue(e.target.value);
             adjustHeight();
           }}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
           onKeyDown={handleKeyDown}
-          placeholder="What do you want to rank for?"
+          placeholder={disabled ? "No credits remaining..." : "What do you want to rank for?"}
           rows={1}
-          className="max-h-[120px] min-h-[24px] flex-1 resize-none bg-transparent text-[15px] text-white outline-none placeholder:text-white/25"
+          disabled={disabled}
+          className="max-h-[160px] min-h-[28px] flex-1 resize-none bg-transparent text-[16px] text-white outline-none placeholder:text-white/25 leading-relaxed"
         />
         <motion.button
           onClick={handleSend}
-          disabled={!value.trim() || isTyping}
+          disabled={!value.trim() || isTyping || disabled}
           className={cn(
-            "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-all mb-0.5",
-            value.trim()
-              ? "bg-white text-[#0A0A0B] hover:bg-white/90 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+            "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-all mb-0",
+            value.trim() && !disabled
+              ? "bg-white text-[#0A0A0B] hover:bg-white/90 shadow-[0_0_24px_rgba(255,255,255,0.12)]"
               : "bg-white/[0.06] text-white/20"
           )}
-          whileHover={value.trim() ? { scale: 1.05 } : {}}
-          whileTap={value.trim() ? { scale: 0.95 } : {}}
+          whileHover={value.trim() && !disabled ? { scale: 1.05 } : {}}
+          whileTap={value.trim() && !disabled ? { scale: 0.95 } : {}}
         >
-          <SendIcon className="w-4 h-4" />
+          <SendIcon className="w-5 h-5" />
         </motion.button>
+      </div>
+
+      {/* Press Enter to send hint */}
+      <div className="mt-2 flex items-center justify-between px-1">
+        <p className="text-[10px] text-white/20">
+          Press <kbd className="px-1 py-0.5 rounded bg-white/[0.04] border border-white/[0.06] text-white/30 font-mono text-[9px]">Enter</kbd> to send · <kbd className="px-1 py-0.5 rounded bg-white/[0.04] border border-white/[0.06] text-white/30 font-mono text-[9px]">Shift+Enter</kbd> for new line
+        </p>
       </div>
     </div>
   );

@@ -10,6 +10,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  emailVerified: boolean;
   signInWithEmail: (email: string, password: string) => Promise<{ error: string | null }>;
   signUp: (email: string, password: string, name: string) => Promise<{ error: string | null }>;
   signInWithGoogle: () => Promise<void>;
@@ -21,6 +22,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   session: null,
   loading: true,
+  emailVerified: false,
   signInWithEmail: async () => ({ error: null }),
   signUp: async () => ({ error: null }),
   signInWithGoogle: async () => {},
@@ -32,6 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [emailVerified, setEmailVerified] = useState(false);
 
   // Create a single Supabase client instance for the auth provider
   const supabase = typeof window !== "undefined" ? createClient() : null as unknown as SupabaseClient;
@@ -43,6 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      setEmailVerified(!!session?.user?.email_confirmed_at);
       setLoading(false);
     });
 
@@ -51,6 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       (_event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
+        setEmailVerified(!!session?.user?.email_confirmed_at);
         setLoading(false);
         // Store user ID for credits tracking
         if (session?.user?.id) {
@@ -99,7 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, session, loading, signInWithEmail, signUp, signInWithGoogle, signOut, supabase }}
+      value={{ user, session, loading, emailVerified, signInWithEmail, signUp, signInWithGoogle, signOut, supabase }}
     >
       {children}
     </AuthContext.Provider>

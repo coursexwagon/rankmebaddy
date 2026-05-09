@@ -164,3 +164,68 @@ Stage Summary:
 - 10 free credits/hour with auto-reset
 - Zero mock data — each user starts clean
 - Glass UI throughout the dashboard
+
+---
+Task ID: 2
+Agent: main
+Task: Fix 6 critical issues — chat API, email verification, credits, mock data, glass UI, chat box
+
+Work Log:
+1. FIX CHAT API "Something went wrong" ERROR
+   - Removed in-memory credits system (globalThis) from /api/chat/route.ts entirely
+   - Credits now checked/deducted by dashboard BEFORE calling chat API via /api/credits POST
+   - Added descriptive error messages with actual error details instead of generic "Something went wrong"
+   - Added better error logging with stack traces via console.error
+   - Chat API now focuses solely on AI processing — no credit management
+
+2. FIX EMAIL VERIFICATION BYPASS
+   - Middleware (src/lib/supabase/middleware.ts): Added email_confirmed_at check — unverified users redirected to /auth with verification_required=true
+   - Auth routes only redirect to dashboard if user is both authenticated AND email verified
+   - use-auth hook: Added emailVerified boolean to AuthContextType, tracks user.email_confirmed_at
+   - Auth page: Added handling for verification_required param, shows amber warning about email verification
+   - Dashboard: Redirects unverified users to /auth?verification_required=true
+
+3. FIX CREDITS SYSTEM
+   - use-credits hook: Added periodic refresh (every 60s), deductCredit now returns false on errors
+   - Dashboard calls deductCredit() BEFORE sending chat messages to /api/chat
+   - CreditsDisplay component in top bar: color-coded states (green > 3, amber ≤ 3, red = 0)
+   - CreditsExhaustedBanner: countdown timer when credits = 0, shows time until reset
+   - Chat input disabled when credits exhausted
+   - Credits refresh after each message (success or error)
+
+4. REMOVE ALL MOCK/DEMO DATA
+   - Removed KeywordItem interface (unused)
+   - Removed RankingEntry interface (unused)
+   - Removed ContentItem interface (unused)
+   - Dashboard starts completely empty for every new user
+
+5. GLASS-DESIGNED UI — GLASSMORPHISM
+   - Top bar: bg-white/[0.02] backdrop-blur-xl instead of solid bg
+   - Navigation tabs: wrapped in glass container with active tab using glass style
+   - Settings section: bg-white/[0.04] backdrop-blur-xl instead of solid bg-[#1A1A1E]
+   - All buttons: glass style with backdrop-blur-xl
+   - Mobile menu: bg-[#0A0A0B]/90 backdrop-blur-xl
+   - Subtle glow effects on hover: shadow-[0_0_15px_rgba(255,255,255,0.04)]
+   - Consistent text-white/XX opacity pattern throughout
+
+6. BIGGER, MORE CREATIVE CHAT BOX
+   - Textarea min-height: 64px (was 56px), max-height: 200px (was 160px)
+   - Gradient border glow effect on focus: bg-gradient-to-r from-white/20 via-white/10 to-white/20
+   - Enhanced shadow on focus: shadow-[0_0_40px_rgba(255,255,255,0.06)]
+   - Send button larger: h-11 w-11 (was h-10 w-10), icon w-5 h-5 (was w-4 h-4)
+   - Font size: text-[16px] (was text-[15px])
+   - Added "Press Enter to send · Shift+Enter for new line" hint below input
+   - Added disabled prop for credits exhaustion state
+   - Messages area: space-y-6 (was space-y-5), py-8 (was py-6) for more spacious feel
+
+Build verification:
+- bun run lint: no errors in modified files
+- npx next build: compiles successfully
+
+Stage Summary:
+- Chat API no longer has in-memory credits — uses Supabase-backed /api/credits
+- Email verification is enforced at middleware, auth, and dashboard levels
+- Credits display in top bar with countdown timer when exhausted
+- Zero mock data — clean start for every user
+- Premium glassmorphism UI throughout
+- Larger, more creative chat box with gradient glow and Enter hint

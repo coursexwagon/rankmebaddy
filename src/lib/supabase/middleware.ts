@@ -44,12 +44,20 @@ export async function updateSession(request: NextRequest) {
       authUrl.searchParams.set("next", pathname);
       return NextResponse.redirect(authUrl);
     }
+
+    // Email verification check — users must verify their email before accessing protected routes
+    if (!user.email_confirmed_at) {
+      const authUrl = new URL("/auth", request.url);
+      authUrl.searchParams.set("next", pathname);
+      authUrl.searchParams.set("verification_required", "true");
+      return NextResponse.redirect(authUrl);
+    }
   }
 
-  // Auth routes: redirect to /dashboard if already authenticated
+  // Auth routes: redirect to /dashboard if already authenticated AND verified
   const authRoutes = ["/auth"];
   if (authRoutes.some((route) => pathname.startsWith(route))) {
-    if (user) {
+    if (user && user.email_confirmed_at) {
       const next = request.nextUrl.searchParams.get("next") ?? "/dashboard";
       return NextResponse.redirect(new URL(next, request.url));
     }

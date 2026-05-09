@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Suspense } from "react";
 
 function AuthForm() {
-  const { signInWithEmail, signUp, user, loading: authLoading } = useAuth();
+  const { signInWithEmail, signUp, user, loading: authLoading, emailVerified } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [mode, setMode] = useState<"login" | "signup">("login");
@@ -19,15 +19,30 @@ function AuthForm() {
   const [success, setSuccess] = useState("");
 
   const nextPath = searchParams.get("next") || "/onboarding";
+  const verificationRequired = searchParams.get("verification_required") === "true";
 
-  // If already logged in, redirect
+  // If already logged in and verified, redirect
   useEffect(() => {
-    if (!authLoading && user) {
+    if (!authLoading && user && emailVerified) {
       const onboarding = typeof window !== "undefined" ? localStorage.getItem("rankmebaddy_onboarding") : null;
       const destination = onboarding ? "/dashboard" : nextPath;
       router.replace(destination);
     }
-  }, [user, authLoading, router, nextPath]);
+  }, [user, authLoading, router, nextPath, emailVerified]);
+
+  // Show verification required message if redirected from middleware
+  useEffect(() => {
+    if (verificationRequired) {
+      setError("Please verify your email address before accessing the dashboard. Check your inbox for the confirmation link.");
+    }
+  }, [verificationRequired]);
+
+  // If user exists but email not verified, show verification message
+  useEffect(() => {
+    if (!authLoading && user && !emailVerified) {
+      setSuccess("Your email is not yet verified. Please check your inbox for the confirmation link, then sign in.");
+    }
+  }, [user, authLoading, emailVerified]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -147,22 +162,25 @@ function AuthForm() {
             />
 
             {error && (
-              <motion.p
+              <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="text-[12px] text-red-400"
+                className="flex items-start gap-2 rounded-lg bg-amber-500/10 border border-amber-500/20 px-3 py-2"
               >
-                {error}
-              </motion.p>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FBBF24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5">
+                  <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+                <p className="text-[12px] text-amber-400">{error}</p>
+              </motion.div>
             )}
 
             {success && (
               <motion.div
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-2 rounded-lg bg-[#4ADE80]/10 px-3 py-2"
+                className="flex items-start gap-2 rounded-lg bg-[#4ADE80]/10 border border-[#4ADE80]/20 px-3 py-2"
               >
-                <div className="h-1.5 w-1.5 rounded-full bg-[#4ADE80] animate-pulse" />
+                <div className="h-1.5 w-1.5 rounded-full bg-[#4ADE80] animate-pulse mt-1 shrink-0" />
                 <p className="text-[12px] text-[#4ADE80]">{success}</p>
               </motion.div>
             )}

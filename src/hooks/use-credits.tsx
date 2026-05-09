@@ -49,6 +49,10 @@ export function CreditsProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     refreshCredits();
+
+    // Refresh credits every 60 seconds to keep countdown accurate
+    const interval = setInterval(refreshCredits, 60000);
+    return () => clearInterval(interval);
   }, [refreshCredits]);
 
   const deductCredit = useCallback(async (): Promise<boolean> => {
@@ -65,14 +69,15 @@ export function CreditsProvider({ children }: { children: ReactNode }) {
       if (res.ok) {
         const data = await res.json();
         setCreditsRemaining(data.credits_remaining);
+        setNextReset(data.next_reset || null);
         if (!data.allowed) {
           return false;
         }
         return true;
       }
-      return true; // Allow on error
+      return false; // Block on API error to be safe
     } catch {
-      return true; // Allow on error
+      return false; // Block on network error
     }
   }, []);
 

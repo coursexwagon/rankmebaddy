@@ -52,30 +52,6 @@ interface OnboardingData {
   context: string;
 }
 
-interface KeywordItem {
-  keyword: string;
-  volume: string;
-  difficulty: string;
-  intent: string;
-  status: "opportunity" | "ranking" | "gap" | "tracked";
-}
-
-interface RankingEntry {
-  keyword: string;
-  position: number;
-  previousPosition: number;
-  url: string;
-  platform: string;
-}
-
-interface ContentItem {
-  title: string;
-  type: "blog" | "page" | "product" | "video";
-  score: number;
-  status: "optimize" | "publish" | "update" | "draft";
-  url?: string;
-}
-
 /* ─── Top Bar Tab Items ─────────────────────────────────────── */
 const topBarTabs = [
   { id: "chat", label: "Chat" },
@@ -194,12 +170,12 @@ function SetupScreen({ onComplete }: { onComplete: () => void }) {
     >
       <div className="w-full max-w-sm text-center">
         <motion.div
-          className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-full border border-[#2A2A2E] bg-[#1A1A1E]"
+          className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl"
           animate={{ scale: [1, 1.04, 1] }}
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
         >
           <motion.div
-            className="h-8 w-8 rounded-full border-2 border-[#2A2A2E] border-t-white"
+            className="h-8 w-8 rounded-full border-2 border-white/[0.1] border-t-white"
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
           />
@@ -216,7 +192,7 @@ function SetupScreen({ onComplete }: { onComplete: () => void }) {
           {steps.map((text, i) => (
             <motion.div
               key={text}
-              className="flex items-center gap-3 rounded-xl border border-[#2A2A2E] bg-[#1A1A1E] px-4 py-3"
+              className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.04] backdrop-blur-xl px-4 py-3"
               initial={{ opacity: 0, x: -12 }}
               animate={{
                 opacity: step >= i ? 1 : 0,
@@ -235,7 +211,7 @@ function SetupScreen({ onComplete }: { onComplete: () => void }) {
                   transition={{ duration: 0.6, repeat: Infinity }}
                 />
               ) : (
-                <div className="h-1.5 w-1.5 rounded-full bg-[#2A2A2E]" />
+                <div className="h-1.5 w-1.5 rounded-full bg-white/10" />
               )}
               <span
                 className={`text-[12px] ${
@@ -336,6 +312,100 @@ function SuggestedPromptChip({ title, onClick }: { title: string; onClick: () =>
     >
       {title}
     </motion.button>
+  );
+}
+
+/* ─── Credits Display — glass pill ─────────────────────────── */
+function CreditsDisplay() {
+  const { creditsRemaining, nextReset, loading } = useCredits();
+  const [countdown, setCountdown] = useState("");
+
+  useEffect(() => {
+    if (!nextReset || creditsRemaining > 0) {
+      return;
+    }
+
+    const updateCountdown = () => {
+      const resetTime = new Date(nextReset).getTime();
+      const now = Date.now();
+      const diff = Math.max(0, resetTime - now);
+      if (diff <= 0) {
+        setCountdown("Resetting...");
+        return;
+      }
+      const minutes = Math.floor(diff / 60000);
+      const seconds = Math.floor((diff % 60000) / 1000);
+      setCountdown(`${minutes}m ${seconds}s`);
+    };
+
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
+    return () => clearInterval(interval);
+  }, [nextReset, creditsRemaining]);
+
+  if (loading) return null;
+
+  return (
+    <div className={`flex items-center gap-2 rounded-full backdrop-blur-xl border px-3 py-1.5 text-[11px] font-medium transition-all ${
+      creditsRemaining <= 0
+        ? "bg-red-500/10 border-red-500/20 text-red-400"
+        : creditsRemaining <= 3
+        ? "bg-amber-500/10 border-amber-500/20 text-amber-400"
+        : "bg-white/[0.06] border-white/[0.08] text-white/70"
+    }`}>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
+      </svg>
+      <span>{creditsRemaining} credits</span>
+      {creditsRemaining <= 0 && countdown && (
+        <span className="text-red-400/70 ml-1">· {countdown}</span>
+      )}
+    </div>
+  );
+}
+
+/* ─── Credits Exhausted Banner ──────────────────────────────── */
+function CreditsExhaustedBanner() {
+  const { creditsRemaining, nextReset } = useCredits();
+  const [countdown, setCountdown] = useState("");
+
+  useEffect(() => {
+    if (creditsRemaining > 0 || !nextReset) return;
+
+    const updateCountdown = () => {
+      const resetTime = new Date(nextReset).getTime();
+      const now = Date.now();
+      const diff = Math.max(0, resetTime - now);
+      if (diff <= 0) {
+        setCountdown("Resetting now...");
+        return;
+      }
+      const minutes = Math.floor(diff / 60000);
+      const seconds = Math.floor((diff % 60000) / 1000);
+      setCountdown(`${minutes}m ${seconds}s until reset`);
+    };
+
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
+    return () => clearInterval(interval);
+  }, [creditsRemaining, nextReset]);
+
+  if (creditsRemaining > 0) return null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="mx-4 sm:mx-6 mb-2 rounded-xl bg-red-500/10 backdrop-blur-xl border border-red-500/20 px-4 py-3 flex items-center gap-3"
+    >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F87171" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+      </svg>
+      <div className="flex-1">
+        <p className="text-[12px] font-medium text-red-400">No credits remaining</p>
+        <p className="text-[11px] text-red-400/60">Credits reset every hour. {countdown}</p>
+      </div>
+    </motion.div>
   );
 }
 
@@ -463,7 +533,7 @@ function KeywordsSection({ onAskAI }: { onAskAI: (prompt: string) => void }) {
         </div>
         <p className="text-[14px] text-white/50 mb-1">No keywords yet</p>
         <p className="text-[12px] text-white/30 mb-4">Chat with the AI to discover keyword opportunities</p>
-        <button onClick={() => onAskAI("Find keyword opportunities for my site")} className="rounded-full bg-white/[0.08] backdrop-blur-xl border border-white/[0.08] px-5 py-2.5 text-[13px] text-white/70 transition-all hover:bg-white/[0.12] hover:text-white">
+        <button onClick={() => onAskAI("Find keyword opportunities for my site")} className="rounded-full bg-white/[0.08] backdrop-blur-xl border border-white/[0.08] px-5 py-2.5 text-[13px] text-white/70 transition-all hover:bg-white/[0.12] hover:text-white hover:shadow-[0_0_20px_rgba(255,255,255,0.06)]">
           Discover Keywords
         </button>
       </div>
@@ -487,7 +557,7 @@ function RankingsSection({ onAskAI }: { onAskAI: (prompt: string) => void }) {
         </div>
         <p className="text-[14px] text-white/50 mb-1">No rankings tracked yet</p>
         <p className="text-[12px] text-white/30 mb-4">The AI agent will track your positions as you use it</p>
-        <button onClick={() => onAskAI("Check my current ranking positions")} className="rounded-full bg-white/[0.08] backdrop-blur-xl border border-white/[0.08] px-5 py-2.5 text-[13px] text-white/70 transition-all hover:bg-white/[0.12] hover:text-white">
+        <button onClick={() => onAskAI("Check my current ranking positions")} className="rounded-full bg-white/[0.08] backdrop-blur-xl border border-white/[0.08] px-5 py-2.5 text-[13px] text-white/70 transition-all hover:bg-white/[0.12] hover:text-white hover:shadow-[0_0_20px_rgba(255,255,255,0.06)]">
           Check Rankings
         </button>
       </div>
@@ -511,7 +581,7 @@ function ContentSection({ onAskAI }: { onAskAI: (prompt: string) => void }) {
         </div>
         <p className="text-[14px] text-white/50 mb-1">No content plan yet</p>
         <p className="text-[12px] text-white/30 mb-4">Let the AI agent engineer content for you</p>
-        <button onClick={() => onAskAI("Create a content strategy and calendar for my site")} className="rounded-full bg-white/[0.08] backdrop-blur-xl border border-white/[0.08] px-5 py-2.5 text-[13px] text-white/70 transition-all hover:bg-white/[0.12] hover:text-white">
+        <button onClick={() => onAskAI("Create a content strategy and calendar for my site")} className="rounded-full bg-white/[0.08] backdrop-blur-xl border border-white/[0.08] px-5 py-2.5 text-[13px] text-white/70 transition-all hover:bg-white/[0.12] hover:text-white hover:shadow-[0_0_20px_rgba(255,255,255,0.06)]">
           Generate Content Plan
         </button>
       </div>
@@ -519,7 +589,7 @@ function ContentSection({ onAskAI }: { onAskAI: (prompt: string) => void }) {
   );
 }
 
-/* ─── Settings Section ──────────────────────────────────────── */
+/* ─── Settings Section — glassmorphism ─────────────────────── */
 function SettingsSection({ onboardingData, onUpdateData, onUpgrade, onSignOut }: { onboardingData: OnboardingData; onUpdateData: (data: OnboardingData) => void; onUpgrade: () => void; onSignOut: () => void }) {
   const [name, setName] = useState(onboardingData.name);
   const [keyword, setKeyword] = useState(onboardingData.keyword);
@@ -537,34 +607,34 @@ function SettingsSection({ onboardingData, onUpdateData, onUpgrade, onSignOut }:
     <div className="mx-auto max-w-2xl space-y-6 p-4 sm:p-6">
       <div>
         <h2 className="font-heading text-lg font-bold text-white">Settings</h2>
-        <p className="text-[12px] text-[#6B6B6B]">Manage your campaign and profile</p>
+        <p className="text-[12px] text-white/40">Manage your campaign and profile</p>
       </div>
 
       <CustomerCenter onUpgrade={onUpgrade} />
 
-      <div className="space-y-4 rounded-2xl border border-[#2A2A2E] bg-[#1A1A1E] p-4">
-        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[#6B6B6B]">Profile</h3>
+      <div className="space-y-4 rounded-2xl border border-white/[0.06] bg-white/[0.04] backdrop-blur-xl p-4">
+        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-white/40">Profile</h3>
         <div className="space-y-2">
-          <label className="text-[10px] font-semibold uppercase tracking-wider text-[#9B9B9B]">Name</label>
-          <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full rounded-xl border border-[#2A2A2E] bg-[#0A0A0B] px-3 py-2.5 text-[13px] text-white outline-none transition-colors focus:border-[#3A3A3E] focus:ring-1 focus:ring-white/5" />
+          <label className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Name</label>
+          <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full rounded-xl border border-white/[0.06] bg-white/[0.04] backdrop-blur-xl px-3 py-2.5 text-[13px] text-white outline-none transition-colors focus:border-white/[0.15] focus:ring-1 focus:ring-white/5" />
         </div>
       </div>
 
-      <div className="space-y-4 rounded-2xl border border-[#2A2A2E] bg-[#1A1A1E] p-4">
-        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[#6B6B6B]">Campaign</h3>
+      <div className="space-y-4 rounded-2xl border border-white/[0.06] bg-white/[0.04] backdrop-blur-xl p-4">
+        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-white/40">Campaign</h3>
         <div className="space-y-2">
-          <label className="text-[10px] font-semibold uppercase tracking-wider text-[#9B9B9B]">Primary Keyword</label>
-          <input type="text" value={keyword} onChange={(e) => setKeyword(e.target.value)} className="w-full rounded-xl border border-[#2A2A2E] bg-[#0A0A0B] px-3 py-2.5 text-[13px] text-white outline-none transition-colors focus:border-[#3A3A3E] focus:ring-1 focus:ring-white/5" />
+          <label className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Primary Keyword</label>
+          <input type="text" value={keyword} onChange={(e) => setKeyword(e.target.value)} className="w-full rounded-xl border border-white/[0.06] bg-white/[0.04] backdrop-blur-xl px-3 py-2.5 text-[13px] text-white outline-none transition-colors focus:border-white/[0.15] focus:ring-1 focus:ring-white/5" />
         </div>
         <div className="space-y-2">
-          <label className="text-[10px] font-semibold uppercase tracking-wider text-[#9B9B9B]">Website</label>
-          <input type="text" value={onboardingData.website} readOnly className="w-full rounded-xl border border-[#2A2A2E] bg-[#0A0A0B] px-3 py-2.5 text-[13px] text-[#6B6B6B] outline-none" />
+          <label className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Website</label>
+          <input type="text" value={onboardingData.website} readOnly className="w-full rounded-xl border border-white/[0.06] bg-white/[0.04] backdrop-blur-xl px-3 py-2.5 text-[13px] text-white/40 outline-none" />
         </div>
         <div className="space-y-2">
-          <label className="text-[10px] font-semibold uppercase tracking-wider text-[#9B9B9B]">Platforms</label>
+          <label className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Platforms</label>
           <div className="flex flex-wrap gap-2">
             {onboardingData.platforms.map((p) => (
-              <span key={p} className="flex items-center gap-1.5 rounded-full border border-[#2A2A2E] bg-[#0A0A0B] px-3 py-1 text-[11px] text-[#9B9B9B]">
+              <span key={p} className="flex items-center gap-1.5 rounded-full border border-white/[0.06] bg-white/[0.04] backdrop-blur-xl px-3 py-1 text-[11px] text-white/50">
                 <PlatformIcon platform={p} size={12} />
                 {p === "aisearch" ? "AI Search" : p.charAt(0).toUpperCase() + p.slice(1)}
               </span>
@@ -573,21 +643,21 @@ function SettingsSection({ onboardingData, onUpdateData, onUpgrade, onSignOut }:
         </div>
       </div>
 
-      <button onClick={handleSave} className="w-full rounded-full bg-white py-3 text-sm font-semibold text-[#0A0A0B] transition-all hover:bg-[#E8E8E8]">
+      <button onClick={handleSave} className="w-full rounded-full bg-white/[0.08] backdrop-blur-xl border border-white/[0.08] py-3 text-sm font-semibold text-white transition-all hover:bg-white/[0.12] hover:shadow-[0_0_20px_rgba(255,255,255,0.06)]">
         {saved ? "Saved ✓" : "Save changes"}
       </button>
 
-      <div className="space-y-3 rounded-2xl border border-red-900/50 bg-red-900/10 p-4">
+      <div className="space-y-3 rounded-2xl border border-red-900/30 bg-red-500/[0.04] backdrop-blur-xl p-4">
         <h3 className="text-[11px] font-semibold uppercase tracking-wider text-red-400">Danger zone</h3>
-        <p className="text-[11px] text-[#6B6B6B]">Reset all onboarding data and start over.</p>
-        <button onClick={() => { localStorage.removeItem("rankmebaddy_onboarding"); onSignOut(); }} className="rounded-full border border-red-900/50 px-3 py-1.5 text-[11px] text-red-400 transition-colors hover:bg-red-900/20">Reset everything</button>
+        <p className="text-[11px] text-white/30">Reset all onboarding data and start over.</p>
+        <button onClick={() => { localStorage.removeItem("rankmebaddy_onboarding"); onSignOut(); }} className="rounded-full border border-red-900/30 bg-red-500/[0.06] backdrop-blur-xl px-3 py-1.5 text-[11px] text-red-400 transition-colors hover:bg-red-900/20 hover:shadow-[0_0_10px_rgba(248,113,113,0.06)]">Reset everything</button>
       </div>
     </div>
   );
 }
 
-/* ─── Main Dashboard ────────────────────────────────────────── */
-export default function DashboardPage() {
+/* ─── Inner Dashboard — needs CreditsProvider context ───────── */
+function DashboardInner() {
   const [onboardingData, setOnboardingData] = useState<OnboardingData | null>(null);
   const [setup, setSetup] = useState(true);
   const [activeSection, setActiveSection] = useState("chat");
@@ -597,7 +667,8 @@ export default function DashboardPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const { isPro } = useSubscription();
-  const { user, signOut, loading } = useAuth();
+  const { user, signOut, loading, emailVerified } = useAuth();
+  const { creditsRemaining, deductCredit, refreshCredits } = useCredits();
 
   // In beta mode, everyone is "pro"
   const effectiveIsPro = BETA_MODE || isPro;
@@ -609,13 +680,29 @@ export default function DashboardPage() {
     } catch { /* ignore */ }
   }, []);
 
-  // No auto-welcome message — show centered greeting in empty state instead
-
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, isSending]);
+
+  // Refresh credits after a message is sent (to sync with backend)
+  const refreshCreditsAfterMessage = useCallback(() => {
+    setTimeout(() => refreshCredits(), 1000);
+  }, [refreshCredits]);
 
   const sendMessage = useCallback(
     async (content: string) => {
       if (!content.trim() || isSending) return;
+
+      // Check/deduct credits BEFORE sending to chat API
+      const canProceed = await deductCredit();
+      if (!canProceed) {
+        setMessages((prev) => [...prev, {
+          id: `error-${Date.now()}`,
+          role: "assistant",
+          content: "No credits remaining. Your credits reset every hour — please wait for the reset timer to count down.",
+          timestamp: new Date()
+        }]);
+        return;
+      }
+
       const userMsg: ChatMessage = { id: `user-${Date.now()}`, role: "user", content: content.trim(), timestamp: new Date() };
       setMessages((prev) => [...prev, userMsg]);
       setIsSending(true);
@@ -628,40 +715,46 @@ export default function DashboardPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ messages: chatMessages, siteData: onboardingData?.siteData, keyword: onboardingData?.keyword, platforms: onboardingData?.platforms, userName: onboardingData?.name, userId }),
         });
-        const data = await res.json();
-        
-        // Handle credits exhausted
-        if (res.status === 429) {
-          setMessages((prev) => [...prev, { id: `error-${Date.now()}`, role: "assistant", content: `No credits remaining. Your credits reset every hour. ${data.next_reset ? `Next reset: ${new Date(data.next_reset).toLocaleTimeString()}` : ""}`, timestamp: new Date() }]);
-          return;
+
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({ error: "Unknown error" }));
+          throw new Error(errorData.error || `Server error (${res.status})`);
         }
-        
+
+        const data = await res.json();
+
         if (data.error) throw new Error(data.error);
         const aiActions: AgentAction[] = data.actions || [];
         setMessages((prev) => [...prev, { id: `ai-${Date.now()}`, role: "assistant", content: data.reply, timestamp: new Date(), actions: aiActions.length > 0 ? aiActions : undefined }]);
-        
-        // Update credits display
-        if (data.credits_remaining !== undefined) {
-          localStorage.setItem("rankmebaddy_credits", String(data.credits_remaining));
-        }
-      } catch {
-        setMessages((prev) => [...prev, { id: `error-${Date.now()}`, role: "assistant", content: "Something went wrong. Could you try that again?", timestamp: new Date() }]);
+
+        // Refresh credits to show updated count
+        refreshCreditsAfterMessage();
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "Something went wrong";
+        console.error("Chat error:", errorMessage);
+        setMessages((prev) => [...prev, { id: `error-${Date.now()}`, role: "assistant", content: `Error: ${errorMessage}. Please try again.`, timestamp: new Date() }]);
+        // Refresh credits even on error (credit was already deducted)
+        refreshCreditsAfterMessage();
       } finally {
         setIsSending(false);
       }
     },
-    [messages, isSending, onboardingData]
+    [messages, isSending, onboardingData, deductCredit, refreshCreditsAfterMessage]
   );
 
   const askInChat = useCallback((prompt: string) => { setActiveSection("chat"); setTimeout(() => sendMessage(prompt), 100); }, [sendMessage]);
   const updateOnboardingData = useCallback((data: OnboardingData) => { setOnboardingData(data); }, []);
 
-  // Auth check
+  // Auth + email verification check
   useEffect(() => {
-    if (!user && !loading) {
-      window.location.href = "/auth";
+    if (!loading) {
+      if (!user) {
+        window.location.href = "/auth";
+      } else if (!emailVerified) {
+        window.location.href = "/auth?verification_required=true";
+      }
     }
-  }, [user, loading]);
+  }, [user, loading, emailVerified]);
 
   // Onboarding data check
   useEffect(() => {
@@ -680,13 +773,13 @@ export default function DashboardPage() {
     if (loading) {
       return (
         <div className="flex min-h-screen items-center justify-center bg-[#0A0A0B]">
-          <motion.div className="h-6 w-6 rounded-full border-2 border-[#2A2A2E] border-t-white" animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }} />
+          <motion.div className="h-6 w-6 rounded-full border-2 border-white/[0.1] border-t-white" animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }} />
         </div>
       );
     }
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#0A0A0B]">
-        <motion.div className="h-6 w-6 rounded-full border-2 border-[#2A2A2E] border-t-white" animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }} />
+        <motion.div className="h-6 w-6 rounded-full border-2 border-white/[0.1] border-t-white" animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }} />
       </div>
     );
   }
@@ -694,34 +787,32 @@ export default function DashboardPage() {
   const siteData = onboardingData.siteData;
   const userName = user?.email?.split("@")[0] || onboardingData.name;
 
-
   return (
-    <CreditsProvider>
     <SubscriptionProvider>
     <div className="flex h-screen flex-col overflow-hidden bg-[#0A0A0B]">
       {/* Paywall Modal */}
       <Paywall open={paywallOpen} onClose={() => setPaywallOpen(false)} />
 
-      {/* ─── Top Bar ──────────────────────────────────────────── */}
-      <header className="flex items-center justify-between border-b border-[#1A1A1E] bg-[#0A0A0B] px-4 py-3 sm:px-6 shrink-0">
+      {/* ─── Top Bar — glassmorphism ──────────────────────────── */}
+      <header className="flex items-center justify-between border-b border-white/[0.06] bg-white/[0.02] backdrop-blur-xl px-4 py-3 sm:px-6 shrink-0">
         {/* Left: Brand */}
         <div className="flex items-center gap-3">
-          <button className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#2A2A2E] bg-[#1A1A1E] sm:hidden" onClick={() => setMobileMenuOpen(true)}>
+          <button className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/[0.06] backdrop-blur-xl border border-white/[0.08] sm:hidden transition-all hover:bg-white/[0.1] hover:border-white/[0.12] hover:shadow-[0_0_15px_rgba(255,255,255,0.04)]" onClick={() => setMobileMenuOpen(true)}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
           </button>
           <span className="font-heading text-sm font-bold text-white">RankMeBaddy</span>
         </div>
 
-        {/* Center: Tabs (desktop only) */}
-        <nav className="hidden sm:flex items-center gap-1">
+        {/* Center: Tabs — glass pills */}
+        <nav className="hidden sm:flex items-center gap-1 bg-white/[0.03] backdrop-blur-xl rounded-xl border border-white/[0.06] p-1">
           {topBarTabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveSection(tab.id)}
-              className={`rounded-lg px-3 py-1.5 text-[12px] font-medium transition-colors ${
+              className={`rounded-lg px-3 py-1.5 text-[12px] font-medium transition-all ${
                 activeSection === tab.id
-                  ? "bg-[#1A1A1E] text-white"
-                  : "text-[#6B6B6B] hover:text-[#9B9B9B] hover:bg-[#1A1A1E]/50"
+                  ? "bg-white/[0.1] backdrop-blur-xl text-white shadow-[0_0_15px_rgba(255,255,255,0.04)] border border-white/[0.08]"
+                  : "text-white/40 hover:text-white/70 hover:bg-white/[0.04]"
               }`}
             >
               {tab.label}
@@ -729,17 +820,18 @@ export default function DashboardPage() {
           ))}
         </nav>
 
-        {/* Right: User avatar + settings */}
+        {/* Right: Credits + New chat + Avatar */}
         <div className="flex items-center gap-2">
+          <CreditsDisplay />
           {activeSection === "chat" && (
-            <button onClick={() => setMessages([])} className="flex items-center gap-1.5 rounded-full border border-[#2A2A2E] bg-[#1A1A1E] px-3 py-1.5 text-[11px] font-medium text-[#9B9B9B] transition-colors hover:text-white hover:border-[#3A3A3E] hover:bg-[#1E1E22]">
+            <button onClick={() => setMessages([])} className="flex items-center gap-1.5 rounded-full bg-white/[0.06] backdrop-blur-xl border border-white/[0.08] px-3 py-1.5 text-[11px] font-medium text-white/60 transition-all hover:bg-white/[0.1] hover:text-white hover:border-white/[0.12] hover:shadow-[0_0_15px_rgba(255,255,255,0.04)]">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14" /><path d="M5 12h14" /></svg>
               New chat
             </button>
           )}
           <button
             onClick={() => setActiveSection("settings")}
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-[#2A2A2E] bg-[#1A1A1E] text-[11px] font-bold text-white transition-colors hover:border-[#3A3A3E]"
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/[0.06] backdrop-blur-xl border border-white/[0.08] text-[11px] font-bold text-white transition-all hover:bg-white/[0.1] hover:border-white/[0.12] hover:shadow-[0_0_15px_rgba(255,255,255,0.04)]"
             title="Settings"
           >
             {userName ? userName[0].toUpperCase() : "U"}
@@ -752,20 +844,20 @@ export default function DashboardPage() {
         {mobileMenuOpen && (
           <>
             <motion.div
-              className="fixed inset-0 z-40 bg-black/60 sm:hidden"
+              className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm sm:hidden"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setMobileMenuOpen(false)}
             />
             <motion.div
-              className="fixed inset-y-0 left-0 z-50 w-[260px] bg-[#0A0A0B] border-r border-[#1A1A1E] shadow-xl sm:hidden flex flex-col"
+              className="fixed inset-y-0 left-0 z-50 w-[260px] bg-[#0A0A0B]/90 border-r border-white/[0.06] shadow-xl sm:hidden flex flex-col backdrop-blur-xl"
               initial={{ x: -260 }}
               animate={{ x: 0 }}
               exit={{ x: -260 }}
               transition={{ duration: 0.2, ease: [0.21, 0.47, 0.32, 0.98] }}
             >
-              <div className="flex items-center gap-2.5 px-4 py-4 border-b border-[#1A1A1E]">
+              <div className="flex items-center gap-2.5 px-4 py-4 border-b border-white/[0.06]">
                 <span className="font-heading text-sm font-bold text-white">RankMeBaddy</span>
               </div>
               <nav className="flex-1 space-y-0.5 px-2 py-2">
@@ -777,8 +869,8 @@ export default function DashboardPage() {
                       onClick={() => { setActiveSection(tab.id); setMobileMenuOpen(false); }}
                       className={`flex w-full items-center rounded-lg px-3 py-2 text-[13px] transition-all ${
                         isActive
-                          ? "bg-[#1A1A1E] text-white font-medium"
-                          : "text-[#6B6B6B] hover:bg-[#1A1A1E] hover:text-white"
+                          ? "bg-white/[0.08] backdrop-blur-xl text-white font-medium border border-white/[0.06]"
+                          : "text-white/40 hover:bg-white/[0.04] hover:text-white"
                       }`}
                     >
                       {tab.label}
@@ -789,8 +881,8 @@ export default function DashboardPage() {
                   onClick={() => { setActiveSection("settings"); setMobileMenuOpen(false); }}
                   className={`flex w-full items-center rounded-lg px-3 py-2 text-[13px] transition-all ${
                     activeSection === "settings"
-                      ? "bg-[#1A1A1E] text-white font-medium"
-                      : "text-[#6B6B6B] hover:bg-[#1A1A1E] hover:text-white"
+                      ? "bg-white/[0.08] backdrop-blur-xl text-white font-medium border border-white/[0.06]"
+                      : "text-white/40 hover:bg-white/[0.04] hover:text-white"
                   }`}
                 >
                   Settings
@@ -799,25 +891,25 @@ export default function DashboardPage() {
                   onClick={() => { setActiveSection("pro"); setMobileMenuOpen(false); }}
                   className={`flex w-full items-center rounded-lg px-3 py-2 text-[13px] transition-all ${
                     activeSection === "pro"
-                      ? "bg-[#1A1A1E] text-white font-medium"
-                      : "text-[#6B6B6B] hover:bg-[#1A1A1E] hover:text-white"
+                      ? "bg-white/[0.08] backdrop-blur-xl text-white font-medium border border-white/[0.06]"
+                      : "text-white/40 hover:bg-white/[0.04] hover:text-white"
                   }`}
                 >
                   Pro
                 </button>
               </nav>
-              <div className="border-t border-[#1A1A1E] px-4 py-3">
+              <div className="border-t border-white/[0.06] px-4 py-3">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#1A1A1E] text-[11px] font-bold text-white">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white/[0.06] backdrop-blur-xl border border-white/[0.08] text-[11px] font-bold text-white">
                     {userName ? userName[0].toUpperCase() : "U"}
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-[12px] font-medium text-white">{userName || "User"}</p>
-                    <p className="text-[10px] text-[#6B6B6B]">{effectiveIsPro ? "Pro plan" : BETA_MODE ? "Beta - Free" : "Free plan"}</p>
+                    <p className="text-[10px] text-white/30">{effectiveIsPro ? "Pro plan" : BETA_MODE ? "Beta - Free" : "Free plan"}</p>
                   </div>
                   <button
                     onClick={async () => { await signOut(); window.location.href = "/auth"; }}
-                    className="flex h-6 w-6 items-center justify-center rounded-md text-[#6B6B6B] hover:bg-[#1A1A1E] hover:text-white transition-colors"
+                    className="flex h-6 w-6 items-center justify-center rounded-md text-white/30 hover:bg-white/[0.06] hover:text-white transition-colors"
                     title="Sign out"
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -838,8 +930,9 @@ export default function DashboardPage() {
         <AnimatePresence mode="wait">
           {activeSection === "chat" && (
             <motion.div key="chat" className="flex h-full flex-col" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
+              <CreditsExhaustedBanner />
               {messages.length === 0 ? (
-                /* Clean welcome — straight to the point */
+                /* Clean welcome — spacious centered */
                 <div className="flex-1 flex flex-col justify-center items-center px-4 sm:px-6">
                   <motion.div
                     className="w-full max-w-2xl flex flex-col items-center"
@@ -849,12 +942,12 @@ export default function DashboardPage() {
                   >
                     {/* Input area — front and center */}
                     <motion.div
-                      className="w-full mb-5"
+                      className="w-full mb-6"
                       initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.1 }}
                     >
-                      <AnimatedAIChat onSendMessage={sendMessage} isTyping={isSending} />
+                      <AnimatedAIChat onSendMessage={sendMessage} isTyping={isSending} disabled={creditsRemaining <= 0} />
                     </motion.div>
 
                     {/* Quick action chips */}
@@ -876,9 +969,9 @@ export default function DashboardPage() {
                 </div>
               ) : (
                 <>
-                  {/* Messages area */}
-                  <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6 custom-scrollbar-dark">
-                    <div className="mx-auto max-w-2xl space-y-5">
+                  {/* Messages area — more spacious */}
+                  <div className="flex-1 overflow-y-auto px-4 py-8 sm:px-6 custom-scrollbar-dark">
+                    <div className="mx-auto max-w-2xl space-y-6">
                       {messages.map((msg) => (
                         <ChatBubble key={msg.id} message={msg} onAction={sendMessage} />
                       ))}
@@ -892,10 +985,10 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
-                  {/* Input bar pinned to bottom */}
-                  <div className="border-t border-[#1A1A1E] bg-[#0A0A0B] px-4 py-3 sm:px-6 shrink-0">
+                  {/* Input bar pinned to bottom — glassmorphism */}
+                  <div className="border-t border-white/[0.06] bg-white/[0.02] backdrop-blur-xl px-4 py-4 sm:px-6 shrink-0">
                     <div className="mx-auto max-w-2xl">
-                      <AnimatedAIChat onSendMessage={sendMessage} isTyping={isSending} />
+                      <AnimatedAIChat onSendMessage={sendMessage} isTyping={isSending} disabled={creditsRemaining <= 0} />
                     </div>
                   </div>
                 </>
@@ -930,26 +1023,26 @@ export default function DashboardPage() {
           {activeSection === "pro" && (
             <motion.div key="pro" className="flex items-center justify-center min-h-[50vh]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <div className="text-center space-y-4 p-8">
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-lg">
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0A0A0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-white/[0.06] backdrop-blur-xl border border-white/[0.08] shadow-[0_0_30px_rgba(255,255,255,0.04)]">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                   </svg>
                 </div>
                 <h2 className="font-heading text-2xl font-bold text-white">RankMeBaddy Pro</h2>
                 {BETA_MODE ? (
                   <>
-                    <div className="inline-flex items-center gap-2 rounded-full bg-[#1A1A1E] border border-[#2A2A2E] px-4 py-2 text-sm font-medium text-[#4ADE80]">
+                    <div className="inline-flex items-center gap-2 rounded-full bg-white/[0.06] backdrop-blur-xl border border-white/[0.08] px-4 py-2 text-sm font-medium text-[#4ADE80]">
                       <div className="h-2 w-2 rounded-full bg-[#4ADE80] animate-pulse" />
                       Beta — All features unlocked for free
                     </div>
-                    <p className="text-sm text-[#6B6B6B] max-w-sm mx-auto">You have full access to all Pro features during the beta. Enjoy unlimited SEO campaigns, all platforms, AI optimization, and more.</p>
+                    <p className="text-sm text-white/40 max-w-sm mx-auto">You have full access to all Pro features during the beta. Enjoy unlimited SEO campaigns, all platforms, AI optimization, and more.</p>
                   </>
                 ) : (
                   <>
-                    <p className="text-sm text-[#6B6B6B] max-w-sm mx-auto">Unlock unlimited SEO campaigns, all platforms, AI optimization, and priority support.</p>
+                    <p className="text-sm text-white/40 max-w-sm mx-auto">Unlock unlimited SEO campaigns, all platforms, AI optimization, and priority support.</p>
                     <motion.button
                       onClick={() => setPaywallOpen(true)}
-                      className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-[#0A0A0B] shadow-lg transition-all hover:bg-[#E8E8E8]"
+                      className="inline-flex items-center gap-2 rounded-full bg-white/[0.08] backdrop-blur-xl border border-white/[0.08] px-6 py-3 text-sm font-semibold text-white shadow-[0_0_20px_rgba(255,255,255,0.04)] transition-all hover:bg-white/[0.12] hover:shadow-[0_0_30px_rgba(255,255,255,0.06)]"
                       whileHover={{ scale: 1.03 }}
                       whileTap={{ scale: 0.97 }}
                     >
@@ -970,6 +1063,14 @@ export default function DashboardPage() {
       </div>
     </div>
     </SubscriptionProvider>
+  );
+}
+
+/* ─── Main Dashboard ────────────────────────────────────────── */
+export default function DashboardPage() {
+  return (
+    <CreditsProvider>
+      <DashboardInner />
     </CreditsProvider>
   );
 }
