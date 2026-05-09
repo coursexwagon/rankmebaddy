@@ -2,13 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-
-/* ─── Color System ───────────────────────────────────────────── */
-// Background: #FAFAF7  |  Surface: #FFFFFF  |  Border: #E8E5E0
-// Text Primary: #1A1A1A  |  Secondary: #6B6B6B  |  Muted: #9B9B9B
-// Accent: #2563EB (blue-600)  |  Accent Light: #EFF6FF (blue-50)
-// Success: #16A34A  |  Error: #DC2626  |  Warning: #D97706
-// Surface Hover: #F5F5F0
+import ReactMarkdown from "react-markdown";
 
 /* ─── Types ──────────────────────────────────────────────────── */
 interface SiteData {
@@ -140,10 +134,19 @@ const navItems = [
 
 /* ─── Quick Action Chips ────────────────────────────────────── */
 const quickActions = [
-  { label: "Keyword gaps", prompt: "What keyword gaps should I target for my site?" },
-  { label: "Optimize titles", prompt: "Review and optimize my page titles for better SEO" },
-  { label: "Competitor analysis", prompt: "Who are my top SEO competitors and what are they ranking for?" },
-  { label: "Content ideas", prompt: "Give me content ideas that could rank for my target keyword" },
+  { label: "Keyword gaps", icon: "🔍", prompt: "What keyword gaps should I target for my site?" },
+  { label: "Optimize titles", icon: "✏️", prompt: "Review and optimize my page titles for better SEO" },
+  { label: "Competitor analysis", icon: "📊", prompt: "Who are my top SEO competitors and what are they ranking for?" },
+  { label: "Content ideas", icon: "💡", prompt: "Give me content ideas that could rank for my target keyword" },
+];
+
+/* ─── Agent Tools Indicator ─────────────────────────────────── */
+const agentTools = [
+  { label: "Web Search", icon: "🌐" },
+  { label: "Site Audit", icon: "🏥" },
+  { label: "Keyword Analysis", icon: "🔑" },
+  { label: "Content Score", icon: "📝" },
+  { label: "SERP Check", icon: "📈" },
 ];
 
 /* ─── Agent Thinking Steps ──────────────────────────────────── */
@@ -198,24 +201,22 @@ function PlatformIcon({ platform, size = 14 }: { platform: string; size?: number
   }
 }
 
-/* ─── Agent Step Indicator (static, no animation) ────────────── */
+/* ─── Agent Step Indicator ────────────────────────────────────── */
 function AgentStepIndicator({ steps, currentStep }: { steps: string[]; currentStep: number }) {
   const displayStep = currentStep % steps.length;
   return (
-    <div className="flex items-center gap-2 text-[12px] text-[#6B6B6B]">
-      <div className="h-1.5 w-1.5 rounded-full bg-blue-600" />
-      <span className="flex items-center gap-1.5">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="11" cy="11" r="8" />
-          <path d="m21 21-4.35-4.35" />
-        </svg>
-        {steps[displayStep]}
-      </span>
+    <div className="flex items-center gap-2.5 text-[12px] text-[#6B6B6B]">
+      <motion.div
+        className="h-2 w-2 rounded-full bg-[#2563EB]"
+        animate={{ scale: [1, 1.4, 1], opacity: [0.5, 1, 0.5] }}
+        transition={{ duration: 0.8, repeat: Infinity }}
+      />
+      <span>{steps[displayStep]}</span>
     </div>
   );
 }
 
-/* ─── Action Buttons ────────────────────────────────────────── */
+/* ─── Action Buttons — pill-shaped ──────────────────────────── */
 function ActionButtons({ actions, onAction }: { actions: AgentAction[]; onAction: (prompt: string) => void }) {
   if (!actions || actions.length === 0) return null;
   return (
@@ -224,9 +225,9 @@ function ActionButtons({ actions, onAction }: { actions: AgentAction[]; onAction
         <motion.button
           key={action.type}
           onClick={() => onAction(action.prompt)}
-          className="inline-flex items-center gap-2 rounded-lg bg-[#F5F0EB] px-3 py-1.5 text-[11px] font-medium text-[#1A1A1A] transition-all hover:bg-[#EDE8E2] border-l-[3px] border-l-blue-600"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+          className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#F5F0EB] to-[#EDE8E2] px-4 py-1.5 text-[11px] font-medium text-[#1A1A1A] transition-all hover:from-[#EDE8E2] hover:to-[#E5DFD8] shadow-sm"
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
         >
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="m5 12h14" /><path d="m12 5 7 7-7 7" />
@@ -236,66 +237,6 @@ function ActionButtons({ actions, onAction }: { actions: AgentAction[]; onAction
       ))}
     </div>
   );
-}
-
-/* ─── Clean Markdown ──────────────────────────────────────────── */
-function cleanMarkdown(text: string): string {
-  return text
-    .replace(/#{1,6}\s+/g, "")
-    .replace(/\*\*\*(.+?)\*\*\*/g, "$1")
-    .replace(/\*\*(.+?)\*\*/g, "$1")
-    .replace(/\*(.+?)\*/g, "$1")
-    .replace(/`([^`]+)`/g, "$1")
-    .replace(/^>\s+/gm, "")
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
-}
-
-/* ─── Step Visualization ────────────────────────────────────── */
-function StepContent({ content }: { content: string }) {
-  // Clean markdown first, then parse
-  const cleaned = cleanMarkdown(content);
-  const lines = cleaned.split("\n");
-  const elements: React.ReactNode[] = [];
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const stepMatch = line.match(/^(\d+)\.\s+(.+)/);
-
-    if (stepMatch) {
-      const stepNum = parseInt(stepMatch[1]);
-      elements.push(
-        <div key={`step-${i}`} className="flex items-start gap-2.5 my-1.5">
-          <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-50 text-[10px] font-bold text-blue-600 mt-0.5">
-            {stepNum}
-          </div>
-          <span className="text-[14px] text-[#1A1A1A] leading-relaxed">{stepMatch[2]}</span>
-        </div>
-      );
-    } else if (line.startsWith("• ") || line.startsWith("- ")) {
-      elements.push(
-        <div key={`bullet-${i}`} className="flex items-start gap-2 my-0.5 ml-0">
-          <div className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[#9B9B9B]" />
-          <span className="text-[14px] text-[#1A1A1A] leading-relaxed">{line.slice(2)}</span>
-        </div>
-      );
-    } else if (line.trim() === "") {
-      elements.push(<div key={`br-${i}`} className="h-1" />);
-    } else {
-      // Check if line is ALL CAPS (likely a section header from the AI)
-      const isAllCaps = line.length > 2 && line === line.toUpperCase() && /[A-Z]/.test(line);
-      if (isAllCaps) {
-        elements.push(
-          <h3 key={`h-${i}`} className="text-[14px] font-bold text-[#1A1A1A] mt-2.5 mb-1">{line}</h3>
-        );
-      } else {
-        elements.push(
-          <span key={`text-${i}`} className="text-[14px] text-[#1A1A1A] leading-relaxed block">{line}</span>
-        );
-      }
-    }
-  }
-
-  return <div className="space-y-0.5">{elements}</div>;
 }
 
 /* ─── Setup Animation ───────────────────────────────────────── */
@@ -412,7 +353,6 @@ function Sidebar({
 }) {
   const sidebarContent = (
     <div className="flex h-full flex-col">
-      {/* Logo */}
       <div className="flex items-center gap-2.5 px-4 py-4 sm:py-5">
         <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -424,35 +364,22 @@ function Sidebar({
         </span>
       </div>
 
-      {/* Site Card */}
       {siteData && (
         <div className="mx-3 mb-3 overflow-hidden rounded-xl border border-[#E8E5E0] bg-white shadow-sm">
           <div className="flex items-center gap-2.5 px-3 py-2.5">
             {siteData.favicon ? (
-              <img
-                src={siteData.favicon}
-                alt=""
-                className="h-5 w-5 rounded"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = "none";
-                }}
-              />
+              <img src={siteData.favicon} alt="" className="h-5 w-5 rounded" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
             ) : (
               <div className="flex h-5 w-5 items-center justify-center rounded bg-[#F5F5F0]">
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M2 12h20" />
+                  <circle cx="12" cy="12" r="10" /><path d="M2 12h20" />
                 </svg>
               </div>
             )}
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[12px] font-medium text-[#1A1A1A]">
-                {siteData.domain}
-              </p>
+              <p className="truncate text-[12px] font-medium text-[#1A1A1A]">{siteData.domain}</p>
               <p className="truncate text-[10px] text-[#9B9B9B]">
-                {siteData.title
-                  ? siteData.title.slice(0, 28) + (siteData.title.length > 28 ? "..." : "")
-                  : "No title detected"}
+                {siteData.title ? siteData.title.slice(0, 28) + (siteData.title.length > 28 ? "..." : "") : "No title detected"}
               </p>
             </div>
             <div className="h-1.5 w-1.5 rounded-full bg-[#16A34A]" title="Connected" />
@@ -470,42 +397,33 @@ function Sidebar({
         </div>
       )}
 
-      {/* Nav */}
       <nav className="flex-1 space-y-0.5 px-2">
         {navItems.map((item) => {
           const isActive = activeSection === item.id;
           return (
             <button
               key={item.id}
-              onClick={() => {
-                onSectionChange(item.id);
-                onMobileClose();
-              }}
+              onClick={() => { onSectionChange(item.id); onMobileClose(); }}
               className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] transition-all ${
                 isActive
                   ? "bg-blue-50 text-blue-600 font-medium"
                   : "text-[#6B6B6B] hover:bg-[#F5F5F0] hover:text-[#1A1A1A]"
               }`}
             >
-              <span className={isActive ? "text-blue-600" : "text-[#9B9B9B]"}>
-                {item.icon}
-              </span>
+              <span className={isActive ? "text-blue-600" : "text-[#9B9B9B]"}>{item.icon}</span>
               {item.label}
             </button>
           );
         })}
       </nav>
 
-      {/* User */}
       <div className="border-t border-[#E8E5E0] px-4 py-3">
         <div className="flex items-center gap-2.5">
           <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600 text-[11px] font-bold text-white">
             {userName ? userName[0].toUpperCase() : "U"}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[12px] font-medium text-[#1A1A1A]">
-              {userName || "User"}
-            </p>
+            <p className="truncate text-[12px] font-medium text-[#1A1A1A]">{userName || "User"}</p>
             <p className="text-[10px] text-[#9B9B9B]">Free plan</p>
           </div>
         </div>
@@ -544,43 +462,48 @@ function Sidebar({
   );
 }
 
-/* ─── Chat Message ──────────────────────────────────────────── */
+/* ─── Chat Bubble — redesigned ──────────────────────────────── */
 function ChatBubble({ message, onAction }: { message: ChatMessage; onAction: (prompt: string) => void }) {
   const isUser = message.role === "user";
 
   return (
     <motion.div
-      className={`flex gap-3 ${isUser ? "flex-row-reverse" : "flex-row"}`}
+      className={`flex ${isUser ? "justify-end" : "justify-start"}`}
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2 }}
     >
       <div
-        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
-          isUser ? "bg-[#E8E5E0] text-[#6B6B6B]" : "bg-blue-50 text-blue-600"
-        }`}
-      >
-        {isUser ? "You" : "R"}
-      </div>
-      <div
         className={`max-w-[85%] ${
           isUser
-            ? "rounded-xl bg-[#F5F0EB] text-[#1A1A1A] px-5 py-3.5"
-            : "rounded-xl bg-[#FAF8F5] text-[#1A1A1A] px-5 py-3.5 border-l-[3px] border-l-blue-600"
+            ? "rounded-2xl bg-[#F5F0EB] text-[#1A1A1A] px-5 py-3.5"
+            : "rounded-2xl bg-white text-[#1A1A1A] px-5 py-3.5 shadow-sm border border-[#E8E5E0]/50"
         }`}
       >
+        {/* Assistant indicator — small blue dot + label */}
+        {!isUser && (
+          <div className="mb-2 flex items-center gap-1.5">
+            <div className="h-1.5 w-1.5 rounded-full bg-[#2563EB]" />
+            <span className="text-[10px] font-medium text-[#2563EB]">RankMeBaddy</span>
+          </div>
+        )}
+
         {isUser ? (
           <div className="text-[14px] leading-relaxed whitespace-pre-wrap">
             {message.content}
           </div>
         ) : (
-          <StepContent content={message.content} />
+          <div className="markdown-content">
+            <ReactMarkdown>{message.content}</ReactMarkdown>
+          </div>
         )}
+
         <div className="flex items-center justify-between mt-2">
           <p className="text-[10px] text-[#9B9B9B]">
             {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
           </p>
         </div>
+
         {!isUser && message.actions && message.actions.length > 0 && (
           <ActionButtons actions={message.actions} onAction={onAction} />
         )}
@@ -603,44 +526,33 @@ function OverviewSection({ siteData, keyword, platforms, onNavigate }: {
     siteData.ogImage ? 15 : 0,
     siteData.lang ? 10 : 0,
     siteData.favicon ? 10 : 0,
-    10, // base
+    10,
   ].reduce((a, b) => a + b, 0);
 
   const issues: { type: "error" | "warning" | "good"; text: string }[] = [];
   if (!siteData.title) issues.push({ type: "error", text: "Missing page title" });
   else if (siteData.title.length > 60) issues.push({ type: "warning", text: "Title is too long (over 60 chars)" });
   else issues.push({ type: "good", text: "Title tag is set" });
-
   if (!siteData.description) issues.push({ type: "error", text: "Missing meta description" });
   else if (siteData.description.length > 160) issues.push({ type: "warning", text: "Description is too long (over 160 chars)" });
   else issues.push({ type: "good", text: "Meta description is set" });
-
   if (!siteData.h1) issues.push({ type: "error", text: "Missing H1 tag" });
   else issues.push({ type: "good", text: "H1 tag is set" });
-
   if (!siteData.ogImage) issues.push({ type: "warning", text: "Missing OG image for social sharing" });
   else issues.push({ type: "good", text: "OG image configured" });
-
   if (!siteData.lang) issues.push({ type: "warning", text: "Missing language attribute" });
   else issues.push({ type: "good", text: "Language attribute set" });
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-4 sm:p-6">
-      {/* Header */}
       <div>
-        <h2 className="font-heading text-lg font-bold text-[#1A1A1A]">
-          SEO Overview
-        </h2>
-        <p className="text-[12px] text-[#6B6B6B]">
-          Real-time analysis of {siteData.domain}
-        </p>
+        <h2 className="font-heading text-lg font-bold text-[#1A1A1A]">SEO Overview</h2>
+        <p className="text-[12px] text-[#6B6B6B]">Real-time analysis of {siteData.domain}</p>
       </div>
 
-      {/* Score + Stats Row */}
       <div className="grid gap-4 sm:grid-cols-4">
-        {/* Score Ring */}
         <motion.div
-          className="flex flex-col items-center justify-center rounded-xl border border-[#E8E5E0] bg-white p-5 shadow-sm"
+          className="flex flex-col items-center justify-center rounded-2xl border border-[#E8E5E0] bg-white p-5 shadow-sm"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
@@ -664,7 +576,6 @@ function OverviewSection({ siteData, keyword, platforms, onNavigate }: {
           <p className="mt-2 text-[10px] font-semibold uppercase tracking-wider text-[#9B9B9B]">SEO Score</p>
         </motion.div>
 
-        {/* Stats */}
         {[
           { label: "Keywords", value: "147", sub: "23 opportunities", accent: true, onClick: () => onNavigate("keywords") },
           { label: "Rankings", value: "12", sub: "Tracked positions", accent: false, onClick: () => onNavigate("rankings") },
@@ -673,62 +584,45 @@ function OverviewSection({ siteData, keyword, platforms, onNavigate }: {
           <motion.button
             key={stat.label}
             onClick={stat.onClick}
-            className="rounded-xl border border-[#E8E5E0] bg-white p-4 text-left shadow-sm transition-colors hover:border-[#9B9B9B]"
+            className="rounded-2xl border border-[#E8E5E0] bg-white p-4 text-left shadow-sm transition-colors hover:border-[#9B9B9B]"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 + i * 0.05 }}
           >
-            <p className={`font-heading text-2xl font-bold ${stat.accent ? "text-blue-600" : "text-[#1A1A1A]"}`}>
-              {stat.value}
-            </p>
+            <p className={`font-heading text-2xl font-bold ${stat.accent ? "text-blue-600" : "text-[#1A1A1A]"}`}>{stat.value}</p>
             <p className="text-[10px] text-[#9B9B9B]">{stat.label}</p>
             <p className="mt-0.5 text-[9px] text-[#9B9B9B]">{stat.sub}</p>
           </motion.button>
         ))}
       </div>
 
-      {/* Issues + Campaign */}
       <div className="grid gap-4 sm:grid-cols-2">
-        {/* SEO Issues */}
         <motion.div
-          className="rounded-xl border border-[#E8E5E0] bg-white p-4 shadow-sm"
+          className="rounded-2xl border border-[#E8E5E0] bg-white p-4 shadow-sm"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-[#9B9B9B]">
-            Site Issues
-          </h3>
+          <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-[#9B9B9B]">Site Issues</h3>
           <div className="space-y-2.5">
             {issues.map((issue) => (
               <div key={issue.text} className="flex items-start gap-2">
-                <div className={`mt-0.5 h-2 w-2 shrink-0 rounded-full ${
-                  issue.type === "error" ? "bg-red-500" : issue.type === "warning" ? "bg-amber-500" : "bg-green-500"
-                }`} />
-                <span className={`text-[12px] ${
-                  issue.type === "error" ? "text-red-600" : issue.type === "warning" ? "text-amber-600" : "text-[#6B6B6B]"
-                }`}>
-                  {issue.text}
-                </span>
+                <div className={`mt-0.5 h-2 w-2 shrink-0 rounded-full ${issue.type === "error" ? "bg-red-500" : issue.type === "warning" ? "bg-amber-500" : "bg-green-500"}`} />
+                <span className={`text-[12px] ${issue.type === "error" ? "text-red-600" : issue.type === "warning" ? "text-amber-600" : "text-[#6B6B6B]"}`}>{issue.text}</span>
               </div>
             ))}
           </div>
         </motion.div>
 
-        {/* Active Campaign */}
         <motion.div
-          className="rounded-xl border border-[#E8E5E0] bg-white p-4 shadow-sm"
+          className="rounded-2xl border border-[#E8E5E0] bg-white p-4 shadow-sm"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.35 }}
         >
-          <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-[#9B9B9B]">
-            Active Campaign
-          </h3>
-          <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
-            <p className="text-[13px] font-medium text-[#1A1A1A]">
-              &ldquo;{keyword}&rdquo;
-            </p>
+          <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-[#9B9B9B]">Active Campaign</h3>
+          <div className="rounded-xl border border-blue-200 bg-blue-50 p-3">
+            <p className="text-[13px] font-medium text-[#1A1A1A]">&ldquo;{keyword}&rdquo;</p>
             <div className="mt-3 flex items-center gap-2">
               <div className="h-1.5 flex-1 rounded-full bg-blue-100">
                 <motion.div
@@ -747,45 +641,24 @@ function OverviewSection({ siteData, keyword, platforms, onNavigate }: {
         </motion.div>
       </div>
 
-      {/* Site Screenshot */}
       <motion.div
-        className="overflow-hidden rounded-xl border border-[#E8E5E0] bg-white shadow-sm"
+        className="overflow-hidden rounded-2xl border border-[#E8E5E0] bg-white shadow-sm"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
       >
-        <h3 className="px-4 pt-4 pb-2 text-[11px] font-semibold uppercase tracking-wider text-[#9B9B9B]">
-          Site Preview
-        </h3>
+        <h3 className="px-4 pt-4 pb-2 text-[11px] font-semibold uppercase tracking-wider text-[#9B9B9B]">Site Preview</h3>
         <div className="relative h-48 w-full overflow-hidden bg-[#F5F5F0]">
-          <img
-            src={siteData.screenshot}
-            alt={`Screenshot of ${siteData.domain}`}
-            className="h-full w-full object-cover object-top"
-            onError={(e) => {
-              (e.target as HTMLImageElement).style.display = "none";
-            }}
-          />
+          <img src={siteData.screenshot} alt={`Screenshot of ${siteData.domain}`} className="h-full w-full object-cover object-top" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
           <div className="absolute bottom-3 left-3 flex items-center gap-2 rounded-lg bg-white/90 px-3 py-1.5 shadow-sm backdrop-blur-sm">
-            {siteData.favicon && (
-              <img
-                src={siteData.favicon}
-                alt=""
-                className="h-3.5 w-3.5 rounded"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = "none";
-                }}
-              />
-            )}
+            {siteData.favicon && <img src={siteData.favicon} alt="" className="h-3.5 w-3.5 rounded" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />}
             <span className="text-[11px] font-medium text-[#1A1A1A]">{siteData.domain}</span>
           </div>
         </div>
         {siteData.title && (
           <div className="border-t border-[#E8E5E0] px-4 py-3">
             <p className="text-[12px] font-medium text-[#1A1A1A]">{siteData.title}</p>
-            {siteData.description && (
-              <p className="mt-1 text-[11px] text-[#6B6B6B] line-clamp-2">{siteData.description}</p>
-            )}
+            {siteData.description && <p className="mt-1 text-[11px] text-[#6B6B6B] line-clamp-2">{siteData.description}</p>}
           </div>
         )}
       </motion.div>
@@ -794,11 +667,7 @@ function OverviewSection({ siteData, keyword, platforms, onNavigate }: {
 }
 
 /* ─── Keywords Section ──────────────────────────────────────── */
-function KeywordsSection({ siteData, keyword, onAskAI }: {
-  siteData: SiteData;
-  keyword: string;
-  onAskAI: (prompt: string) => void;
-}) {
+function KeywordsSection({ siteData, keyword, onAskAI }: { siteData: SiteData; keyword: string; onAskAI: (prompt: string) => void }) {
   const domainBase = siteData.domain?.split(".")[0] || "site";
   const [filter, setFilter] = useState<string>("all");
 
@@ -830,62 +699,31 @@ function KeywordsSection({ siteData, keyword, onAskAI }: {
           <h2 className="font-heading text-lg font-bold text-[#1A1A1A]">Keywords</h2>
           <p className="text-[12px] text-[#6B6B6B]">{keywords.length} keywords tracked for {siteData.domain}</p>
         </div>
-        <button
-          onClick={() => onAskAI("Find more keyword opportunities for my site beyond what's listed")}
-          className="shrink-0 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-[11px] font-medium text-blue-600 transition-colors hover:bg-blue-100"
-        >
-          + Find more
-        </button>
+        <button onClick={() => onAskAI("Find more keyword opportunities for my site beyond what's listed")} className="shrink-0 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-[11px] font-medium text-blue-600 transition-colors hover:bg-blue-100">+ Find more</button>
       </div>
 
-      {/* Filters */}
       <div className="flex gap-2">
         {["all", "opportunity", "ranking", "gap", "tracked"].map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`rounded-full border px-3 py-1 text-[11px] capitalize transition-all ${
-              filter === f
-                ? "border-blue-300 bg-blue-50 text-blue-600 font-medium"
-                : "border-[#E8E5E0] text-[#6B6B6B] hover:text-[#1A1A1A] hover:border-[#9B9B9B]"
-            }`}
-          >
-            {f}
-          </button>
+          <button key={f} onClick={() => setFilter(f)} className={`rounded-full border px-3 py-1 text-[11px] capitalize transition-all ${filter === f ? "border-blue-300 bg-blue-50 text-blue-600 font-medium" : "border-[#E8E5E0] text-[#6B6B6B] hover:text-[#1A1A1A] hover:border-[#9B9B9B]"}`}>{f}</button>
         ))}
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto rounded-xl border border-[#E8E5E0] bg-white shadow-sm">
+      <div className="overflow-x-auto rounded-2xl border border-[#E8E5E0] bg-white shadow-sm">
         <div className="min-w-[540px]">
-        <div className="grid grid-cols-[1fr_80px_80px_90px_90px] gap-2 border-b border-[#E8E5E0] px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-[#9B9B9B]">
-          <span>Keyword</span>
-          <span>Volume</span>
-          <span>Difficulty</span>
-          <span>Intent</span>
-          <span>Status</span>
-        </div>
-        <div className="divide-y divide-[#E8E5E0]">
-          {filtered.map((kw, i) => (
-            <motion.div
-              key={kw.keyword}
-              className="grid grid-cols-[1fr_80px_80px_90px_90px] gap-2 px-4 py-3 text-[12px] transition-colors hover:bg-[#F5F5F0]"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: i * 0.03 }}
-            >
-              <span className="font-medium text-[#1A1A1A] truncate">{kw.keyword}</span>
-              <span className="text-[#6B6B6B]">{kw.volume}</span>
-              <span className={parseInt(kw.difficulty) > 60 ? "text-red-600" : parseInt(kw.difficulty) > 40 ? "text-amber-600" : "text-green-600"}>
-                {kw.difficulty}
-              </span>
-              <span className="text-[#6B6B6B]">{kw.intent}</span>
-              <span className={`rounded-full border px-2 py-0.5 text-[10px] capitalize ${statusColors[kw.status]}`}>
-                {kw.status}
-              </span>
-            </motion.div>
-          ))}
-        </div>
+          <div className="grid grid-cols-[1fr_80px_80px_90px_90px] gap-2 border-b border-[#E8E5E0] px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-[#9B9B9B]">
+            <span>Keyword</span><span>Volume</span><span>Difficulty</span><span>Intent</span><span>Status</span>
+          </div>
+          <div className="divide-y divide-[#E8E5E0]">
+            {filtered.map((kw, i) => (
+              <motion.div key={kw.keyword} className="grid grid-cols-[1fr_80px_80px_90px_90px] gap-2 px-4 py-3 text-[12px] transition-colors hover:bg-[#F5F5F0]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.03 }}>
+                <span className="font-medium text-[#1A1A1A] truncate">{kw.keyword}</span>
+                <span className="text-[#6B6B6B]">{kw.volume}</span>
+                <span className={parseInt(kw.difficulty) > 60 ? "text-red-600" : parseInt(kw.difficulty) > 40 ? "text-amber-600" : "text-green-600"}>{kw.difficulty}</span>
+                <span className="text-[#6B6B6B]">{kw.intent}</span>
+                <span className={`rounded-full border px-2 py-0.5 text-[10px] capitalize ${statusColors[kw.status]}`}>{kw.status}</span>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
@@ -893,11 +731,7 @@ function KeywordsSection({ siteData, keyword, onAskAI }: {
 }
 
 /* ─── Rankings Section ──────────────────────────────────────── */
-function RankingsSection({ siteData, keyword, platforms }: {
-  siteData: SiteData;
-  keyword: string;
-  platforms: string[];
-}) {
+function RankingsSection({ siteData, keyword, platforms }: { siteData: SiteData; keyword: string; platforms: string[] }) {
   const domainBase = siteData.domain?.split(".")[0] || "site";
   const rankings: RankingEntry[] = [
     { keyword: keyword || domainBase, position: 24, previousPosition: 31, url: "/", platform: "google" },
@@ -915,61 +749,39 @@ function RankingsSection({ siteData, keyword, platforms }: {
         <p className="text-[12px] text-[#6B6B6B]">Tracking {rankings.length} positions across {platforms.length} platform{platforms.length !== 1 ? "s" : ""}</p>
       </div>
 
-      {/* Summary cards */}
       <div className="grid grid-cols-3 gap-3">
         {[
           { label: "Avg. Position", value: "32", trend: "+5", positive: true },
           { label: "Page 1 Rankings", value: "2", trend: "+1", positive: true },
           { label: "Improving", value: "4", trend: "of 6", positive: true },
         ].map((stat, i) => (
-          <motion.div
-            key={stat.label}
-            className="rounded-xl border border-[#E8E5E0] bg-white p-3.5 shadow-sm"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 + i * 0.05 }}
-          >
+          <motion.div key={stat.label} className="rounded-2xl border border-[#E8E5E0] bg-white p-3.5 shadow-sm" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + i * 0.05 }}>
             <p className="font-heading text-xl font-bold text-[#1A1A1A]">{stat.value}</p>
             <p className="text-[10px] text-[#9B9B9B]">{stat.label}</p>
-            <p className={`mt-0.5 text-[10px] ${stat.positive ? "text-green-600" : "text-red-600"}`}>
-              {stat.trend}
-            </p>
+            <p className={`mt-0.5 text-[10px] ${stat.positive ? "text-green-600" : "text-red-600"}`}>{stat.trend}</p>
           </motion.div>
         ))}
       </div>
 
-      {/* Ranking table */}
-      <div className="overflow-x-auto rounded-xl border border-[#E8E5E0] bg-white shadow-sm">
+      <div className="overflow-x-auto rounded-2xl border border-[#E8E5E0] bg-white shadow-sm">
         <div className="min-w-[480px]">
-        <div className="grid grid-cols-[1fr_70px_80px_70px_60px] gap-2 border-b border-[#E8E5E0] px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-[#9B9B9B]">
-          <span>Keyword</span>
-          <span>Platform</span>
-          <span>Position</span>
-          <span>Change</span>
-          <span>URL</span>
-        </div>
-        <div className="divide-y divide-[#E8E5E0]">
-          {rankings.map((r, i) => {
-            const change = r.previousPosition - r.position;
-            return (
-              <motion.div
-                key={`${r.keyword}-${r.platform}`}
-                className="grid grid-cols-[1fr_70px_80px_70px_60px] gap-2 px-4 py-3 text-[12px] items-center transition-colors hover:bg-[#F5F5F0]"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: i * 0.04 }}
-              >
-                <span className="font-medium text-[#1A1A1A] truncate">{r.keyword}</span>
-                <span><PlatformIcon platform={r.platform} size={16} /></span>
-                <span className="text-[#1A1A1A]">#{r.position}</span>
-                <span className={change > 0 ? "text-green-600" : change < 0 ? "text-red-600" : "text-[#6B6B6B]"}>
-                  {change > 0 ? "+" : ""}{change}
-                </span>
-                <span className="truncate text-[#9B9B9B]">{r.url}</span>
-              </motion.div>
-            );
-          })}
-        </div>
+          <div className="grid grid-cols-[1fr_70px_80px_70px_60px] gap-2 border-b border-[#E8E5E0] px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-[#9B9B9B]">
+            <span>Keyword</span><span>Platform</span><span>Position</span><span>Change</span><span>URL</span>
+          </div>
+          <div className="divide-y divide-[#E8E5E0]">
+            {rankings.map((r, i) => {
+              const change = r.previousPosition - r.position;
+              return (
+                <motion.div key={`${r.keyword}-${r.platform}`} className="grid grid-cols-[1fr_70px_80px_70px_60px] gap-2 px-4 py-3 text-[12px] items-center transition-colors hover:bg-[#F5F5F0]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.04 }}>
+                  <span className="font-medium text-[#1A1A1A] truncate">{r.keyword}</span>
+                  <span><PlatformIcon platform={r.platform} size={16} /></span>
+                  <span className="text-[#1A1A1A]">#{r.position}</span>
+                  <span className={change > 0 ? "text-green-600" : change < 0 ? "text-red-600" : "text-[#6B6B6B]"}>{change > 0 ? "+" : ""}{change}</span>
+                  <span className="truncate text-[#9B9B9B]">{r.url}</span>
+                </motion.div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>
@@ -977,11 +789,7 @@ function RankingsSection({ siteData, keyword, platforms }: {
 }
 
 /* ─── Content Section ───────────────────────────────────────── */
-function ContentSection({ siteData, keyword, onAskAI }: {
-  siteData: SiteData;
-  keyword: string;
-  onAskAI: (prompt: string) => void;
-}) {
+function ContentSection({ siteData, keyword, onAskAI }: { siteData: SiteData; keyword: string; onAskAI: (prompt: string) => void }) {
   const domainBase = siteData.domain?.split(".")[0] || "site";
   const contentItems: ContentItem[] = [
     { title: siteData.title || "Homepage", type: "page", score: siteData.title ? 72 : 25, status: siteData.title ? "optimize" : "update", url: "/" },
@@ -998,12 +806,7 @@ function ContentSection({ siteData, keyword, onAskAI }: {
     draft: "text-[#6B6B6B] border-[#E8E5E0] bg-[#F5F5F0]",
   };
 
-  const typeIcons: Record<string, string> = {
-    blog: "Blog",
-    page: "Page",
-    product: "Product",
-    video: "Video",
-  };
+  const typeIcons: Record<string, string> = { blog: "Blog", page: "Page", product: "Product", video: "Video" };
 
   return (
     <div className="mx-auto max-w-4xl space-y-5 p-4 sm:p-6">
@@ -1012,51 +815,26 @@ function ContentSection({ siteData, keyword, onAskAI }: {
           <h2 className="font-heading text-lg font-bold text-[#1A1A1A]">Content</h2>
           <p className="text-[12px] text-[#6B6B6B]">Content strategy and optimization tasks</p>
         </div>
-        <button
-          onClick={() => onAskAI("Generate a complete content calendar for my SEO campaign")}
-          className="shrink-0 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-[11px] font-medium text-blue-600 transition-colors hover:bg-blue-100"
-        >
-          + Generate plan
-        </button>
+        <button onClick={() => onAskAI("Generate a complete content calendar for my SEO campaign")} className="shrink-0 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-[11px] font-medium text-blue-600 transition-colors hover:bg-blue-100">+ Generate plan</button>
       </div>
 
       <div className="space-y-2.5">
         {contentItems.map((item, i) => (
-          <motion.div
-            key={item.title}
-            className="flex items-center gap-4 rounded-xl border border-[#E8E5E0] bg-white px-4 py-3.5 shadow-sm transition-colors hover:border-[#9B9B9B]"
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.05 }}
-          >
-            {/* Type badge */}
-            <span className="shrink-0 rounded-md border border-[#E8E5E0] bg-[#F5F5F0] px-2 py-1 text-[9px] font-semibold uppercase text-[#6B6B6B]">
-              {typeIcons[item.type]}
-            </span>
-
-            {/* Title + URL */}
+          <motion.div key={item.title} className="flex items-center gap-4 rounded-2xl border border-[#E8E5E0] bg-white px-4 py-3.5 shadow-sm transition-colors hover:border-[#9B9B9B]" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
+            <span className="shrink-0 rounded-md border border-[#E8E5E0] bg-[#F5F5F0] px-2 py-1 text-[9px] font-semibold uppercase text-[#6B6B6B]">{typeIcons[item.type]}</span>
             <div className="min-w-0 flex-1">
               <p className="truncate text-[13px] font-medium text-[#1A1A1A]">{item.title}</p>
               {item.url && <p className="text-[10px] text-[#9B9B9B]">{siteData.domain}{item.url}</p>}
             </div>
-
-            {/* Score */}
             {item.score > 0 && (
               <div className="flex items-center gap-2">
                 <div className="h-1.5 w-16 rounded-full bg-[#E8E5E0]">
-                  <div
-                    className={`h-1.5 rounded-full ${item.score >= 70 ? "bg-blue-600" : item.score >= 40 ? "bg-amber-500" : "bg-red-500"}`}
-                    style={{ width: `${item.score}%` }}
-                  />
+                  <div className={`h-1.5 rounded-full ${item.score >= 70 ? "bg-blue-600" : item.score >= 40 ? "bg-amber-500" : "bg-red-500"}`} style={{ width: `${item.score}%` }} />
                 </div>
                 <span className="text-[10px] text-[#6B6B6B]">{item.score}</span>
               </div>
             )}
-
-            {/* Status */}
-            <span className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[10px] capitalize ${statusStyles[item.status]}`}>
-              {item.status}
-            </span>
+            <span className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[10px] capitalize ${statusStyles[item.status]}`}>{item.status}</span>
           </motion.div>
         ))}
       </div>
@@ -1065,10 +843,7 @@ function ContentSection({ siteData, keyword, onAskAI }: {
 }
 
 /* ─── Settings Section ──────────────────────────────────────── */
-function SettingsSection({ onboardingData, onUpdateData }: {
-  onboardingData: OnboardingData;
-  onUpdateData: (data: OnboardingData) => void;
-}) {
+function SettingsSection({ onboardingData, onUpdateData }: { onboardingData: OnboardingData; onUpdateData: (data: OnboardingData) => void }) {
   const [name, setName] = useState(onboardingData.name);
   const [keyword, setKeyword] = useState(onboardingData.keyword);
   const [saved, setSaved] = useState(false);
@@ -1076,9 +851,7 @@ function SettingsSection({ onboardingData, onUpdateData }: {
   const handleSave = () => {
     const updated = { ...onboardingData, name, keyword };
     onUpdateData(updated);
-    try {
-      localStorage.setItem("rankmebaddy_onboarding", JSON.stringify(updated));
-    } catch { /* ignore */ }
+    try { localStorage.setItem("rankmebaddy_onboarding", JSON.stringify(updated)); } catch { /* ignore */ }
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -1090,40 +863,23 @@ function SettingsSection({ onboardingData, onUpdateData }: {
         <p className="text-[12px] text-[#6B6B6B]">Manage your campaign and profile</p>
       </div>
 
-      {/* Profile */}
-      <div className="space-y-4 rounded-xl border border-[#E8E5E0] bg-white p-4 shadow-sm">
+      <div className="space-y-4 rounded-2xl border border-[#E8E5E0] bg-white p-4 shadow-sm">
         <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[#9B9B9B]">Profile</h3>
         <div className="space-y-2">
           <label className="text-[10px] font-semibold uppercase tracking-wider text-[#6B6B6B]">Name</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full rounded-lg border border-[#E8E5E0] bg-white px-3 py-2.5 text-[13px] text-[#1A1A1A] outline-none transition-colors focus:border-blue-300 focus:ring-1 focus:ring-blue-100"
-          />
+          <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full rounded-xl border border-[#E8E5E0] bg-white px-3 py-2.5 text-[13px] text-[#1A1A1A] outline-none transition-colors focus:border-blue-300 focus:ring-1 focus:ring-blue-100" />
         </div>
       </div>
 
-      {/* Campaign */}
-      <div className="space-y-4 rounded-xl border border-[#E8E5E0] bg-white p-4 shadow-sm">
+      <div className="space-y-4 rounded-2xl border border-[#E8E5E0] bg-white p-4 shadow-sm">
         <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[#9B9B9B]">Campaign</h3>
         <div className="space-y-2">
           <label className="text-[10px] font-semibold uppercase tracking-wider text-[#6B6B6B]">Primary Keyword</label>
-          <input
-            type="text"
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            className="w-full rounded-lg border border-[#E8E5E0] bg-white px-3 py-2.5 text-[13px] text-[#1A1A1A] outline-none transition-colors focus:border-blue-300 focus:ring-1 focus:ring-blue-100"
-          />
+          <input type="text" value={keyword} onChange={(e) => setKeyword(e.target.value)} className="w-full rounded-xl border border-[#E8E5E0] bg-white px-3 py-2.5 text-[13px] text-[#1A1A1A] outline-none transition-colors focus:border-blue-300 focus:ring-1 focus:ring-blue-100" />
         </div>
         <div className="space-y-2">
           <label className="text-[10px] font-semibold uppercase tracking-wider text-[#6B6B6B]">Website</label>
-          <input
-            type="text"
-            value={onboardingData.website}
-            readOnly
-            className="w-full rounded-lg border border-[#E8E5E0] bg-[#F5F5F0] px-3 py-2.5 text-[13px] text-[#9B9B9B] outline-none"
-          />
+          <input type="text" value={onboardingData.website} readOnly className="w-full rounded-xl border border-[#E8E5E0] bg-[#F5F5F0] px-3 py-2.5 text-[13px] text-[#9B9B9B] outline-none" />
         </div>
         <div className="space-y-2">
           <label className="text-[10px] font-semibold uppercase tracking-wider text-[#6B6B6B]">Platforms</label>
@@ -1138,27 +894,14 @@ function SettingsSection({ onboardingData, onUpdateData }: {
         </div>
       </div>
 
-      {/* Save */}
-      <button
-        onClick={handleSave}
-        className="w-full rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white transition-all hover:bg-blue-700"
-      >
+      <button onClick={handleSave} className="w-full rounded-full bg-blue-600 py-3 text-sm font-semibold text-white transition-all hover:bg-blue-700">
         {saved ? "Saved ✓" : "Save changes"}
       </button>
 
-      {/* Danger zone */}
-      <div className="space-y-3 rounded-xl border border-red-200 bg-red-50 p-4">
+      <div className="space-y-3 rounded-2xl border border-red-200 bg-red-50 p-4">
         <h3 className="text-[11px] font-semibold uppercase tracking-wider text-red-600">Danger zone</h3>
         <p className="text-[11px] text-[#6B6B6B]">Reset all onboarding data and start over.</p>
-        <button
-          onClick={() => {
-            localStorage.removeItem("rankmebaddy_onboarding");
-            window.location.href = "/onboarding";
-          }}
-          className="rounded-lg border border-red-300 px-3 py-1.5 text-[11px] text-red-600 transition-colors hover:bg-red-100"
-        >
-          Reset everything
-        </button>
+        <button onClick={() => { localStorage.removeItem("rankmebaddy_onboarding"); window.location.href = "/onboarding"; }} className="rounded-full border border-red-300 px-3 py-1.5 text-[11px] text-red-600 transition-colors hover:bg-red-100">Reset everything</button>
       </div>
     </div>
   );
@@ -1178,18 +921,13 @@ export default function DashboardPage() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const agentStepIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Load onboarding data from localStorage
   useEffect(() => {
     try {
       const stored = localStorage.getItem("rankmebaddy_onboarding");
-      if (stored) {
-        const data = JSON.parse(stored) as OnboardingData;
-        setOnboardingData(data);
-      }
+      if (stored) { const data = JSON.parse(stored) as OnboardingData; setOnboardingData(data); }
     } catch { /* ignore */ }
   }, []);
 
-  // Generate welcome message after setup
   useEffect(() => {
     if (!setup && onboardingData && messages.length === 0) {
       const name = onboardingData.name?.split(" ")[0] || "there";
@@ -1205,12 +943,10 @@ export default function DashboardPage() {
       const welcomeMsg: ChatMessage = {
         id: "welcome",
         role: "assistant",
-        content: `Hey ${name}! I've finished analyzing ${domain}.\n\nHere's what I found:\n\n1. ${
+        content: `Hey ${name}! I've finished analyzing **${domain}**.\n\nHere's what I found:\n\n1. ${
           onboardingData.siteData?.title
-            ? `Your page title is "${onboardingData.siteData.title.slice(0, 60)}" — ${
-                onboardingData.siteData.title.length > 60 ? "it's a bit long, we should trim it" : "good length"
-              }`
-            : "No page title detected — this is critical for SEO"
+            ? `Your page title is "${onboardingData.siteData.title.slice(0, 60)}" — ${onboardingData.siteData.title.length > 60 ? "it's a bit long, we should trim it" : "good length"}`
+            : "No page title detected — this is **critical** for SEO"
         }\n2. ${
           onboardingData.siteData?.description ? "Meta description is set" : "No meta description — we need to add one"
         }\n3. ${
@@ -1227,29 +963,16 @@ export default function DashboardPage() {
     }
   }, [setup, onboardingData, messages.length]);
 
-  // Auto-scroll chat
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isSending]);
+  useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, isSending]);
 
-  // Agent thinking step rotation
   useEffect(() => {
     if (isSending) {
       setAgentStep(0);
-      agentStepIntervalRef.current = setInterval(() => {
-        setAgentStep((prev) => prev + 1);
-      }, 1500);
+      agentStepIntervalRef.current = setInterval(() => { setAgentStep((prev) => prev + 1); }, 1500);
     } else {
-      if (agentStepIntervalRef.current) {
-        clearInterval(agentStepIntervalRef.current);
-        agentStepIntervalRef.current = null;
-      }
+      if (agentStepIntervalRef.current) { clearInterval(agentStepIntervalRef.current); agentStepIntervalRef.current = null; }
     }
-    return () => {
-      if (agentStepIntervalRef.current) {
-        clearInterval(agentStepIntervalRef.current);
-      }
-    };
+    return () => { if (agentStepIntervalRef.current) { clearInterval(agentStepIntervalRef.current); } };
   }, [isSending]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -1258,68 +981,28 @@ export default function DashboardPage() {
     e.target.style.height = Math.min(e.target.scrollHeight, 120) + "px";
   };
 
-  // Send message to AI
   const sendMessage = useCallback(
     async (content: string) => {
       if (!content.trim() || isSending) return;
-
-      const userMsg: ChatMessage = {
-        id: `user-${Date.now()}`,
-        role: "user",
-        content: content.trim(),
-        timestamp: new Date(),
-      };
-
+      const userMsg: ChatMessage = { id: `user-${Date.now()}`, role: "user", content: content.trim(), timestamp: new Date() };
       setMessages((prev) => [...prev, userMsg]);
       setInputValue("");
       setIsSending(true);
-
       if (inputRef.current) inputRef.current.style.height = "auto";
 
       try {
-        const chatMessages = [...messages, userMsg].map((m) => ({
-          role: m.role,
-          content: m.content,
-        }));
-
+        const chatMessages = [...messages, userMsg].map((m) => ({ role: m.role, content: m.content }));
         const res = await fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            messages: chatMessages,
-            siteData: onboardingData?.siteData,
-            keyword: onboardingData?.keyword,
-            platforms: onboardingData?.platforms,
-            userName: onboardingData?.name,
-          }),
+          body: JSON.stringify({ messages: chatMessages, siteData: onboardingData?.siteData, keyword: onboardingData?.keyword, platforms: onboardingData?.platforms, userName: onboardingData?.name }),
         });
-
         const data = await res.json();
-
         if (data.error) throw new Error(data.error);
-
         const aiActions: AgentAction[] = data.actions || [];
-
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: `ai-${Date.now()}`,
-            role: "assistant",
-            content: data.reply,
-            timestamp: new Date(),
-            actions: aiActions.length > 0 ? aiActions : undefined,
-          },
-        ]);
+        setMessages((prev) => [...prev, { id: `ai-${Date.now()}`, role: "assistant", content: data.reply, timestamp: new Date(), actions: aiActions.length > 0 ? aiActions : undefined }]);
       } catch {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: `error-${Date.now()}`,
-            role: "assistant",
-            content: "Something went wrong. Could you try that again?",
-            timestamp: new Date(),
-          },
-        ]);
+        setMessages((prev) => [...prev, { id: `error-${Date.now()}`, role: "assistant", content: "Something went wrong. Could you try that again?", timestamp: new Date() }]);
       } finally {
         setIsSending(false);
       }
@@ -1328,27 +1011,12 @@ export default function DashboardPage() {
   );
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage(inputValue);
-    }
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(inputValue); }
   };
 
-  // Navigate to chat with a pre-filled question
-  const askInChat = useCallback(
-    (prompt: string) => {
-      setActiveSection("chat");
-      setTimeout(() => sendMessage(prompt), 100);
-    },
-    [sendMessage]
-  );
+  const askInChat = useCallback((prompt: string) => { setActiveSection("chat"); setTimeout(() => sendMessage(prompt), 100); }, [sendMessage]);
+  const updateOnboardingData = useCallback((data: OnboardingData) => { setOnboardingData(data); }, []);
 
-  // Update onboarding data (from settings)
-  const updateOnboardingData = useCallback((data: OnboardingData) => {
-    setOnboardingData(data);
-  }, []);
-
-  // Redirect if no data
   useEffect(() => {
     const timer = setTimeout(() => {
       const stored = localStorage.getItem("rankmebaddy_onboarding");
@@ -1357,23 +1025,14 @@ export default function DashboardPage() {
     return () => clearTimeout(timer);
   }, []);
 
-  /* ─── Setup screen ─── */
   if (setup && onboardingData) {
-    return (
-      <AnimatePresence>
-        <SetupScreen onComplete={() => setSetup(false)} />
-      </AnimatePresence>
-    );
+    return (<AnimatePresence><SetupScreen onComplete={() => setSetup(false)} /></AnimatePresence>);
   }
 
   if (!onboardingData) {
     return (
       <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: "#FAFAF7" }}>
-        <motion.div
-          className="h-6 w-6 rounded-full border-2 border-[#E8E5E0] border-t-blue-600"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
-        />
+        <motion.div className="h-6 w-6 rounded-full border-2 border-[#E8E5E0] border-t-blue-600" animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }} />
       </div>
     );
   }
@@ -1382,69 +1041,65 @@ export default function DashboardPage() {
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ backgroundColor: "#FAFAF7" }}>
-      {/* Sidebar */}
-      <Sidebar
-        siteData={siteData}
-        activeSection={activeSection}
-        onSectionChange={setActiveSection}
-        userName={onboardingData.name}
-        platforms={onboardingData.platforms || []}
-        mobileOpen={mobileSidebar}
-        onMobileClose={() => setMobileSidebar(false)}
-      />
+      <Sidebar siteData={siteData} activeSection={activeSection} onSectionChange={setActiveSection} userName={onboardingData.name} platforms={onboardingData.platforms || []} mobileOpen={mobileSidebar} onMobileClose={() => setMobileSidebar(false)} />
 
-      {/* Main */}
       <main className="flex min-w-0 flex-1 flex-col">
         {/* Top Bar */}
         <header className="flex items-center justify-between border-b border-[#E8E5E0] bg-white px-4 py-3 sm:px-6">
           <div className="flex items-center gap-3">
-            <button
-              className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#E8E5E0] bg-white sm:hidden"
-              onClick={() => setMobileSidebar(true)}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B6B6B" strokeWidth="2" strokeLinecap="round">
-                <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" />
-              </svg>
+            <button className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#E8E5E0] bg-white sm:hidden" onClick={() => setMobileSidebar(true)}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B6B6B" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
             </button>
             <div>
-              <h1 className="font-heading text-sm font-bold text-[#1A1A1A] capitalize">
-                {activeSection === "chat" ? "Chat" : activeSection}
-              </h1>
-              <p className="text-[10px] text-[#9B9B9B]">
-                {siteData?.domain || "No site connected"}
-              </p>
+              <h1 className="font-heading text-sm font-bold text-[#1A1A1A] capitalize">{activeSection === "chat" ? "Chat" : activeSection}</h1>
+              <p className="text-[10px] text-[#9B9B9B]">{siteData?.domain || "No site connected"}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             {activeSection === "chat" && (
-              <button
-                onClick={() => setMessages([])}
-                className="flex items-center gap-1.5 rounded-lg border border-[#E8E5E0] bg-white px-2.5 py-1.5 text-[11px] text-[#6B6B6B] transition-colors hover:text-[#1A1A1A] hover:border-[#9B9B9B]"
-              >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 5v14" /><path d="M5 12h14" />
-                </svg>
+              <button onClick={() => setMessages([])} className="flex items-center gap-1.5 rounded-full border border-[#E8E5E0] bg-white px-2.5 py-1.5 text-[11px] text-[#6B6B6B] transition-colors hover:text-[#1A1A1A] hover:border-[#9B9B9B]">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14" /><path d="M5 12h14" /></svg>
                 New chat
               </button>
             )}
           </div>
         </header>
 
-        {/* Content area — switches by section */}
+        {/* Content area */}
         <div className="min-h-0 flex-1 overflow-y-auto">
           <AnimatePresence mode="wait">
             {activeSection === "chat" && (
               <motion.div key="chat" className="flex h-full flex-col" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
                 {/* Messages */}
-                <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6">
+                <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6 custom-scrollbar">
                   <div className="mx-auto max-w-2xl space-y-5">
+                    {/* Agent tools indicator */}
+                    <motion.div
+                      className="flex flex-wrap items-center gap-2"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.3 }}
+                    >
+                      <span className="text-[10px] font-medium uppercase tracking-wider text-[#9B9B9B]">Tools:</span>
+                      {agentTools.map((tool) => (
+                        <span key={tool.label} className="inline-flex items-center gap-1 rounded-full bg-[#F5F0EB] px-2.5 py-1 text-[10px] text-[#6B6B6B]">
+                          <span>{tool.icon}</span>
+                          {tool.label}
+                        </span>
+                      ))}
+                    </motion.div>
+
                     {messages.map((msg) => (
                       <ChatBubble key={msg.id} message={msg} onAction={sendMessage} />
                     ))}
+
                     {isSending && (
-                      <motion.div className="flex gap-3" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-50 text-[10px] font-bold text-blue-600">R</div>
-                        <div className="rounded-xl bg-[#FAF8F5] px-5 py-3.5 border-l-[3px] border-l-blue-600">
+                      <motion.div className="flex justify-start" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+                        <div className="max-w-[85%] rounded-2xl bg-white px-5 py-3.5 shadow-sm border border-[#E8E5E0]/50">
+                          <div className="mb-2 flex items-center gap-1.5">
+                            <div className="h-1.5 w-1.5 rounded-full bg-[#2563EB]" />
+                            <span className="text-[10px] font-medium text-[#2563EB]">RankMeBaddy</span>
+                          </div>
                           <AgentStepIndicator steps={agentThinkingSteps} currentStep={agentStep} />
                         </div>
                       </motion.div>
@@ -1462,8 +1117,9 @@ export default function DashboardPage() {
                           key={action.label}
                           onClick={() => sendMessage(action.prompt)}
                           disabled={isSending}
-                          className="rounded-lg bg-[#F5F0EB] border border-[#E8E5E0] px-3 py-1.5 text-[11px] text-[#1A1A1A] transition-all hover:bg-[#EDE8E2] disabled:opacity-40"
+                          className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#F5F0EB] to-[#EDE8E2] px-4 py-1.5 text-[11px] text-[#1A1A1A] transition-all hover:from-[#EDE8E2] hover:to-[#E5DFD8] disabled:opacity-40 shadow-sm"
                         >
+                          <span>{action.icon}</span>
                           {action.label}
                         </button>
                       ))}
@@ -1474,82 +1130,60 @@ export default function DashboardPage() {
                 {/* Input */}
                 <div className="border-t border-[#E8E5E0] bg-white px-4 py-3 sm:px-6">
                   <div className="mx-auto max-w-2xl">
-                    <div className="flex items-end gap-2 rounded-2xl border border-[#E8E5E0] bg-white px-4 py-2.5 transition-all focus-within:border-blue-300 focus-within:shadow-lg focus-within:shadow-blue-50">
+                    <div className="flex items-end gap-2 rounded-2xl border border-[#E8E5E0] bg-[#FAFAF7] px-4 py-3 transition-colors focus-within:border-[#2563EB]/30 focus-within:ring-1 focus-within:ring-[#2563EB]/10">
                       <textarea
                         ref={inputRef}
                         value={inputValue}
                         onChange={handleInputChange}
                         onKeyDown={handleKeyDown}
-                        placeholder={isSending ? "Agent is working..." : "Ask about keywords, rankings, content..."}
-                        disabled={isSending}
+                        placeholder="Ask RankMeBaddy to rank anything..."
                         rows={1}
-                        className="max-h-[120px] min-h-[20px] flex-1 resize-none bg-transparent text-[14px] text-[#1A1A1A] placeholder:text-[#9B9B9B] outline-none disabled:opacity-50"
+                        className="max-h-[120px] min-h-[20px] flex-1 resize-none bg-transparent text-[14px] text-[#1A1A1A] outline-none placeholder:text-[#9B9B9B]"
                       />
-                      <button
+                      <motion.button
                         onClick={() => sendMessage(inputValue)}
                         disabled={!inputValue.trim() || isSending}
-                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-600 transition-all hover:bg-blue-700 disabled:opacity-30"
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#2563EB] to-[#6A3093] text-white transition-all disabled:opacity-30"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
                       >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                           <path d="m5 12h14" /><path d="m12 5 7 7-7 7" />
                         </svg>
-                      </button>
+                      </motion.button>
                     </div>
-                    <p className="mt-1.5 text-center text-[9px] text-[#9B9B9B]">
-                      RankMeBaddy may produce inaccurate info. Verify important details.
-                    </p>
                   </div>
                 </div>
               </motion.div>
             )}
 
             {activeSection === "overview" && siteData && (
-              <motion.div key="overview" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
-                <OverviewSection
-                  siteData={siteData}
-                  keyword={onboardingData.keyword}
-                  platforms={onboardingData.platforms || []}
-                  onNavigate={setActiveSection}
-                />
+              <motion.div key="overview" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <OverviewSection siteData={siteData} keyword={onboardingData.keyword} platforms={onboardingData.platforms || []} onNavigate={setActiveSection} />
               </motion.div>
             )}
 
             {activeSection === "keywords" && siteData && (
-              <motion.div key="keywords" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
-                <KeywordsSection
-                  siteData={siteData}
-                  keyword={onboardingData.keyword}
-                  onAskAI={askInChat}
-                />
+              <motion.div key="keywords" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <KeywordsSection siteData={siteData} keyword={onboardingData.keyword} onAskAI={askInChat} />
               </motion.div>
             )}
 
             {activeSection === "rankings" && siteData && (
-              <motion.div key="rankings" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
-                <RankingsSection
-                  siteData={siteData}
-                  keyword={onboardingData.keyword}
-                  platforms={onboardingData.platforms || []}
-                />
+              <motion.div key="rankings" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <RankingsSection siteData={siteData} keyword={onboardingData.keyword} platforms={onboardingData.platforms || []} />
               </motion.div>
             )}
 
             {activeSection === "content" && siteData && (
-              <motion.div key="content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
-                <ContentSection
-                  siteData={siteData}
-                  keyword={onboardingData.keyword}
-                  onAskAI={askInChat}
-                />
+              <motion.div key="content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <ContentSection siteData={siteData} keyword={onboardingData.keyword} onAskAI={askInChat} />
               </motion.div>
             )}
 
             {activeSection === "settings" && (
-              <motion.div key="settings" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
-                <SettingsSection
-                  onboardingData={onboardingData}
-                  onUpdateData={updateOnboardingData}
-                />
+              <motion.div key="settings" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <SettingsSection onboardingData={onboardingData} onUpdateData={updateOnboardingData} />
               </motion.div>
             )}
           </AnimatePresence>

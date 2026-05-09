@@ -4,12 +4,7 @@ import { useRef } from "react";
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-/* ─── Color System ───────────────────────────────────────────── */
-// Background: #FAFAF7  |  Surface: #FFFFFF  |  Border: #E8E5E0
-// Text: #1A1A1A  |  Secondary: #6B6B6B  |  Muted: #9B9B9B
-// Accent: #2563EB  |  Accent Warm: #6EE7B7
-
-/* ─── Animated Card with scroll-triggered reveal ──────────────── */
+/* ─── Animated Card ──────────────────────────────────────────── */
 interface CardProps {
   children: React.ReactNode;
   className?: string;
@@ -20,7 +15,7 @@ function Card({ children, className, delay = 0 }: CardProps) {
   return (
     <motion.div
       className={cn(
-        "relative overflow-hidden rounded-xl border border-[#E8E5E0] bg-white shadow-sm",
+        "relative overflow-hidden rounded-2xl border border-[#E8E5E0] bg-white shadow-sm",
         className
       )}
       initial={{ opacity: 0, y: 30 }}
@@ -38,7 +33,7 @@ function Card({ children, className, delay = 0 }: CardProps) {
   );
 }
 
-/* ─── Chat Interface (Full Product Mockup) ───────────────────── */
+/* ─── Chat Interface ─────────────────────────────────────────── */
 function ChatInterfaceBox() {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-80px" });
@@ -46,7 +41,6 @@ function ChatInterfaceBox() {
   return (
     <Card className="col-span-1 md:col-span-2" delay={0}>
       <div ref={ref} className="flex flex-col">
-        {/* App chrome — sidebar + top bar */}
         <div className="flex">
           {/* Sidebar */}
           <div className="hidden w-14 shrink-0 flex-col items-center gap-3 border-r border-[#E8E5E0] bg-[#FAFAF7] pt-4 sm:flex">
@@ -71,30 +65,20 @@ function ChatInterfaceBox() {
                 </svg>
               </div>
             </div>
-            <div className="mt-auto mb-4">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#F5F5F0]">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                  <circle cx="12" cy="7" r="4" />
-                </svg>
-              </div>
-            </div>
           </div>
 
           {/* Main chat area */}
           <div className="flex flex-1 flex-col">
-            {/* Top bar */}
             <div className="flex items-center justify-between border-b border-[#E8E5E0] px-4 py-2.5 bg-white">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-[#1A1A1A]">Best Protein Powder</span>
-                <span className="rounded bg-blue-50 px-1.5 py-0.5 text-[9px] font-medium text-blue-600">Active</span>
+                <span className="rounded-full bg-blue-50 px-1.5 py-0.5 text-[9px] font-medium text-blue-600">Active</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="rounded border border-[#E8E5E0] bg-[#FAFAF7] px-2 py-0.5 text-[9px] text-[#6B6B6B]">Day 14</span>
+                <span className="rounded-full border border-[#E8E5E0] bg-[#FAFAF7] px-2 py-0.5 text-[9px] text-[#6B6B6B]">Day 14</span>
               </div>
             </div>
 
-            {/* Chat messages */}
             <div className="flex-1 space-y-4 p-4 sm:p-5 bg-[#FAFAF7]">
               <motion.div
                 className="flex justify-end"
@@ -102,7 +86,7 @@ function ChatInterfaceBox() {
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.4, delay: 0.3 }}
               >
-                <div className="max-w-[80%] rounded-xl bg-[#F5F0EB] px-4 py-2.5 text-[12px] leading-relaxed text-[#1A1A1A]">
+                <div className="max-w-[80%] rounded-2xl bg-[#F5F0EB] px-4 py-2.5 text-[12px] leading-relaxed text-[#1A1A1A]">
                   I want to rank for &quot;best protein powder&quot; on Google, YouTube, and Amazon. Can you handle all three?
                 </div>
               </motion.div>
@@ -113,7 +97,11 @@ function ChatInterfaceBox() {
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.4, delay: 0.8 }}
               >
-                <div className="max-w-[90%] rounded-xl bg-[#FAF8F5] border-l-[3px] border-l-blue-600 px-4 py-3">
+                <div className="max-w-[90%] rounded-2xl bg-white px-4 py-3 shadow-sm border border-[#E8E5E0]/50">
+                  <div className="mb-1 flex items-center gap-1.5">
+                    <div className="h-1.5 w-1.5 rounded-full bg-[#2563EB]" />
+                    <span className="text-[10px] font-medium text-[#2563EB]">RankMeBaddy</span>
+                  </div>
                   <p className="text-[12px] leading-relaxed text-[#1A1A1A]">
                     On it. Three campaigns launched in parallel:
                   </p>
@@ -164,36 +152,18 @@ function ChatInterfaceBox() {
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.4, delay: 2.0 }}
               >
-                <div className="max-w-[80%] rounded-xl bg-[#F5F0EB] px-4 py-2.5 text-[12px] leading-relaxed text-[#1A1A1A]">
+                <div className="max-w-[80%] rounded-2xl bg-[#F5F0EB] px-4 py-2.5 text-[12px] leading-relaxed text-[#1A1A1A]">
                   Also check TikTok — our competitor just ranked there last week.
-                </div>
-              </motion.div>
-
-              <motion.div
-                className="flex justify-start"
-                initial={{ opacity: 0, y: 10 }}
-                animate={isInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.4, delay: 2.4 }}
-              >
-                <div className="max-w-[85%] rounded-xl bg-[#FAF8F5] border-l-[3px] border-l-blue-600 px-4 py-2.5">
-                  <p className="text-[12px] leading-relaxed text-[#1A1A1A]">
-                    Added TikTok to the campaign. Found their video strategy — drafting a content plan that targets the same keywords with a different angle.
-                  </p>
-                  <div className="mt-2.5 inline-flex items-center gap-1.5 rounded-lg border border-[#FE2C55]/20 bg-[#FE2C55]/5 px-2.5 py-1.5">
-                    <span className="flex h-4 w-4 items-center justify-center rounded bg-[#FE2C55]/20 text-[7px] font-bold text-[#FE2C55]">TT</span>
-                    <span className="text-[10px] text-[#6B6B6B]">Analyzing competitor content</span>
-                    <span className="ml-1 text-[10px] font-medium text-[#D97706]">12%</span>
-                  </div>
                 </div>
               </motion.div>
             </div>
 
             {/* Input bar */}
             <div className="border-t border-[#E8E5E0] px-4 py-3 bg-white">
-              <div className="flex items-center gap-2 rounded-2xl border border-[#E8E5E0] bg-white px-3.5 py-2.5">
+              <div className="flex items-center gap-2 rounded-full border border-[#E8E5E0] bg-[#FAFAF7] px-4 py-2.5">
                 <span className="text-[11px] text-[#9B9B9B]">Ask RankMeBaddy to rank anything...</span>
-                <div className="ml-auto flex h-7 w-7 items-center justify-center rounded-full bg-[#2563EB]">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <div className="ml-auto flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-[#2563EB] to-[#6A3093]">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round">
                     <path d="m5 12h14" /><path d="m12 5 7 7-7 7" />
                   </svg>
                 </div>
@@ -230,14 +200,14 @@ function RankingsCard() {
             </span>
             <span className="text-sm font-medium text-[#1A1A1A]">Rankings</span>
           </div>
-          <span className="rounded bg-blue-50 px-1.5 py-0.5 text-[9px] font-medium text-blue-600">14 days</span>
+          <span className="rounded-full bg-blue-50 px-1.5 py-0.5 text-[9px] font-medium text-blue-600">14 days</span>
         </div>
 
         <div className="flex-1 space-y-2.5">
           {rankings.map((r, i) => (
             <motion.div
               key={r.platform}
-              className="group flex items-center gap-2.5 rounded-lg border border-[#E8E5E0]/60 bg-[#FAFAF7] px-3 py-2.5 transition-colors hover:border-[#9B9B9B]/40"
+              className="group flex items-center gap-2.5 rounded-xl border border-[#E8E5E0]/60 bg-[#FAFAF7] px-3 py-2.5 transition-colors hover:border-[#9B9B9B]/40"
               initial={{ opacity: 0, x: -10 }}
               animate={isInView ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 0.35, delay: 0.4 + i * 0.12 }}
@@ -297,7 +267,7 @@ function ScoreRingCard() {
             </span>
             <span className="text-sm font-medium text-[#1A1A1A]">Content Score</span>
           </div>
-          <span className="rounded bg-blue-50 px-1.5 py-0.5 text-[9px] font-medium text-blue-600">Excellent</span>
+          <span className="rounded-full bg-blue-50 px-1.5 py-0.5 text-[9px] font-medium text-blue-600">Excellent</span>
         </div>
 
         <div className="flex items-center justify-center py-2">
@@ -377,7 +347,7 @@ function SectionTitle() {
       className="mb-12 flex flex-col items-center gap-4 text-center"
       style={{ y }}
     >
-      <span className="inline-flex items-center gap-2 rounded-lg border border-[#E8E5E0] bg-white px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-[#6B6B6B]">
+      <span className="inline-flex items-center gap-2 rounded-full border border-[#E8E5E0] bg-white px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-[#6B6B6B]">
         The Solution
       </span>
       <h2 className="font-heading text-3xl font-bold text-[#1A1A1A] sm:text-4xl md:text-5xl">

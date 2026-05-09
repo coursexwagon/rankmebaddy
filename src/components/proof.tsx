@@ -4,11 +4,6 @@ import { useRef } from "react";
 import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import Image from "next/image";
 
-/* ─── Color System ───────────────────────────────────────────── */
-// Background: #FAFAF7  |  Surface: #FFFFFF  |  Border: #E8E5E0
-// Text: #1A1A1A  |  Secondary: #6B6B6B  |  Muted: #9B9B9B
-// Accent: #2563EB  |  Accent Warm: #6EE7B7
-
 /* ─── Testimonial Data ───────────────────────────────────────── */
 const testimonials = [
   {
@@ -86,7 +81,7 @@ function TestimonialCard({
   return (
     <motion.div
       ref={ref}
-      className="relative overflow-hidden rounded-xl border border-[#E8E5E0] bg-white"
+      className="relative overflow-hidden rounded-2xl border border-[#E8E5E0] bg-white"
       initial={{ opacity: 0, y: 40, scale: 0.95 }}
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, margin: "-40px" }}
@@ -100,7 +95,7 @@ function TestimonialCard({
         transition: { duration: 0.2 },
       }}
     >
-      {/* Top section — photo + name + stars */}
+      {/* Top section */}
       <div className="border-b border-[#E8E5E0] p-5">
         <div className="flex items-start gap-3.5">
           <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-[#E8E5E0]">
@@ -183,7 +178,7 @@ export default function ProofSection() {
           className="mb-14 flex flex-col items-center gap-3 text-center"
           style={{ y: headerY }}
         >
-          <span className="inline-flex items-center gap-2 rounded-lg border border-[#E8E5E0] bg-white px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-[#6B6B6B]">
+          <span className="inline-flex items-center gap-2 rounded-full border border-[#E8E5E0] bg-white px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-[#6B6B6B]">
             Proof
           </span>
           <h2 className="font-heading text-2xl font-bold text-[#1A1A1A] sm:text-3xl md:text-4xl">

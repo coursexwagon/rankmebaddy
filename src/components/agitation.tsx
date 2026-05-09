@@ -3,11 +3,6 @@
 import { useRef } from "react";
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
 
-/* ─── Color System ───────────────────────────────────────────── */
-// Background: #FAFAF7  |  Surface: #FFFFFF  |  Border: #E8E5E0
-// Text: #1A1A1A  |  Secondary: #6B6B6B  |  Muted: #9B9B9B
-// Accent: #2563EB  |  Error/Warm: #DC2626
-
 /* ─── Platform Data ──────────────────────────────────────────── */
 const platforms = [
   {
@@ -101,7 +96,7 @@ export default function AgitationSection() {
           className="mb-14 flex flex-col items-center gap-3 text-center"
           style={{ y: headerY }}
         >
-          <span className="inline-flex items-center gap-2 rounded-lg border border-[#E8E5E0] bg-white px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-[#6B6B6B]">
+          <span className="inline-flex items-center gap-2 rounded-full border border-[#E8E5E0] bg-white px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-[#6B6B6B]">
             The Reality
           </span>
           <h2 className="font-heading text-2xl font-bold text-[#1A1A1A] sm:text-3xl md:text-4xl">
@@ -121,7 +116,7 @@ export default function AgitationSection() {
             animate={isInView ? { opacity: 1, scale: 1 } : {}}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-5 py-2">
+            <div className="flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-5 py-2">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10" />
                 <polyline points="12 6 12 12 16 14" />
