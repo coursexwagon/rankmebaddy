@@ -17,7 +17,7 @@ export default function Navbar() {
     <motion.nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "border-b border-[#27272A]/40 bg-[#0A0A0B]/80 backdrop-blur-xl"
+          ? "border-b border-[#E8E5E0]/60 bg-[#FAFAF7]/90 backdrop-blur-xl"
           : "bg-transparent"
       }`}
       initial={{ y: -20, opacity: 0 }}
@@ -27,25 +27,25 @@ export default function Navbar() {
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
         {/* Logo */}
         <a href="/" className="flex items-center gap-2.5">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#6EE7B7]/10">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6EE7B7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="20 6 9 17 4 12" />
             </svg>
           </div>
-          <span className="font-heading text-sm font-bold text-[#FAFAFA]">
+          <span className="font-heading text-sm font-bold text-[#1A1A1A]">
             RankMeBaddy
           </span>
         </a>
 
         {/* Desktop nav */}
         <div className="hidden items-center gap-6 sm:flex">
-          <a href="#solution" className="text-[13px] text-[#71717A] transition-colors hover:text-[#A1A1AA]">
+          <a href="#solution" className="text-[13px] text-[#6B6B6B] transition-colors hover:text-[#1A1A1A]">
             Features
           </a>
-          <a href="#proof" className="text-[13px] text-[#71717A] transition-colors hover:text-[#A1A1AA]">
+          <a href="#proof" className="text-[13px] text-[#6B6B6B] transition-colors hover:text-[#1A1A1A]">
             Results
           </a>
-          <a href="#pricing" className="text-[13px] text-[#71717A] transition-colors hover:text-[#A1A1AA]">
+          <a href="#pricing" className="text-[13px] text-[#6B6B6B] transition-colors hover:text-[#1A1A1A]">
             Pricing
           </a>
         </div>
@@ -54,23 +54,23 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
           <a
             href="/dashboard"
-            className="hidden rounded-full border border-[#27272A] bg-[#18181B] px-4 py-2 text-[12px] font-medium text-[#A1A1AA] transition-colors hover:border-[#3F3F46] hover:text-[#FAFAFA] sm:inline-flex"
+            className="hidden rounded-lg border border-[#E8E5E0] bg-white px-4 py-2 text-[12px] font-medium text-[#6B6B6B] transition-colors hover:border-[#9B9B9B] hover:text-[#1A1A1A] sm:inline-flex"
           >
             Log in
           </a>
           <a
             href="/onboarding"
-            className="rounded-full bg-[#6EE7B7] px-4 py-2 text-[12px] font-semibold text-[#0A0A0B] transition-all hover:bg-[#6EE7B7]/90"
+            className="rounded-lg bg-[#2563EB] px-4 py-2 text-[12px] font-semibold text-white transition-all hover:bg-blue-700"
           >
             Start free
           </a>
 
           {/* Mobile hamburger */}
           <button
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#27272A] sm:hidden"
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#E8E5E0] sm:hidden"
             onClick={() => setMobileOpen(!mobileOpen)}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A1A1AA" strokeWidth="2" strokeLinecap="round">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B6B6B" strokeWidth="2" strokeLinecap="round">
               <line x1="3" y1="6" x2="21" y2="6" />
               <line x1="3" y1="12" x2="21" y2="12" />
               <line x1="3" y1="18" x2="21" y2="18" />
@@ -83,16 +83,16 @@ export default function Navbar() {
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
-            className="border-t border-[#27272A]/40 bg-[#0A0A0B]/95 px-4 py-4 backdrop-blur-xl sm:hidden"
+            className="border-t border-[#E8E5E0]/60 bg-[#FAFAF7]/95 px-4 py-4 backdrop-blur-xl sm:hidden"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
           >
             <div className="flex flex-col gap-3">
-              <a href="#solution" className="text-sm text-[#A1A1AA]" onClick={() => setMobileOpen(false)}>Features</a>
-              <a href="#proof" className="text-sm text-[#A1A1AA]" onClick={() => setMobileOpen(false)}>Results</a>
-              <a href="#pricing" className="text-sm text-[#A1A1AA]" onClick={() => setMobileOpen(false)}>Pricing</a>
+              <a href="#solution" className="text-sm text-[#6B6B6B]" onClick={() => setMobileOpen(false)}>Features</a>
+              <a href="#proof" className="text-sm text-[#6B6B6B]" onClick={() => setMobileOpen(false)}>Results</a>
+              <a href="#pricing" className="text-sm text-[#6B6B6B]" onClick={() => setMobileOpen(false)}>Pricing</a>
             </div>
           </motion.div>
         )}

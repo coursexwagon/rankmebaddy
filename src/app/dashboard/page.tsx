@@ -198,16 +198,12 @@ function PlatformIcon({ platform, size = 14 }: { platform: string; size?: number
   }
 }
 
-/* ─── Agent Step Indicator ───────────────────────────────────── */
+/* ─── Agent Step Indicator (static, no animation) ────────────── */
 function AgentStepIndicator({ steps, currentStep }: { steps: string[]; currentStep: number }) {
   const displayStep = currentStep % steps.length;
   return (
     <div className="flex items-center gap-2 text-[12px] text-[#6B6B6B]">
-      <motion.div
-        className="h-1.5 w-1.5 rounded-full bg-blue-600"
-        animate={{ scale: [1, 1.4, 1], opacity: [0.5, 1, 0.5] }}
-        transition={{ duration: 0.8, repeat: Infinity }}
-      />
+      <div className="h-1.5 w-1.5 rounded-full bg-blue-600" />
       <span className="flex items-center gap-1.5">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="11" cy="11" r="8" />
@@ -228,11 +224,11 @@ function ActionButtons({ actions, onAction }: { actions: AgentAction[]; onAction
         <motion.button
           key={action.type}
           onClick={() => onAction(action.prompt)}
-          className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-[11px] font-medium text-blue-700 transition-all hover:bg-blue-100 hover:border-blue-300"
+          className="inline-flex items-center gap-2 rounded-lg bg-[#F5F0EB] px-3 py-1.5 text-[11px] font-medium text-[#1A1A1A] transition-all hover:bg-[#EDE8E2] border-l-[3px] border-l-blue-600"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="m5 12h14" /><path d="m12 5 7 7-7 7" />
           </svg>
           {action.label}
@@ -242,10 +238,23 @@ function ActionButtons({ actions, onAction }: { actions: AgentAction[]; onAction
   );
 }
 
+/* ─── Clean Markdown ──────────────────────────────────────────── */
+function cleanMarkdown(text: string): string {
+  return text
+    .replace(/#{1,6}\s+/g, "")
+    .replace(/\*\*\*(.+?)\*\*\*/g, "$1")
+    .replace(/\*\*(.+?)\*\*/g, "$1")
+    .replace(/\*(.+?)\*/g, "$1")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/^>\s+/gm, "")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
+}
+
 /* ─── Step Visualization ────────────────────────────────────── */
 function StepContent({ content }: { content: string }) {
-  // Parse numbered steps and render with step indicators
-  const lines = content.split("\n");
+  // Clean markdown first, then parse
+  const cleaned = cleanMarkdown(content);
+  const lines = cleaned.split("\n");
   const elements: React.ReactNode[] = [];
 
   for (let i = 0; i < lines.length; i++) {
@@ -259,26 +268,30 @@ function StepContent({ content }: { content: string }) {
           <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-50 text-[10px] font-bold text-blue-600 mt-0.5">
             {stepNum}
           </div>
-          <span className="text-[13px] text-[#1A1A1A] leading-relaxed">{stepMatch[2]}</span>
+          <span className="text-[14px] text-[#1A1A1A] leading-relaxed">{stepMatch[2]}</span>
         </div>
       );
-    } else if (line.startsWith("• ") || line.startsWith("- ") || line.startsWith("* ")) {
+    } else if (line.startsWith("• ") || line.startsWith("- ")) {
       elements.push(
         <div key={`bullet-${i}`} className="flex items-start gap-2 my-0.5 ml-0">
           <div className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[#9B9B9B]" />
-          <span className="text-[13px] text-[#1A1A1A] leading-relaxed">{line.slice(2)}</span>
+          <span className="text-[14px] text-[#1A1A1A] leading-relaxed">{line.slice(2)}</span>
         </div>
-      );
-    } else if (line.startsWith("## ")) {
-      elements.push(
-        <h3 key={`h-${i}`} className="text-[13px] font-bold text-[#1A1A1A] mt-2 mb-1">{line.slice(3)}</h3>
       );
     } else if (line.trim() === "") {
       elements.push(<div key={`br-${i}`} className="h-1" />);
     } else {
-      elements.push(
-        <span key={`text-${i}`} className="text-[13px] text-[#1A1A1A] leading-relaxed">{line}</span>
-      );
+      // Check if line is ALL CAPS (likely a section header from the AI)
+      const isAllCaps = line.length > 2 && line === line.toUpperCase() && /[A-Z]/.test(line);
+      if (isAllCaps) {
+        elements.push(
+          <h3 key={`h-${i}`} className="text-[14px] font-bold text-[#1A1A1A] mt-2.5 mb-1">{line}</h3>
+        );
+      } else {
+        elements.push(
+          <span key={`text-${i}`} className="text-[14px] text-[#1A1A1A] leading-relaxed block">{line}</span>
+        );
+      }
     }
   }
 
@@ -550,21 +563,21 @@ function ChatBubble({ message, onAction }: { message: ChatMessage; onAction: (pr
         {isUser ? "You" : "R"}
       </div>
       <div
-        className={`max-w-[85%] rounded-2xl px-4 py-3 ${
+        className={`max-w-[85%] ${
           isUser
-            ? "rounded-tr-sm bg-blue-50 text-[#1A1A1A]"
-            : "rounded-tl-sm border border-[#E8E5E0] bg-white text-[#1A1A1A] shadow-sm"
+            ? "rounded-xl bg-[#F5F0EB] text-[#1A1A1A] px-5 py-3.5"
+            : "rounded-xl bg-[#FAF8F5] text-[#1A1A1A] px-5 py-3.5 border-l-[3px] border-l-blue-600"
         }`}
       >
         {isUser ? (
-          <div className="text-[13px] leading-relaxed whitespace-pre-wrap">
+          <div className="text-[14px] leading-relaxed whitespace-pre-wrap">
             {message.content}
           </div>
         ) : (
           <StepContent content={message.content} />
         )}
-        <div className="flex items-center justify-between mt-1.5">
-          <p className={`text-[10px] ${isUser ? "text-[#9B9B9B]" : "text-[#9B9B9B]"}`}>
+        <div className="flex items-center justify-between mt-2">
+          <p className="text-[10px] text-[#9B9B9B]">
             {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
           </p>
         </div>
@@ -1431,7 +1444,7 @@ export default function DashboardPage() {
                     {isSending && (
                       <motion.div className="flex gap-3" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
                         <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-50 text-[10px] font-bold text-blue-600">R</div>
-                        <div className="rounded-2xl rounded-tl-sm border border-[#E8E5E0] bg-white px-4 py-3 shadow-sm">
+                        <div className="rounded-xl bg-[#FAF8F5] px-5 py-3.5 border-l-[3px] border-l-blue-600">
                           <AgentStepIndicator steps={agentThinkingSteps} currentStep={agentStep} />
                         </div>
                       </motion.div>
@@ -1449,7 +1462,7 @@ export default function DashboardPage() {
                           key={action.label}
                           onClick={() => sendMessage(action.prompt)}
                           disabled={isSending}
-                          className="rounded-full border border-[#E8E5E0] bg-white px-3 py-1.5 text-[11px] text-[#6B6B6B] transition-all hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50 disabled:opacity-40"
+                          className="rounded-lg bg-[#F5F0EB] border border-[#E8E5E0] px-3 py-1.5 text-[11px] text-[#1A1A1A] transition-all hover:bg-[#EDE8E2] disabled:opacity-40"
                         >
                           {action.label}
                         </button>
@@ -1461,7 +1474,7 @@ export default function DashboardPage() {
                 {/* Input */}
                 <div className="border-t border-[#E8E5E0] bg-white px-4 py-3 sm:px-6">
                   <div className="mx-auto max-w-2xl">
-                    <div className="flex items-end gap-2 rounded-xl border border-[#E8E5E0] bg-white px-4 py-2.5 shadow-sm transition-colors focus-within:border-blue-300 focus-within:shadow-md">
+                    <div className="flex items-end gap-2 rounded-2xl border border-[#E8E5E0] bg-white px-4 py-2.5 transition-all focus-within:border-blue-300 focus-within:shadow-lg focus-within:shadow-blue-50">
                       <textarea
                         ref={inputRef}
                         value={inputValue}
@@ -1470,14 +1483,14 @@ export default function DashboardPage() {
                         placeholder={isSending ? "Agent is working..." : "Ask about keywords, rankings, content..."}
                         disabled={isSending}
                         rows={1}
-                        className="max-h-[120px] min-h-[20px] flex-1 resize-none bg-transparent text-[13px] text-[#1A1A1A] placeholder:text-[#9B9B9B] outline-none disabled:opacity-50"
+                        className="max-h-[120px] min-h-[20px] flex-1 resize-none bg-transparent text-[14px] text-[#1A1A1A] placeholder:text-[#9B9B9B] outline-none disabled:opacity-50"
                       />
                       <button
                         onClick={() => sendMessage(inputValue)}
                         disabled={!inputValue.trim() || isSending}
-                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-600 transition-all hover:bg-blue-700 disabled:opacity-30"
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-600 transition-all hover:bg-blue-700 disabled:opacity-30"
                       >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <path d="m5 12h14" /><path d="m12 5 7 7-7 7" />
                         </svg>
                       </button>

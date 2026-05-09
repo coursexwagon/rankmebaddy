@@ -5,8 +5,9 @@ import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import Image from "next/image";
 
 /* ─── Color System ───────────────────────────────────────────── */
-// Background: #0A0A0B  |  Surface: #18181B  |  Border: #27272A
-// Text: #FAFAFA  |  Secondary: #A1A1AA  |  Muted: #71717A
+// Background: #FAFAF7  |  Surface: #FFFFFF  |  Border: #E8E5E0
+// Text: #1A1A1A  |  Secondary: #6B6B6B  |  Muted: #9B9B9B
+// Accent: #2563EB  |  Accent Warm: #6EE7B7
 
 /* ─── Testimonial Data ───────────────────────────────────────── */
 const testimonials = [
@@ -82,15 +83,12 @@ function TestimonialCard({
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-60px" });
 
-  const rotation = index === 0 ? -1.5 : index === 1 ? 1 : -0.8;
-
   return (
     <motion.div
       ref={ref}
-      className="relative overflow-hidden rounded-2xl border border-[#27272A] bg-[#18181B]/60"
-      style={{ transform: `rotate(${rotation}deg)` }}
-      initial={{ opacity: 0, y: 40, scale: 0.95, rotateY: -10 }}
-      whileInView={{ opacity: 1, y: 0, scale: 1, rotateY: 0 }}
+      className="relative overflow-hidden rounded-xl border border-[#E8E5E0] bg-white"
+      initial={{ opacity: 0, y: 40, scale: 0.95 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, margin: "-40px" }}
       transition={{
         duration: 0.7,
@@ -103,9 +101,9 @@ function TestimonialCard({
       }}
     >
       {/* Top section — photo + name + stars */}
-      <div className="border-b border-[#27272A]/60 p-5">
+      <div className="border-b border-[#E8E5E0] p-5">
         <div className="flex items-start gap-3.5">
-          <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-[#27272A]">
+          <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-[#E8E5E0]">
             <Image
               src={testimonial.photo}
               alt={testimonial.name}
@@ -117,10 +115,10 @@ function TestimonialCard({
           <div className="flex-1">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[13px] font-semibold text-[#FAFAFA]">
+                <p className="text-[13px] font-semibold text-[#1A1A1A]">
                   {testimonial.name}
                 </p>
-                <p className="text-[10px] text-[#71717A]">
+                <p className="text-[10px] text-[#9B9B9B]">
                   {testimonial.role}, {testimonial.company}
                 </p>
               </div>
@@ -132,24 +130,24 @@ function TestimonialCard({
 
       {/* Quote */}
       <div className="p-5">
-        <p className="text-[12px] leading-relaxed text-[#A1A1AA]">
+        <p className="text-[12px] leading-relaxed text-[#6B6B6B]">
           &ldquo;{testimonial.quote}&rdquo;
         </p>
       </div>
 
       {/* Metrics */}
-      <div className="border-t border-[#27272A]/40 px-5 py-4">
+      <div className="border-t border-[#E8E5E0] px-5 py-4">
         <div className="flex gap-4">
           {testimonial.metrics.map((m) => (
             <div key={m.label} className="flex-1">
-              <p className="text-[9px] uppercase tracking-wider text-[#52525B]">
+              <p className="text-[9px] uppercase tracking-wider text-[#9B9B9B]">
                 {m.label}
               </p>
               <div className="mt-1 flex items-baseline gap-1.5">
-                <span className="text-lg font-bold text-[#6EE7B7]">
+                <span className="text-lg font-bold text-[#2563EB]">
                   {m.value}
                 </span>
-                <span className="text-[9px] text-[#52525B]">
+                <span className="text-[9px] text-[#9B9B9B]">
                   from {m.before}
                 </span>
               </div>
@@ -176,22 +174,22 @@ export default function ProofSection() {
       id="proof"
       ref={sectionRef}
       className="relative px-4 py-20 sm:px-6 sm:py-28"
-      style={{ backgroundColor: "#0A0A0B" }}
+      style={{ backgroundColor: "#FAFAF7" }}
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#27272A] to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E8E5E0] to-transparent" />
 
       <div className="mx-auto max-w-6xl">
         <motion.div
           className="mb-14 flex flex-col items-center gap-3 text-center"
           style={{ y: headerY }}
         >
-          <span className="inline-flex items-center gap-2 rounded-full border border-[#27272A] bg-[#18181B] px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-[#A1A1AA]">
+          <span className="inline-flex items-center gap-2 rounded-lg border border-[#E8E5E0] bg-white px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-[#6B6B6B]">
             Proof
           </span>
-          <h2 className="font-heading text-2xl font-bold text-[#FAFAFA] sm:text-3xl md:text-4xl">
+          <h2 className="font-heading text-2xl font-bold text-[#1A1A1A] sm:text-3xl md:text-4xl">
             Real results. Real people.
           </h2>
-          <p className="max-w-md text-sm text-[#71717A]">
+          <p className="max-w-md text-sm text-[#6B6B6B]">
             Teams using RankMeBaddy get the exact keywords, content, and strategy they need to rank — then see results in under 14 days.
           </p>
         </motion.div>

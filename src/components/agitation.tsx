@@ -4,15 +4,14 @@ import { useRef } from "react";
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
 
 /* ─── Color System ───────────────────────────────────────────── */
-// Background: #0A0A0B  |  Surface: #18181B  |  Border: #27272A
-// Text: #FAFAFA  |  Secondary: #A1A1AA  |  Muted: #71717A
-// Error: #FCA5A5 (red-300, muted)  |  Accent: #6EE7B7
+// Background: #FAFAF7  |  Surface: #FFFFFF  |  Border: #E8E5E0
+// Text: #1A1A1A  |  Secondary: #6B6B6B  |  Muted: #9B9B9B
+// Accent: #2563EB  |  Error/Warm: #DC2626
 
 /* ─── Platform Data ──────────────────────────────────────────── */
 const platforms = [
   {
     name: "Google",
-    letter: "G",
     color: "#4285F4",
     hours: 4,
     result: "Page 2 rankings",
@@ -27,20 +26,18 @@ const platforms = [
   },
   {
     name: "YouTube",
-    letter: "YT",
     color: "#FF0000",
     hours: 3,
     result: "Inconsistent views",
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
         <path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.38.55A3.02 3.02 0 0 0 .5 6.19 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.81 3.02 3.02 0 0 0 2.12 2.14c1.88.55 9.38.55 9.38.55s7.5 0 9.38-.55a3.02 3.02 0 0 0 2.12-2.14A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.81z" fill="#FF0000" />
-        <path d="M9.75 15.02 15.75 12 9.75 8.98v6.04z" fill="#FAFAFA" />
+        <path d="M9.75 15.02 15.75 12 9.75 8.98v6.04z" fill="#FFFFFF" />
       </svg>
     ),
   },
   {
     name: "Amazon",
-    letter: "A",
     color: "#FF9900",
     hours: 2,
     result: "Low visibility",
@@ -52,24 +49,22 @@ const platforms = [
   },
   {
     name: "TikTok",
-    letter: "TT",
     color: "#FE2C55",
     hours: 1.5,
     result: "Zero traction",
     icon: (
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-        <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" fill="#FAFAFA" />
+        <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" fill="#1A1A1A" />
       </svg>
     ),
   },
   {
     name: "AI Search",
-    letter: "AI",
-    color: "#A1A1AA",
+    color: "#2563EB",
     hours: 0.5,
     result: "Not optimized",
     icon: (
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A1A1AA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z" />
         <path d="M16 14H8a6 6 0 0 0-6 6v1h20v-1a6 6 0 0 0-6-6z" />
       </svg>
@@ -88,19 +83,17 @@ export default function AgitationSection() {
     offset: ["start end", "end start"],
   });
 
-  // Parallax for header
   const headerY = useTransform(scrollYProgress, [0, 1], [60, -30]);
-  // Parallax for the content (slower)
   const contentY = useTransform(scrollYProgress, [0, 1], [30, -15]);
 
   return (
     <section
       className="relative px-4 py-20 sm:px-6 sm:py-28"
-      style={{ backgroundColor: "#0A0A0B" }}
+      style={{ backgroundColor: "#FAFAF7" }}
       ref={sectionRef}
     >
       {/* Top divider */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#27272A] to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E8E5E0] to-transparent" />
 
       <div className="mx-auto max-w-4xl">
         {/* Section label — parallax */}
@@ -108,13 +101,13 @@ export default function AgitationSection() {
           className="mb-14 flex flex-col items-center gap-3 text-center"
           style={{ y: headerY }}
         >
-          <span className="inline-flex items-center gap-2 rounded-full border border-[#27272A] bg-[#18181B] px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-[#A1A1AA]">
+          <span className="inline-flex items-center gap-2 rounded-lg border border-[#E8E5E0] bg-white px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-[#6B6B6B]">
             The Reality
           </span>
-          <h2 className="font-heading text-2xl font-bold text-[#FAFAFA] sm:text-3xl md:text-4xl">
+          <h2 className="font-heading text-2xl font-bold text-[#1A1A1A] sm:text-3xl md:text-4xl">
             Your week in SEO
           </h2>
-          <p className="max-w-md text-sm text-[#71717A]">
+          <p className="max-w-md text-sm text-[#6B6B6B]">
             Hours poured in. Platforms juggled. Rankings barely moved.
           </p>
         </motion.div>
@@ -128,15 +121,15 @@ export default function AgitationSection() {
             animate={isInView ? { opacity: 1, scale: 1 } : {}}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <div className="flex items-center gap-2 rounded-full border border-[#FCA5A5]/20 bg-[#FCA5A5]/5 px-5 py-2">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FCA5A5" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-5 py-2">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10" />
                 <polyline points="12 6 12 12 16 14" />
               </svg>
-              <span className="text-lg font-bold tabular-nums text-[#FCA5A5]">
+              <span className="text-lg font-bold tabular-nums text-red-600">
                 {totalHours} hrs
               </span>
-              <span className="text-xs text-[#FCA5A5]/70">/week wasted</span>
+              <span className="text-xs text-red-500">/week wasted</span>
             </div>
           </motion.div>
 
@@ -161,21 +154,21 @@ export default function AgitationSection() {
                     <div className="flex w-24 shrink-0 items-center gap-2.5 sm:w-28">
                       <span
                         className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
-                        style={{ backgroundColor: `${p.color}15` }}
+                        style={{ backgroundColor: `${p.color}10` }}
                       >
                         {p.icon}
                       </span>
-                      <span className="text-xs font-medium text-[#FAFAFA] sm:text-sm">
+                      <span className="text-xs font-medium text-[#1A1A1A] sm:text-sm">
                         {p.name}
                       </span>
                     </div>
 
                     <div className="relative flex-1">
-                      <div className="h-8 overflow-hidden rounded-lg bg-[#18181B]/60">
+                      <div className="h-8 overflow-hidden rounded-lg bg-[#F5F5F0]">
                         <motion.div
                           className="relative flex h-full items-center"
                           style={{
-                            backgroundColor: `${p.color}20`,
+                            backgroundColor: `${p.color}15`,
                             borderLeft: `2px solid ${p.color}40`,
                           }}
                           initial={{ width: 0 }}
@@ -202,7 +195,7 @@ export default function AgitationSection() {
                       animate={isInView ? { opacity: 1 } : {}}
                       transition={{ duration: 0.4, delay: 0.8 + i * 0.1 }}
                     >
-                      <span className="inline-flex items-center gap-1.5 text-[11px] text-[#FCA5A5]/80">
+                      <span className="inline-flex items-center gap-1.5 text-[11px] text-red-500/80">
                         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                           <circle cx="12" cy="12" r="10" />
                           <line x1="15" y1="9" x2="9" y2="15" />
@@ -219,25 +212,25 @@ export default function AgitationSection() {
 
           {/* Summary bar */}
           <motion.div
-            className="mt-6 flex items-center justify-between rounded-xl border border-[#27272A] bg-[#18181B]/30 px-5 py-4"
+            className="mt-6 flex items-center justify-between rounded-xl border border-[#E8E5E0] bg-white px-5 py-4 shadow-sm"
             initial={{ opacity: 0, y: 10 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.5, delay: 1.2 }}
             whileHover={{ scale: 1.01, transition: { duration: 0.2 } }}
           >
             <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FCA5A5]/10">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FCA5A5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-50">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
                   <line x1="12" y1="9" x2="12" y2="13" />
                   <line x1="12" y1="17" x2="12.01" y2="17" />
                 </svg>
               </div>
               <div>
-                <p className="text-sm font-semibold text-[#FAFAFA]">
+                <p className="text-sm font-semibold text-[#1A1A1A]">
                   5 platforms. {totalHours}+ hours. Zero progress.
                 </p>
-                <p className="text-xs text-[#71717A]">
+                <p className="text-xs text-[#9B9B9B]">
                   Every week you repeat this cycle — and your rankings don&apos;t budge.
                 </p>
               </div>

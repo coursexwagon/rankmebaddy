@@ -4,8 +4,9 @@ import { useRef } from "react";
 import { motion, useScroll, useTransform, useInView } from "framer-motion";
 
 /* ─── Color System ───────────────────────────────────────────── */
-// Background: #0A0A0B  |  Surface: #18181B  |  Border: #27272A
-// Text: #FAFAFA  |  Secondary: #A1A1AA  |  Muted: #71717A
+// Background: #FAFAF7  |  Surface: #FFFFFF  |  Border: #E8E5E0
+// Text: #1A1A1A  |  Secondary: #6B6B6B  |  Muted: #9B9B9B
+// Accent: #2563EB
 
 /* ─── Underline for headings ─────────────────────────────────── */
 function UnderlinedWord({ children }: { children: React.ReactNode }) {
@@ -100,20 +101,19 @@ function PricingCard({
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-60px" });
 
-  // Staggered reveal — cards slide in from below with offset
-  const yOffset = index === 1 ? 0 : 24; // middle card sits higher
+  const yOffset = index === 1 ? 0 : 24;
 
   return (
     <motion.div
       ref={ref}
-      className={`relative overflow-hidden rounded-2xl border ${
+      className={`relative overflow-hidden rounded-xl border ${
         plan.highlighted
-          ? "border-[#6EE7B7]/30 bg-[#18181B]/80"
-          : "border-[#27272A] bg-[#18181B]/40"
+          ? "border-blue-200 bg-white shadow-lg shadow-blue-50"
+          : "border-[#E8E5E0] bg-white"
       }`}
       style={{ marginTop: yOffset }}
-      initial={{ opacity: 0, y: 60, rotateX: 8 }}
-      whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+      initial={{ opacity: 0, y: 60 }}
+      whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
       transition={{
         duration: 0.7,
@@ -128,14 +128,14 @@ function PricingCard({
             className="absolute -top-20 -right-20 h-40 w-40 rounded-full"
             style={{
               background:
-                "radial-gradient(circle, rgba(110,231,183,0.08) 0%, transparent 70%)",
+                "radial-gradient(circle, rgba(37,99,235,0.06) 0%, transparent 70%)",
             }}
           />
           <div
             className="absolute -bottom-20 -left-20 h-40 w-40 rounded-full"
             style={{
               background:
-                "radial-gradient(circle, rgba(110,231,183,0.05) 0%, transparent 70%)",
+                "radial-gradient(circle, rgba(37,99,235,0.04) 0%, transparent 70%)",
             }}
           />
         </div>
@@ -144,11 +144,11 @@ function PricingCard({
       <div className="relative p-6 sm:p-8">
         {/* Plan name */}
         <div className="mb-1 flex items-center justify-between">
-          <h3 className="text-sm font-semibold uppercase tracking-wider text-[#A1A1AA]">
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-[#6B6B6B]">
             {plan.name}
           </h3>
           {plan.highlighted && (
-            <span className="rounded-full bg-[#6EE7B7]/10 px-2.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-[#6EE7B7]">
+            <span className="rounded-lg bg-blue-50 px-2.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-blue-600">
               Popular
             </span>
           )}
@@ -156,31 +156,31 @@ function PricingCard({
 
         {/* Price */}
         <div className="mt-3 flex items-baseline gap-1">
-          <span className="text-4xl font-bold text-[#FAFAFA] sm:text-5xl">
+          <span className="text-4xl font-bold text-[#1A1A1A] sm:text-5xl">
             ${plan.price}
           </span>
-          <span className="text-sm text-[#71717A]">{plan.period}</span>
+          <span className="text-sm text-[#9B9B9B]">{plan.period}</span>
         </div>
 
         {/* Description */}
-        <p className="mt-3 text-[13px] leading-relaxed text-[#71717A]">
+        <p className="mt-3 text-[13px] leading-relaxed text-[#6B6B6B]">
           {plan.description}
         </p>
 
         {/* CTA */}
         <a
           href="/onboarding"
-          className={`mt-6 block w-full rounded-full py-3 text-center text-sm font-semibold transition-all ${
+          className={`mt-6 block w-full rounded-lg py-3 text-center text-sm font-semibold transition-all ${
             plan.highlighted
-              ? "bg-[#6EE7B7] text-[#0A0A0B] hover:bg-[#6EE7B7]/90"
-              : "border border-[#27272A] bg-transparent text-[#FAFAFA] hover:border-[#3F3F46] hover:bg-[#18181B]"
+              ? "bg-[#2563EB] text-white hover:bg-blue-700"
+              : "border border-[#E8E5E0] bg-white text-[#1A1A1A] hover:border-[#9B9B9B] hover:bg-[#FAFAF7]"
           }`}
         >
           {plan.cta}
         </a>
 
         {/* Features */}
-        <ul className="mt-6 space-y-3 border-t border-[#27272A]/40 pt-6">
+        <ul className="mt-6 space-y-3 border-t border-[#E8E5E0] pt-6">
           {plan.features.map((feature, i) => (
             <motion.li
               key={feature.text}
@@ -195,7 +195,7 @@ function PricingCard({
                   height="14"
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke="#6EE7B7"
+                  stroke="#2563EB"
                   strokeWidth="2.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -209,7 +209,7 @@ function PricingCard({
                   height="14"
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke="#3F3F46"
+                  stroke="#E8E5E0"
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -221,7 +221,7 @@ function PricingCard({
               )}
               <span
                 className={
-                  feature.included ? "text-[#A1A1AA]" : "text-[#52525B]"
+                  feature.included ? "text-[#6B6B6B]" : "text-[#9B9B9B]"
                 }
               >
                 {feature.text}
@@ -242,7 +242,6 @@ export default function PricingSection() {
     offset: ["start end", "end start"],
   });
 
-  // Parallax for the section label
   const labelY = useTransform(scrollYProgress, [0, 1], [40, -20]);
 
   return (
@@ -250,9 +249,9 @@ export default function PricingSection() {
       id="pricing"
       ref={sectionRef}
       className="relative px-4 py-20 sm:px-6 sm:py-28"
-      style={{ backgroundColor: "#0A0A0B" }}
+      style={{ backgroundColor: "#FAFAF7" }}
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#27272A] to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E8E5E0] to-transparent" />
 
       <div className="mx-auto max-w-5xl">
         {/* Section header with parallax */}
@@ -260,13 +259,13 @@ export default function PricingSection() {
           className="mb-14 flex flex-col items-center gap-3 text-center"
           style={{ y: labelY }}
         >
-          <span className="inline-flex items-center gap-2 rounded-full border border-[#27272A] bg-[#18181B] px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-[#A1A1AA]">
+          <span className="inline-flex items-center gap-2 rounded-lg border border-[#E8E5E0] bg-white px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-[#6B6B6B]">
             Pricing
           </span>
-          <h2 className="font-heading text-2xl font-bold text-[#FAFAFA] sm:text-3xl md:text-4xl">
+          <h2 className="font-heading text-2xl font-bold text-[#1A1A1A] sm:text-3xl md:text-4xl">
             <UnderlinedWord>Simple</UnderlinedWord> pricing. No surprises.
           </h2>
-          <p className="max-w-lg text-sm text-[#71717A]">
+          <p className="max-w-lg text-sm text-[#6B6B6B]">
             Get the keywords, content strategy, and implementation guidance you
             need — across every platform. Start free, upgrade when you&apos;re ready.
           </p>
@@ -281,7 +280,7 @@ export default function PricingSection() {
 
         {/* Bottom trust line */}
         <motion.p
-          className="mt-10 text-center text-xs text-[#52525B]"
+          className="mt-10 text-center text-xs text-[#9B9B9B]"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}

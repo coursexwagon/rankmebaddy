@@ -5,10 +5,11 @@ import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 /* ─── Color System ───────────────────────────────────────────── */
-// Background: #0A0A0B  |  Surface: #18181B  |  Border: #27272A
-// Text: #FAFAFA  |  Secondary: #A1A1AA  |  Muted: #71717A
+// Background: #FAFAF7  |  Surface: #FFFFFF  |  Border: #E8E5E0
+// Text: #1A1A1A  |  Secondary: #6B6B6B  |  Muted: #9B9B9B
+// Accent: #2563EB  |  Accent Warm: #6EE7B7
 
-/* ─── Animated Card with scroll-triggered 3D tilt ────────────── */
+/* ─── Animated Card with scroll-triggered reveal ──────────────── */
 interface CardProps {
   children: React.ReactNode;
   className?: string;
@@ -19,16 +20,16 @@ function Card({ children, className, delay = 0 }: CardProps) {
   return (
     <motion.div
       className={cn(
-        "relative overflow-hidden rounded-2xl border border-[#27272A] bg-[#18181B]/40",
+        "relative overflow-hidden rounded-xl border border-[#E8E5E0] bg-white shadow-sm",
         className
       )}
-      initial={{ opacity: 0, y: 30, rotateX: 5 }}
-      whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
       transition={{ duration: 0.7, delay, ease: [0.21, 0.47, 0.32, 0.98] }}
       whileHover={{
         y: -3,
-        borderColor: "rgba(110,231,183,0.15)",
+        borderColor: "rgba(37,99,235,0.2)",
         transition: { duration: 0.2 },
       }}
     >
@@ -48,31 +49,31 @@ function ChatInterfaceBox() {
         {/* App chrome — sidebar + top bar */}
         <div className="flex">
           {/* Sidebar */}
-          <div className="hidden w-14 shrink-0 flex-col items-center gap-3 border-r border-[#27272A]/60 bg-[#18181B]/60 pt-4 sm:flex">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#6EE7B7]/10">
-              <span className="text-[11px] font-bold text-[#6EE7B7]">R</span>
+          <div className="hidden w-14 shrink-0 flex-col items-center gap-3 border-r border-[#E8E5E0] bg-[#FAFAF7] pt-4 sm:flex">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50">
+              <span className="text-[11px] font-bold text-blue-600">R</span>
             </div>
             <div className="space-y-2.5 px-2.5">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#27272A]/60">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#A1A1AA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                 </svg>
               </div>
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#6EE7B7]/10">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6EE7B7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#F5F5F0]">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6B6B6B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
                 </svg>
               </div>
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#27272A]/60">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#71717A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#F5F5F0]">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="11" cy="11" r="8" />
                   <path d="m21 21-4.3-4.3" />
                 </svg>
               </div>
             </div>
             <div className="mt-auto mb-4">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#27272A]/60">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#71717A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#F5F5F0]">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                   <circle cx="12" cy="7" r="4" />
                 </svg>
@@ -83,25 +84,25 @@ function ChatInterfaceBox() {
           {/* Main chat area */}
           <div className="flex flex-1 flex-col">
             {/* Top bar */}
-            <div className="flex items-center justify-between border-b border-[#27272A]/60 px-4 py-2.5">
+            <div className="flex items-center justify-between border-b border-[#E8E5E0] px-4 py-2.5 bg-white">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-[#FAFAFA]">Best Protein Powder</span>
-                <span className="rounded bg-[#6EE7B7]/10 px-1.5 py-0.5 text-[9px] font-medium text-[#6EE7B7]">Active</span>
+                <span className="text-sm font-medium text-[#1A1A1A]">Best Protein Powder</span>
+                <span className="rounded bg-blue-50 px-1.5 py-0.5 text-[9px] font-medium text-blue-600">Active</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="rounded border border-[#27272A] bg-[#18181B] px-2 py-0.5 text-[9px] text-[#A1A1AA]">Day 14</span>
+                <span className="rounded border border-[#E8E5E0] bg-[#FAFAF7] px-2 py-0.5 text-[9px] text-[#6B6B6B]">Day 14</span>
               </div>
             </div>
 
             {/* Chat messages */}
-            <div className="flex-1 space-y-4 p-4 sm:p-5">
+            <div className="flex-1 space-y-4 p-4 sm:p-5 bg-[#FAFAF7]">
               <motion.div
                 className="flex justify-end"
                 initial={{ opacity: 0, y: 10 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.4, delay: 0.3 }}
               >
-                <div className="max-w-[80%] rounded-2xl rounded-br-sm bg-[#27272A] px-4 py-2.5 text-[12px] leading-relaxed text-[#FAFAFA]">
+                <div className="max-w-[80%] rounded-xl bg-[#F5F0EB] px-4 py-2.5 text-[12px] leading-relaxed text-[#1A1A1A]">
                   I want to rank for &quot;best protein powder&quot; on Google, YouTube, and Amazon. Can you handle all three?
                 </div>
               </motion.div>
@@ -112,8 +113,8 @@ function ChatInterfaceBox() {
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.4, delay: 0.8 }}
               >
-                <div className="max-w-[90%] rounded-2xl rounded-bl-sm border border-[#27272A]/60 bg-[#18181B] px-4 py-3">
-                  <p className="text-[12px] leading-relaxed text-[#A1A1AA]">
+                <div className="max-w-[90%] rounded-xl bg-[#FAF8F5] border-l-[3px] border-l-blue-600 px-4 py-3">
+                  <p className="text-[12px] leading-relaxed text-[#1A1A1A]">
                     On it. Three campaigns launched in parallel:
                   </p>
 
@@ -133,10 +134,10 @@ function ChatInterfaceBox() {
                       >
                         <div className="flex items-center gap-1.5">
                           <span className="flex h-4 w-4 items-center justify-center rounded text-[7px] font-bold" style={{ color: p.color, backgroundColor: `${p.color}20` }}>{p.letter}</span>
-                          <span className="text-[9px] font-medium text-[#FAFAFA]">{p.name}</span>
+                          <span className="text-[9px] font-medium text-[#1A1A1A]">{p.name}</span>
                         </div>
                         <div className="mt-2">
-                          <div className="h-1 rounded-full bg-[#27272A]">
+                          <div className="h-1 rounded-full bg-[#E8E5E0]">
                             <motion.div
                               className="h-1 rounded-full"
                               style={{ backgroundColor: p.color }}
@@ -145,13 +146,13 @@ function ChatInterfaceBox() {
                               transition={{ duration: 1, delay: p.delay + 0.2 }}
                             />
                           </div>
-                          <p className="mt-1 text-[8px] text-[#A1A1AA]">{p.detail}</p>
+                          <p className="mt-1 text-[8px] text-[#6B6B6B]">{p.detail}</p>
                         </div>
                       </motion.div>
                     ))}
                   </div>
 
-                  <p className="mt-3 text-[11px] text-[#71717A]">
+                  <p className="mt-3 text-[11px] text-[#9B9B9B]">
                     Full report in ~48 hours. I&apos;ll notify you when each one completes.
                   </p>
                 </div>
@@ -163,7 +164,7 @@ function ChatInterfaceBox() {
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.4, delay: 2.0 }}
               >
-                <div className="max-w-[80%] rounded-2xl rounded-br-sm bg-[#27272A] px-4 py-2.5 text-[12px] leading-relaxed text-[#FAFAFA]">
+                <div className="max-w-[80%] rounded-xl bg-[#F5F0EB] px-4 py-2.5 text-[12px] leading-relaxed text-[#1A1A1A]">
                   Also check TikTok — our competitor just ranked there last week.
                 </div>
               </motion.div>
@@ -174,27 +175,26 @@ function ChatInterfaceBox() {
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.4, delay: 2.4 }}
               >
-                <div className="max-w-[85%] rounded-2xl rounded-bl-sm border border-[#27272A]/60 bg-[#18181B] px-4 py-2.5">
-                  <p className="text-[12px] leading-relaxed text-[#A1A1AA]">
+                <div className="max-w-[85%] rounded-xl bg-[#FAF8F5] border-l-[3px] border-l-blue-600 px-4 py-2.5">
+                  <p className="text-[12px] leading-relaxed text-[#1A1A1A]">
                     Added TikTok to the campaign. Found their video strategy — drafting a content plan that targets the same keywords with a different angle.
                   </p>
                   <div className="mt-2.5 inline-flex items-center gap-1.5 rounded-lg border border-[#FE2C55]/20 bg-[#FE2C55]/5 px-2.5 py-1.5">
                     <span className="flex h-4 w-4 items-center justify-center rounded bg-[#FE2C55]/20 text-[7px] font-bold text-[#FE2C55]">TT</span>
-                    <span className="text-[10px] text-[#A1A1AA]">Analyzing competitor content</span>
-                    <span className="ml-1 text-[10px] font-medium text-[#F59E0B]">12%</span>
+                    <span className="text-[10px] text-[#6B6B6B]">Analyzing competitor content</span>
+                    <span className="ml-1 text-[10px] font-medium text-[#D97706]">12%</span>
                   </div>
                 </div>
               </motion.div>
             </div>
 
             {/* Input bar */}
-            <div className="border-t border-[#27272A]/60 px-4 py-3">
-              <div className="flex items-center gap-2 rounded-xl border border-[#27272A] bg-[#0A0A0B]/60 px-3.5 py-2.5">
-                <span className="text-[11px] text-[#52525B]">Ask RankMeBaddy to rank anything...</span>
-                <div className="ml-auto flex h-7 w-7 items-center justify-center rounded-lg bg-[#6EE7B7]/10">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6EE7B7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="m5 12 7-7 7 7" />
-                    <path d="M12 19V5" />
+            <div className="border-t border-[#E8E5E0] px-4 py-3 bg-white">
+              <div className="flex items-center gap-2 rounded-2xl border border-[#E8E5E0] bg-white px-3.5 py-2.5">
+                <span className="text-[11px] text-[#9B9B9B]">Ask RankMeBaddy to rank anything...</span>
+                <div className="ml-auto flex h-7 w-7 items-center justify-center rounded-full bg-[#2563EB]">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="m5 12h14" /><path d="m12 5 7 7-7 7" />
                   </svg>
                 </div>
               </div>
@@ -223,21 +223,21 @@ function RankingsCard() {
       <div ref={ref} className="flex flex-col p-5 sm:p-6">
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-[#6EE7B7]/10">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6EE7B7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-blue-50">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
               </svg>
             </span>
-            <span className="text-sm font-medium text-[#FAFAFA]">Rankings</span>
+            <span className="text-sm font-medium text-[#1A1A1A]">Rankings</span>
           </div>
-          <span className="rounded bg-[#6EE7B7]/10 px-1.5 py-0.5 text-[9px] font-medium text-[#6EE7B7]">14 days</span>
+          <span className="rounded bg-blue-50 px-1.5 py-0.5 text-[9px] font-medium text-blue-600">14 days</span>
         </div>
 
         <div className="flex-1 space-y-2.5">
           {rankings.map((r, i) => (
             <motion.div
               key={r.platform}
-              className="group flex items-center gap-2.5 rounded-lg border border-[#27272A]/40 bg-[#0A0A0B]/30 px-3 py-2.5 transition-colors hover:border-[#27272A]/70"
+              className="group flex items-center gap-2.5 rounded-lg border border-[#E8E5E0]/60 bg-[#FAFAF7] px-3 py-2.5 transition-colors hover:border-[#9B9B9B]/40"
               initial={{ opacity: 0, x: -10 }}
               animate={isInView ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 0.35, delay: 0.4 + i * 0.12 }}
@@ -249,23 +249,23 @@ function RankingsCard() {
                 {r.icon}
               </span>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[10px] text-[#71717A]">{r.keyword}</p>
+                <p className="truncate text-[10px] text-[#9B9B9B]">{r.keyword}</p>
               </div>
               <div className="flex items-center gap-1.5 text-[11px] tabular-nums">
-                <span className="text-[#52525B] line-through">{r.before}</span>
-                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#6EE7B7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <span className="text-[#9B9B9B] line-through">{r.before}</span>
+                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="m5 12 7-7 7 7" />
                 </svg>
-                <span className="font-semibold text-[#FAFAFA]">{r.after}</span>
+                <span className="font-semibold text-[#1A1A1A]">{r.after}</span>
               </div>
             </motion.div>
           ))}
         </div>
 
-        <div className="mt-4 border-t border-[#27272A]/40 pt-3">
+        <div className="mt-4 border-t border-[#E8E5E0] pt-3">
           <div className="flex items-center justify-between text-[10px]">
-            <span className="text-[#71717A]">Average improvement</span>
-            <span className="font-semibold text-[#6EE7B7]">+35 positions</span>
+            <span className="text-[#9B9B9B]">Average improvement</span>
+            <span className="font-semibold text-[#2563EB]">+35 positions</span>
           </div>
         </div>
       </div>
@@ -279,7 +279,7 @@ function ScoreRingCard() {
   const isInView = useInView(ref, { once: true, margin: "-80px" });
 
   const metrics = [
-    { label: "Keywords", value: 12, max: 12, color: "#6EE7B7" },
+    { label: "Keywords", value: 12, max: 12, color: "#2563EB" },
     { label: "Content", value: 94, max: 100, color: "#4285F4" },
     { label: "Authority", value: 78, max: 100, color: "#FF9900" },
   ];
@@ -289,24 +289,24 @@ function ScoreRingCard() {
       <div ref={ref} className="flex flex-col p-5 sm:p-6">
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-[#6EE7B7]/10">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6EE7B7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-blue-50">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 20h9" />
                 <path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.855z" />
               </svg>
             </span>
-            <span className="text-sm font-medium text-[#FAFAFA]">Content Score</span>
+            <span className="text-sm font-medium text-[#1A1A1A]">Content Score</span>
           </div>
-          <span className="rounded bg-[#6EE7B7]/10 px-1.5 py-0.5 text-[9px] font-medium text-[#6EE7B7]">Excellent</span>
+          <span className="rounded bg-blue-50 px-1.5 py-0.5 text-[9px] font-medium text-blue-600">Excellent</span>
         </div>
 
         <div className="flex items-center justify-center py-2">
           <div className="relative flex h-28 w-28 items-center justify-center">
             <svg className="absolute h-28 w-28 -rotate-90" viewBox="0 0 112 112">
-              <circle cx="56" cy="56" r="48" stroke="#27272A" strokeWidth="6" fill="none" />
+              <circle cx="56" cy="56" r="48" stroke="#E8E5E0" strokeWidth="6" fill="none" />
               <motion.circle
                 cx="56" cy="56" r="48"
-                stroke="#6EE7B7"
+                stroke="#2563EB"
                 strokeWidth="6"
                 fill="none"
                 strokeLinecap="round"
@@ -318,14 +318,14 @@ function ScoreRingCard() {
             </svg>
             <div className="relative text-center">
               <motion.span
-                className="block text-2xl font-bold text-[#FAFAFA]"
+                className="block text-2xl font-bold text-[#1A1A1A]"
                 initial={{ opacity: 0 }}
                 animate={isInView ? { opacity: 1 } : {}}
                 transition={{ duration: 0.5, delay: 1 }}
               >
                 94
               </motion.span>
-              <span className="block text-[9px] text-[#71717A]">out of 100</span>
+              <span className="block text-[9px] text-[#9B9B9B]">out of 100</span>
             </div>
           </div>
         </div>
@@ -339,9 +339,9 @@ function ScoreRingCard() {
               animate={isInView ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 0.3, delay: 0.8 + i * 0.1 }}
             >
-              <span className="w-16 text-[10px] text-[#71717A]">{m.label}</span>
+              <span className="w-16 text-[10px] text-[#9B9B9B]">{m.label}</span>
               <div className="flex-1">
-                <div className="h-1.5 rounded-full bg-[#27272A]">
+                <div className="h-1.5 rounded-full bg-[#E8E5E0]">
                   <motion.div
                     className="h-1.5 rounded-full"
                     style={{ backgroundColor: m.color }}
@@ -351,7 +351,7 @@ function ScoreRingCard() {
                   />
                 </div>
               </div>
-              <span className="w-8 text-right text-[10px] font-medium tabular-nums text-[#FAFAFA]">
+              <span className="w-8 text-right text-[10px] font-medium tabular-nums text-[#1A1A1A]">
                 {m.value}
               </span>
             </motion.div>
@@ -377,13 +377,13 @@ function SectionTitle() {
       className="mb-12 flex flex-col items-center gap-4 text-center"
       style={{ y }}
     >
-      <span className="inline-flex items-center gap-2 rounded-full border border-[#27272A] bg-[#18181B] px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-[#A1A1AA]">
+      <span className="inline-flex items-center gap-2 rounded-lg border border-[#E8E5E0] bg-white px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-[#6B6B6B]">
         The Solution
       </span>
-      <h2 className="font-heading text-3xl font-bold text-[#FAFAFA] sm:text-4xl md:text-5xl">
+      <h2 className="font-heading text-3xl font-bold text-[#1A1A1A] sm:text-4xl md:text-5xl">
         Just tell it what to rank
       </h2>
-      <p className="max-w-lg text-sm text-[#71717A] sm:text-base">
+      <p className="max-w-lg text-sm text-[#6B6B6B] sm:text-base">
         Chat with your AI SEO partner. It handles keyword research, content optimization, and ranking — across every platform at once.
       </p>
     </motion.div>
@@ -396,9 +396,9 @@ export default function SolutionSection() {
     <section
       id="solution"
       className="relative px-4 py-20 sm:px-6 sm:py-28"
-      style={{ backgroundColor: "#0A0A0B" }}
+      style={{ backgroundColor: "#FAFAF7" }}
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#27272A] to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E8E5E0] to-transparent" />
 
       <div className="mx-auto max-w-5xl">
         <SectionTitle />

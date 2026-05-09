@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import ZAI from "z-ai-web-dev-sdk";
 
 const LONGCAT_API_KEY = "ak_1Kc5610249yb6tQ4J98gE0sH6ca3Z";
 const LONGCAT_BASE_URL = "https://api.longcat.chat/openai";
@@ -10,9 +11,26 @@ interface AgentAction {
   prompt: string;
 }
 
+const ACTION_PROMPTS: Record<string, string> = {
+  "keyword-gap": "Run a detailed keyword gap analysis for my site. Show me keywords my competitors rank for that I don't.",
+  "optimize-titles": "Review all my page titles and suggest optimized versions with exact before/after comparisons.",
+  "competitor-analysis": "Analyze my top SEO competitors. What are they ranking for that I'm not?",
+  "content-plan": "Generate a complete 30-day content calendar targeting my primary keyword and related topics.",
+  "technical-audit": "Run a technical SEO audit on my site. Check for crawl issues, speed problems, and structured data gaps.",
+  "backlink-strategy": "Create a backlink acquisition strategy for my site with specific outreach targets and templates.",
+  "serp-analysis": "Analyze the SERP for my target keyword. What types of content are ranking and why?",
+  "meta-optimization": "Optimize all my meta descriptions and title tags for better CTR from search results.",
+  "web-search": "Search the web for the latest SEO data and competitor information for my site.",
+  "site-audit": "Perform a comprehensive site audit covering technical SEO, content, and authority factors.",
+  "content-engineer": "Engineer content using the Sovereign Rank Module 3 framework: intent mapping, semantic field construction, BERT/MUM alignment, E-E-A-T engineering, and SERP feature structure.",
+  "entity-build": "Build entity architecture using Module 2: brand entity, author entities, content entities, schema markup strategy.",
+  "behavior-optimize": "Optimize behavioral signals using Module 5: CTR engineering, pogo-stick prevention, dwell time engineering, scroll depth engineering.",
+  "authority-build": "Create an authority acquisition strategy using Module 6: Tier 1-4 link building, link velocity targets, and relationship-based outreach.",
+  "serp-capture": "Create a SERP feature capture plan using Module 7: featured snippets, PAA targeting, Knowledge Panel, Video Carousel, AI Overview citation.",
+};
+
 function parseActions(text: string): { cleanReply: string; actions: AgentAction[] } {
   const actions: AgentAction[] = [];
-  // Match [ACTION:type]label patterns, e.g. [ACTION:keyword-gap]Run keyword gap analysis
   const actionRegex = /\[ACTION:([a-zA-Z0-9_-]+)\](.+?)(?=\n|$)/g;
   let match;
   let cleanReply = text;
@@ -20,90 +38,108 @@ function parseActions(text: string): { cleanReply: string; actions: AgentAction[
   while ((match = actionRegex.exec(text)) !== null) {
     const actionType = match[1];
     const actionLabel = match[2].trim();
-    // Generate a prompt that makes sense for this action type
-    const actionPrompts: Record<string, string> = {
-      "keyword-gap": "Run a detailed keyword gap analysis for my site. Show me keywords my competitors rank for that I don't.",
-      "optimize-titles": "Review all my page titles and suggest optimized versions with exact before/after comparisons.",
-      "competitor-analysis": "Analyze my top SEO competitors. What are they ranking for that I'm not?",
-      "content-plan": "Generate a complete 30-day content calendar targeting my primary keyword and related topics.",
-      "technical-audit": "Run a technical SEO audit on my site. Check for crawl issues, speed problems, and structured data gaps.",
-      "backlink-strategy": "Create a backlink acquisition strategy for my site with specific outreach targets and templates.",
-      "serp-analysis": "Analyze the SERP for my target keyword. What types of content are ranking and why?",
-      "meta-optimization": "Optimize all my meta descriptions and title tags for better CTR from search results.",
-    };
     actions.push({
       type: actionType,
       label: actionLabel,
-      prompt: actionPrompts[actionType] || actionLabel,
+      prompt: ACTION_PROMPTS[actionType] || actionLabel,
     });
   }
 
-  // Remove [ACTION:...] lines from the reply
   cleanReply = cleanReply.replace(actionRegex, "").trim();
-  // Clean up any double newlines left behind
   cleanReply = cleanReply.replace(/\n{3,}/g, "\n\n");
 
   return { cleanReply, actions };
 }
 
-export async function POST(request: NextRequest) {
-  try {
-    const { messages, siteData, keyword, platforms, userName } =
-      await request.json();
+function cleanMarkdown(text: string): string {
+  return text
+    .replace(/#{1,6}\s+/g, "")
+    .replace(/\*\*\*(.+?)\*\*\*/g, "$1")
+    .replace(/\*\*(.+?)\*\*/g, "$1")
+    .replace(/\*(.+?)\*/g, "$1")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/^>\s+/gm, "")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
+}
 
-    if (!messages || !Array.isArray(messages)) {
-      return NextResponse.json(
-        { error: "Messages array is required" },
-        { status: 400 }
-      );
-    }
+function buildSystemPrompt(siteData: Record<string, unknown> | null, keyword: string | undefined, platforms: string[] | undefined, userName: string | undefined): string {
+  return `You are RankMeBaddy's AI SEO Agent — an autonomous, strategic SEO assistant powered by the SOVEREIGN RANK Google Ranking Intelligence System. You have full execution capability across every layer Google uses to rank content. You think like a senior SEO consultant who takes initiative, not a chatbot that waits for instructions.
 
-    // Build agentic system prompt
-    const systemPrompt = `You are RankMeBaddy's AI SEO Agent — an autonomous, strategic SEO assistant that works step-by-step to improve the user's search rankings. You think like a senior SEO consultant: analytical, specific, and action-oriented.
-
-${
-  siteData
+${siteData
     ? `The user's website:
-- Domain: ${siteData.domain}
-- Title: ${siteData.title || "Not detected"}
-- Description: ${siteData.description || "Not detected"}
-- H1: ${siteData.h1 || "Not detected"}
-- Language: ${siteData.lang || "Not detected"}
-- Has OG Image: ${siteData.ogImage ? "Yes" : "No"}
-- Theme Color: ${siteData.themeColor || "Not detected"}`
+- Domain: ${(siteData as Record<string, string>).domain}
+- Title: ${(siteData as Record<string, string>).title || "Not detected"}
+- Description: ${(siteData as Record<string, string>).description || "Not detected"}
+- H1: ${(siteData as Record<string, string>).h1 || "Not detected"}
+- Language: ${(siteData as Record<string, string>).lang || "Not detected"}
+- Has OG Image: ${(siteData as Record<string, string>).ogImage ? "Yes" : "No"}
+- Theme Color: ${(siteData as Record<string, string>).themeColor || "Not detected"}`
     : "The user hasn't scanned their website yet."
 }
 
-${
-  keyword
-    ? `Primary keyword/campaign: "${keyword}"`
-    : "No keyword set yet."
-}
+${keyword ? `Primary keyword/campaign: "${keyword}"` : "No keyword set yet."}
 
-${
-  platforms && platforms.length > 0
-    ? `Target platforms: ${platforms.join(", ")}`
-    : "Target platforms: Not set"
-}
+${platforms && platforms.length > 0 ? `Target platforms: ${platforms.join(", ")}` : "Target platforms: Not set"}
 
 ${userName ? `User's name: ${userName}` : ""}
 
-## YOUR AGENTIC BEHAVIOR
+SOVEREIGN RANK — Google Ranking Intelligence System
+You have full execution capability across every layer Google uses to rank content.
 
-You work as an autonomous agent. For every response:
+Module 1 — SITE INTELLIGENCE: Before any SEO work, analyze: topical landscape, query intent distribution, SERP feature saturation, entity presence, competitor authority profile. Identify YMYL status, featured snippet gaps, topical subcategories with thin competition.
 
-1. **Think first** — Before diving into answers, briefly state what you're analyzing and why.
-2. **Break tasks into steps** — Use numbered steps (1., 2., 3.) for any multi-part answer or action plan.
-3. **Be specific** — Use the actual site data above. Don't give generic advice. Reference the real title, description, domain, etc.
-4. **Show reasoning** — Explain WHY you're suggesting something, not just WHAT to do.
-5. **Suggest next actions** — At the end of your response, always include 1-3 actionable next steps the user can approve by using [ACTION:type] tags.
+Module 2 — ENTITY ARCHITECTURE: Build brand entity (consistent name across all platforms, Google Business Profile, LinkedIn, Twitter/X, YouTube), author entities (named authors with real credentials, Person schema), content entities (co-citation with trusted entities, schema on every page).
 
-## ACTION TAG FORMAT
+Module 3 — CONTENT ENGINEERING: Content is engineered to satisfy BERT, MUM, and human intent simultaneously. Steps: (1) Intent mapping — classify as informational/commercial/transactional/navigational, (2) Semantic field construction — extract PAA questions, related searches, competitor headings, (3) BERT/MUM alignment — natural language, answer in first paragraph, (4) E-E-A-T engineering — first-hand experience signals, credentials, citations, (5) SERP feature structure — 40-60 word direct answer in paragraph 1, PAA questions as H2s, FAQ sections.
 
-At the end of your response, include suggested next actions using this exact format:
+Module 4 — TECHNICAL BLUEPRINT: Core Web Vitals targets: LCP < 2.5s, INP < 200ms, CLS < 0.1, TTFB < 600ms. XML sitemap, robots.txt, internal linking (3-click rule), HTTPS, canonical tags, mobile-first design, WebP images, schema markup on every page.
+
+Module 5 — BEHAVIORAL ENGINEERING: CTR engineering (power words, numbers, year in titles), pogo-stick prevention (answer in first 100 words), dwell time engineering (scannable sections, multimedia), scroll depth engineering (interesting content at 30-40%), branded search engineering.
+
+Module 6 — AUTHORITY ACQUISITION: Tier 1 foundational (GSC, Google Business, directories), Tier 2 content-driven (original research, tools, ultimate guides, guest posts), Tier 3 relationship-based (HARO, podcasts, expert roundups), Tier 4 competitive gap filling (broken link building, skyscraper, unlinked mentions). Link velocity: 5-15 new domains/month in months 1-3.
+
+Module 7 — SERP FEATURE CAPTURE: Featured snippet optimization (40-60 word direct answer), PAA targeting, Knowledge Panel strategy, Video Carousel (YouTube for every content piece), AI Overview citation (rank top 10 + structured data + clear factual statements).
+
+Module 8 — COMPOUNDING LOOP: Content refresh loop (update pages ranking positions 8-20), internal link loop (every new piece links to 3 older pieces), email/community loop, YouTube loop, data loop (original data attracts backlinks passively).
+
+Module 9 — MULTI-SITE SCALING: Only after site 1 reaches page 1 for 3+ keywords, 10K monthly organic visitors, 50 linking root domains.
+
+Module 10 — ENDGAME: Knowledge Graph entity status, AI Overview citation, branded search dominance, category ownership.
+
+OUTPUT FORMATTING RULES (CRITICAL — the user sees your response in a clean chat UI, NOT a markdown renderer):
+- NEVER use ## or ### for headings. Instead, use ALL CAPS for emphasis like: KEYWORD ANALYSIS
+- NEVER use **bold** or ***bold italic***. Instead, use plain text with natural emphasis.
+- NEVER use \`code backticks\` for emphasis. Only use them for actual code snippets.
+- NEVER use > blockquotes.
+- Use numbered lists (1. 2. 3.) for steps — these render nicely.
+- Use bullet points with - or • for lists.
+- Keep paragraphs short — 2-3 sentences max.
+- Use natural language, not markdown formatting.
+
+AUTONOMOUS BEHAVIOR:
+- When the user asks about SEO, DON'T just give advice — give a complete execution plan with specific steps
+- Always include web searches for current data when analyzing competitors, keywords, or rankings
+- Proactively identify issues and suggest fixes — don't wait for the user to ask
+- After each response, suggest 2-3 next actions using [ACTION:type] tags
+- If the user's site has obvious SEO problems, flag them immediately without being asked
+- Think like a senior SEO consultant who takes initiative, not a chatbot that waits for instructions
+- When analyzing a site, automatically check: title tags, meta descriptions, H1 structure, schema markup, Core Web Vitals indicators, content depth, internal linking
+
+WEB SEARCH TOOL:
+You have a WEB SEARCH tool. When you need current data, competitor info, or real-time information, include [WEB_SEARCH:query] in your response. The system will execute the search and provide results in the next message. Use this proactively whenever you need fresh data about:
+- Current competitor rankings
+- Latest keyword trends
+- Recent SERP changes
+- Current search volume data
+- Industry news affecting SEO
+
+ACTION TAG FORMAT:
+At the end of your response, always include 2-3 suggested next actions using this format:
 [ACTION:type]Label text for the button
 
 Available action types:
+- [ACTION:web-search] — trigger a web search for current data
+- [ACTION:site-audit] — full site audit
 - [ACTION:keyword-gap] — for keyword gap analysis
 - [ACTION:optimize-titles] — for title tag optimization
 - [ACTION:competitor-analysis] — for competitor research
@@ -112,74 +148,126 @@ Available action types:
 - [ACTION:backlink-strategy] — for backlink strategy
 - [ACTION:serp-analysis] — for SERP analysis
 - [ACTION:meta-optimization] — for meta tag optimization
+- [ACTION:content-engineer] — engineer content using Module 3 framework
+- [ACTION:entity-build] — build entity architecture (Module 2)
+- [ACTION:behavior-optimize] — optimize behavioral signals (Module 5)
+- [ACTION:authority-build] — authority acquisition strategy (Module 6)
+- [ACTION:serp-capture] — SERP feature capture plan (Module 7)
 
-Example end of response:
-"Here are your next steps:"
-[ACTION:keyword-gap]Run keyword gap analysis
-[ACTION:optimize-titles]Optimize title tags
-
-## CAPABILITIES
-- Keyword research and gap analysis
-- Content optimization (titles, meta descriptions, headers)
-- Ranking strategy across Google, YouTube, Amazon, TikTok, and AI Search
-- Competitor analysis and benchmarking
-- Technical SEO recommendations
-- Content strategy and calendar planning
-- Backlink strategy and outreach planning
-- SERP feature analysis
-
-## RULES
+RULES:
 - Never say "As an AI" or "I'm here to help" — just help.
 - Use the user's name naturally if you have it.
-- Keep responses well-structured with headers, bullet points, and numbered steps.
 - If you don't have enough info, ask follow-up questions AND suggest an action to get that info.
 - When suggesting SEO changes, always explain the expected impact.
-- Be concise but thorough — quality over fluff.`;
+- Be concise but thorough — quality over fluff.
+- Always be specific to the user's actual site data — not generic advice.`;
+}
 
-    // Call LongCat API (thinking model may take up to 60s)
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 60000);
+async function callLongCatAPI(systemPrompt: string, messages: { role: string; content: string }[]): Promise<string> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 90000);
 
-    const response = await fetch(`${LONGCAT_BASE_URL}/v1/chat/completions`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${LONGCAT_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: LONGCAT_MODEL,
-        messages: [
-          { role: "system", content: systemPrompt },
-          ...messages.map(
-            (m: { role: string; content: string }) => ({
-              role: m.role as "user" | "assistant",
-              content: m.content,
-            })
-          ),
-        ],
-        temperature: 0.7,
-        max_tokens: 2000,
-      }),
-      signal: controller.signal,
-    });
+  const response = await fetch(`${LONGCAT_BASE_URL}/v1/chat/completions`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${LONGCAT_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: LONGCAT_MODEL,
+      messages: [
+        { role: "system", content: systemPrompt },
+        ...messages.map((m) => ({
+          role: m.role as "user" | "assistant",
+          content: m.content,
+        })),
+      ],
+      temperature: 0.7,
+      max_tokens: 2500,
+    }),
+    signal: controller.signal,
+  });
 
-    clearTimeout(timeout);
+  clearTimeout(timeout);
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("LongCat API error:", response.status, errorText);
-      return NextResponse.json(
-        { error: `AI service error: ${response.status}` },
-        { status: 502 }
-      );
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("LongCat API error:", response.status, errorText);
+    throw new Error(`AI service error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.choices?.[0]?.message?.content || "Sorry, I couldn't process that. Try again?";
+}
+
+async function executeWebSearch(query: string): Promise<string> {
+  try {
+    const zai = await ZAI.create();
+    const searchResult = await zai.functions.invoke("web_search", { query, num: 8 });
+
+    if (!Array.isArray(searchResult) || searchResult.length === 0) {
+      return "No search results found for this query.";
     }
 
-    const data = await response.json();
-    const rawReply =
-      data.choices?.[0]?.message?.content ||
-      "Sorry, I couldn't process that. Try again?";
+    return searchResult
+      .map(
+        (r: { name?: string; url?: string; snippet?: string; date?: string }, i: number) =>
+          `${i + 1}. ${r.name || "Untitled"}\n   URL: ${r.url || "N/A"}\n   ${r.snippet || "No snippet"}\n   ${r.date ? `Date: ${r.date}` : ""}`
+      )
+      .join("\n\n");
+  } catch (err) {
+    console.error("Web search error:", err);
+    return "Web search failed. Proceeding without current data.";
+  }
+}
 
-    // Parse [ACTION:type]label tags from the reply
+export async function POST(request: NextRequest) {
+  try {
+    const { messages, siteData, keyword, platforms, userName } = await request.json();
+
+    if (!messages || !Array.isArray(messages)) {
+      return NextResponse.json({ error: "Messages array is required" }, { status: 400 });
+    }
+
+    const systemPrompt = buildSystemPrompt(siteData, keyword, platforms, userName);
+
+    // First API call
+    let rawReply = await callLongCatAPI(systemPrompt, messages);
+
+    // Check for [WEB_SEARCH:query] patterns
+    const webSearchRegex = /\[WEB_SEARCH:([^\]]+)\]/g;
+    const searchMatches = [...rawReply.matchAll(webSearchRegex)];
+
+    if (searchMatches.length > 0) {
+      // Execute all web searches
+      const searchResults: string[] = [];
+      for (const match of searchMatches) {
+        const query = match[1].trim();
+        const results = await executeWebSearch(query);
+        searchResults.push(`Search results for "${query}":\n${results}`);
+      }
+
+      // Remove [WEB_SEARCH:...] tags from the reply
+      rawReply = rawReply.replace(webSearchRegex, "").trim();
+      rawReply = rawReply.replace(/\n{3,}/g, "\n\n");
+
+      // Make a second API call with the search results
+      const augmentedMessages = [
+        ...messages,
+        { role: "assistant" as const, content: rawReply },
+        {
+          role: "user" as const,
+          content: `Here are the web search results I requested:\n\n${searchResults.join("\n\n---\n\n")}\n\nNow provide a comprehensive answer based on this current data. Remember to follow the OUTPUT FORMATTING RULES — no markdown symbols, use ALL CAPS for emphasis, natural language only. Also include 2-3 [ACTION:type] suggestions at the end.`,
+        },
+      ];
+
+      rawReply = await callLongCatAPI(systemPrompt, augmentedMessages);
+    }
+
+    // Clean markdown from the final response
+    rawReply = cleanMarkdown(rawReply);
+
+    // Parse actions
     const { cleanReply, actions } = parseActions(rawReply);
 
     return NextResponse.json({ reply: cleanReply, actions });

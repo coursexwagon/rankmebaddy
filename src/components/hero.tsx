@@ -1,155 +1,207 @@
 "use client";
 
-import { useRef, useMemo } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { motion, useScroll, useTransform } from "framer-motion";
-import * as THREE from "three";
+import { useRef, useEffect, useState } from "react";
+import { motion, useScroll, useTransform, useInView } from "framer-motion";
 
 /* ─── Color System ───────────────────────────────────────────── */
-// Background: #0A0A0B  |  Surface: #18181B  |  Border: #27272A
-// Text: #FAFAFA  |  Secondary: #A1A1AA  |  Muted: #71717A
+// Background: #FAFAF7  |  Surface: #FFFFFF  |  Border: #E8E5E0
+// Text: #1A1A1A  |  Secondary: #6B6B6B  |  Muted: #9B9B9B
+// Accent: #2563EB  |  Accent Warm: #6EE7B7
 
-/* ─── 3D Globe — Colorless wireframe (original look) ─────────── */
-function Globe() {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const wireRef = useRef<THREE.LineSegments>(null);
+/* ─── Counter Animation ──────────────────────────────────────── */
+function AnimatedCounter({ target, suffix = "" }: { target: number; suffix?: string }) {
+  const [count, setCount] = useState(0);
+  const ref = useRef<HTMLSpanElement>(null);
+  const isInView = useInView(ref, { once: true });
 
-  const wireGeo = useMemo(() => {
-    const geo = new THREE.IcosahedronGeometry(2.2, 3);
-    return new THREE.EdgesGeometry(geo);
-  }, []);
+  useEffect(() => {
+    if (!isInView) return;
+    let current = 0;
+    const increment = target / 60;
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= target) {
+        setCount(target);
+        clearInterval(timer);
+      } else {
+        setCount(Math.floor(current));
+      }
+    }, 16);
+    return () => clearInterval(timer);
+  }, [isInView, target]);
 
-  // Latitude rings (like the original SVG)
-  const rings = useMemo(() => {
-    const r = [];
-    const latitudes = [-40, -20, 0, 20, 40];
-    latitudes.forEach((lat) => {
-      const phi = (90 - lat) * (Math.PI / 180);
-      const ringRadius = 2.2 * Math.sin(phi);
-      const y = 2.2 * Math.cos(phi);
-      r.push({ radius: ringRadius, y });
-    });
-    return r;
-  }, []);
+  return <span ref={ref}>{count.toLocaleString()}{suffix}</span>;
+}
 
-  useFrame((state, delta) => {
-    if (meshRef.current) meshRef.current.rotation.y += delta * 0.06;
-    if (wireRef.current) wireRef.current.rotation.y += delta * 0.06;
-  });
+/* ─── Dashboard Mockup ───────────────────────────────────────── */
+function DashboardMockup() {
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <group>
-      {/* Dark fill sphere */}
-      <mesh ref={meshRef}>
-        <sphereGeometry args={[2.15, 32, 32]} />
-        <meshBasicMaterial color="#0A0A0B" transparent opacity={0.95} />
-      </mesh>
+    <motion.div
+      ref={ref}
+      className="relative mx-auto mt-16 max-w-4xl px-4 sm:mt-20"
+      initial={{ opacity: 0, y: 40 }}
+      animate={isInView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.8, delay: 0.6, ease: [0.21, 0.47, 0.32, 0.98] }}
+    >
+      {/* Browser chrome */}
+      <div className="overflow-hidden rounded-xl border border-[#E8E5E0] bg-white shadow-2xl shadow-black/5">
+        {/* Title bar */}
+        <div className="flex items-center gap-2 border-b border-[#E8E5E0] bg-[#FAFAF7] px-4 py-2.5">
+          <div className="flex gap-1.5">
+            <div className="h-2.5 w-2.5 rounded-full bg-[#FF5F57]" />
+            <div className="h-2.5 w-2.5 rounded-full bg-[#FFBD2E]" />
+            <div className="h-2.5 w-2.5 rounded-full bg-[#28CA41]" />
+          </div>
+          <div className="mx-auto flex items-center gap-1.5 rounded-md bg-white border border-[#E8E5E0] px-3 py-1">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="2" strokeLinecap="round">
+              <circle cx="12" cy="12" r="10" /><path d="M2 12h20" />
+            </svg>
+            <span className="text-[10px] text-[#9B9B9B]">rankmebaddy.com/dashboard</span>
+          </div>
+        </div>
 
-      {/* Wireframe icosahedron */}
-      <lineSegments ref={wireRef} geometry={wireGeo}>
-        <lineBasicMaterial color="#FAFAFA" transparent opacity={0.07} />
-      </lineSegments>
+        {/* Dashboard content mockup */}
+        <div className="flex min-h-[320px] sm:min-h-[400px]">
+          {/* Sidebar */}
+          <div className="hidden w-[180px] shrink-0 border-r border-[#E8E5E0] bg-white sm:block">
+            <div className="flex items-center gap-2 px-4 py-4">
+              <div className="flex h-6 w-6 items-center justify-center rounded-md bg-blue-50">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+              <span className="text-[11px] font-bold text-[#1A1A1A]">RankMeBaddy</span>
+            </div>
+            <div className="space-y-0.5 px-2">
+              {["Chat", "Overview", "Keywords", "Rankings", "Content", "Settings"].map((item, i) => (
+                <motion.div
+                  key={item}
+                  className={`flex items-center gap-2 rounded-md px-3 py-1.5 text-[10px] ${
+                    i === 0 ? "bg-blue-50 text-blue-600 font-medium" : "text-[#9B9B9B]"
+                  }`}
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={isInView ? { opacity: 1, x: 0 } : {}}
+                  transition={{ delay: 0.8 + i * 0.05 }}
+                >
+                  {item}
+                </motion.div>
+              ))}
+            </div>
+          </div>
 
-      {/* Latitude rings */}
-      {rings.map((ring, i) => (
-        <mesh key={i} rotation-x={0}>
-          <ringGeometry args={[ring.radius - 0.01, ring.radius, 64]} />
-          <meshBasicMaterial
-            color="#FAFAFA"
-            transparent
-            opacity={0.05}
-            side={THREE.DoubleSide}
-          />
-        </mesh>
-      ))}
+          {/* Main content area */}
+          <div className="flex-1 bg-[#FAFAF7] p-4 sm:p-6">
+            {/* Header */}
+            <motion.div
+              className="mb-4"
+              initial={{ opacity: 0, y: 8 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ delay: 1 }}
+            >
+              <div className="h-3 w-24 rounded bg-[#1A1A1A]/10 mb-2" />
+              <div className="h-2 w-32 rounded bg-[#9B9B9B]/20" />
+            </motion.div>
 
-      {/* Prime meridian ring */}
-      <mesh rotation={[0, 0, Math.PI / 2]}>
-        <ringGeometry args={[2.19, 2.2, 64]} />
-        <meshBasicMaterial
-          color="#FAFAFA"
-          transparent
-          opacity={0.04}
-          side={THREE.DoubleSide}
-        />
-      </mesh>
-    </group>
+            {/* Chat messages */}
+            <div className="space-y-3">
+              <motion.div
+                className="flex justify-end"
+                initial={{ opacity: 0, y: 8 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ delay: 1.1 }}
+              >
+                <div className="max-w-[75%] rounded-xl bg-[#F5F0EB] px-3 py-2">
+                  <div className="h-2 w-28 rounded bg-[#1A1A1A]/20" />
+                  <div className="mt-1.5 h-2 w-20 rounded bg-[#1A1A1A]/10" />
+                </div>
+              </motion.div>
+
+              <motion.div
+                className="flex gap-2"
+                initial={{ opacity: 0, y: 8 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ delay: 1.3 }}
+              >
+                <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-50 text-[8px] font-bold text-blue-600">R</div>
+                <div className="max-w-[80%] rounded-xl bg-[#FAF8F5] border-l-[2px] border-l-blue-600 px-3 py-2">
+                  <div className="h-2 w-full rounded bg-[#1A1A1A]/15" />
+                  <div className="mt-1.5 h-2 w-4/5 rounded bg-[#1A1A1A]/10" />
+                  <div className="mt-1.5 h-2 w-3/5 rounded bg-[#1A1A1A]/10" />
+                  <div className="mt-2 flex gap-1.5">
+                    <div className="rounded-md bg-[#F5F0EB] border-l-[2px] border-l-blue-600 px-2 py-1">
+                      <div className="h-1.5 w-14 rounded bg-[#1A1A1A]/20" />
+                    </div>
+                    <div className="rounded-md bg-[#F5F0EB] border-l-[2px] border-l-blue-600 px-2 py-1">
+                      <div className="h-1.5 w-12 rounded bg-[#1A1A1A]/20" />
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Input bar */}
+            <motion.div
+              className="mt-4 flex items-center gap-2 rounded-xl border border-[#E8E5E0] bg-white px-3 py-2"
+              initial={{ opacity: 0 }}
+              animate={isInView ? { opacity: 1 } : {}}
+              transition={{ delay: 1.5 }}
+            >
+              <div className="h-2 flex-1 rounded bg-[#9B9B9B]/15" />
+              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600">
+                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round">
+                  <path d="m5 12h14" /><path d="m12 5 7 7-7 7" />
+                </svg>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </div>
+
+      {/* Decorative shadow/glow under the mockup */}
+      <div className="pointer-events-none absolute -bottom-8 left-1/2 -translate-x-1/2 h-32 w-3/4 rounded-full bg-blue-200/20 blur-3xl" />
+    </motion.div>
   );
 }
 
-/* ─── Floating Particles ─────────────────────────────────────── */
-function FloatingParticles() {
-  const particles = [
-    { x: "10%", y: "20%", size: 3, delay: 0, duration: 18 },
-    { x: "85%", y: "15%", size: 2, delay: 2, duration: 22 },
-    { x: "70%", y: "70%", size: 2.5, delay: 4, duration: 20 },
-    { x: "20%", y: "75%", size: 2, delay: 1, duration: 24 },
-    { x: "50%", y: "10%", size: 1.5, delay: 3, duration: 16 },
-    { x: "90%", y: "45%", size: 2, delay: 5, duration: 19 },
-    { x: "5%", y: "50%", size: 1.5, delay: 2.5, duration: 21 },
+/* ─── Social Proof Stats ─────────────────────────────────────── */
+function SocialProof() {
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-50px" });
+
+  const stats = [
+    { value: 2400, suffix: "+", label: "Sites analyzed" },
+    { value: 147, suffix: "", label: "Avg. keywords tracked per site" },
+    { value: 14, suffix: " days", label: "Average time to page 1" },
   ];
 
   return (
-    <div className="pointer-events-none absolute inset-0">
-      {particles.map((p, i) => (
-        <motion.div
-          key={i}
-          className="absolute rounded-full bg-[#6EE7B7]"
-          style={{ left: p.x, top: p.y, width: p.size, height: p.size }}
-          animate={{
-            y: [0, -20, 0, 15, 0],
-            x: [0, 10, -8, 5, 0],
-            opacity: [0.15, 0.35, 0.2, 0.4, 0.15],
-          }}
-          transition={{
-            duration: p.duration,
-            delay: p.delay,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
-/* ─── Underline Span ─────────────────────────────────────────── */
-function UnderlinedWord({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="relative inline-block">
-      {children}
-      <svg
-        className="absolute -bottom-1 left-0 w-full overflow-visible"
-        viewBox="0 0 200 12"
-        preserveAspectRatio="none"
-        style={{ height: "0.12em" }}
-      >
-        <motion.path
-          d="M2,8 C40,3 80,11 120,6 C150,2 175,9 198,5"
-          stroke="#6EE7B7"
-          strokeWidth="3"
-          strokeLinecap="round"
-          fill="none"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 1, delay: 0.8, ease: "easeOut" }}
-        />
-      </svg>
-    </span>
-  );
-}
-
-/* ─── Grid Lines Background ──────────────────────────────────── */
-function GridLines() {
-  return (
-    <div
-      className="pointer-events-none absolute inset-0 opacity-[0.025]"
-      style={{
-        backgroundImage:
-          "linear-gradient(#FAFAFA 1px, transparent 1px), linear-gradient(90deg, #FAFAFA 1px, transparent 1px)",
-        backgroundSize: "60px 60px",
-      }}
-    />
+    <motion.div
+      ref={ref}
+      className="mx-auto mt-20 max-w-3xl px-4"
+      initial={{ opacity: 0, y: 20 }}
+      animate={isInView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.6, delay: 0.2 }}
+    >
+      <div className="grid grid-cols-3 gap-6 sm:gap-8">
+        {stats.map((stat, i) => (
+          <motion.div
+            key={stat.label}
+            className="text-center"
+            initial={{ opacity: 0, y: 12 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.5, delay: 0.4 + i * 0.1 }}
+          >
+            <p className="font-heading text-2xl font-bold text-[#2563EB] sm:text-3xl">
+              <AnimatedCounter target={stat.value} suffix={stat.suffix} />
+            </p>
+            <p className="mt-1 text-[11px] text-[#6B6B6B] sm:text-[12px]">{stat.label}</p>
+          </motion.div>
+        ))}
+      </div>
+    </motion.div>
   );
 }
 
@@ -161,67 +213,82 @@ export default function HeroSection() {
     offset: ["start start", "end start"],
   });
 
-  // Parallax: globe moves slower than text
-  const globeY = useTransform(scrollYProgress, [0, 1], [0, 150]);
   const textY = useTransform(scrollYProgress, [0, 1], [0, 60]);
-  const globeOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
+  const bgOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0.3]);
 
   return (
     <section
       ref={sectionRef}
-      className="relative overflow-hidden px-4 pt-28 pb-20 sm:px-6 sm:pt-36 sm:pb-28 md:pt-44"
-      style={{ backgroundColor: "#0A0A0B" }}
+      className="relative overflow-hidden px-4 pt-28 pb-8 sm:px-6 sm:pt-36 sm:pb-12 md:pt-44"
+      style={{ backgroundColor: "#FAFAF7" }}
     >
-      <GridLines />
-      <FloatingParticles />
-
-      {/* 3D Globe — parallax layer */}
-      <motion.div
-        className="pointer-events-none absolute inset-0 flex items-center justify-center"
-        style={{ y: globeY, opacity: globeOpacity }}
-      >
-        <div className="h-[500px] w-[500px] sm:h-[600px] sm:w-[600px] md:h-[700px] md:w-[700px]">
-          <Canvas
-            camera={{ position: [0, 0, 5.5], fov: 45 }}
-            style={{ background: "transparent" }}
-            gl={{ alpha: true, antialias: true }}
-          >
-            <ambientLight intensity={0.1} />
-            <Globe />
-          </Canvas>
-        </div>
-      </motion.div>
-
-      {/* Subtle radial glow */}
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+      {/* Animated gradient mesh background */}
+      <motion.div className="absolute inset-0 overflow-hidden" style={{ opacity: bgOpacity }}>
         <div
-          className="h-[600px] w-[600px] rounded-full sm:h-[700px] sm:w-[700px]"
+          className="absolute inset-0"
           style={{
-            background:
-              "radial-gradient(circle, rgba(250,250,250,0.02) 0%, transparent 70%)",
+            background: "linear-gradient(135deg, #EFF6FF 0%, #FAFAF7 25%, #F0FDF4 50%, #FAFAF7 75%, #EFF6FF 100%)",
+            backgroundSize: "400% 400%",
+            animation: "gradientShift 15s ease infinite",
           }}
         />
-      </div>
-
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[#0A0A0B]/60 to-transparent" />
+        {/* Floating orbs */}
+        <motion.div
+          className="absolute w-64 h-64 rounded-full opacity-20"
+          style={{ background: "radial-gradient(circle, #2563EB 0%, transparent 70%)", left: "20%", top: "30%" }}
+          animate={{ x: [0, 30, -20, 0], y: [0, -20, 30, 0], scale: [1, 1.1, 0.9, 1] }}
+          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute w-48 h-48 rounded-full opacity-15"
+          style={{ background: "radial-gradient(circle, #6EE7B7 0%, transparent 70%)", right: "15%", top: "20%" }}
+          animate={{ x: [0, -25, 15, 0], y: [0, 25, -15, 0], scale: [1, 0.9, 1.1, 1] }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute w-36 h-36 rounded-full opacity-10"
+          style={{ background: "radial-gradient(circle, #2563EB 0%, transparent 70%)", right: "30%", bottom: "20%" }}
+          animate={{ x: [0, 15, -10, 0], y: [0, -15, 10, 0] }}
+          transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </motion.div>
 
       {/* Text — parallax layer */}
-      <motion.div className="relative z-10 mx-auto max-w-3xl" style={{ y: textY }}>
+      <motion.div className="relative z-10 mx-auto max-w-3xl text-center" style={{ y: textY }}>
         {/* Headline */}
         <motion.h1
-          className="font-heading text-center text-4xl font-bold leading-[1.08] tracking-tight text-[#FAFAFA] sm:text-5xl md:text-6xl lg:text-7xl"
+          className="font-heading text-4xl font-bold leading-[1.08] tracking-tight text-[#1A1A1A] sm:text-5xl md:text-6xl lg:text-7xl"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
         >
-          <UnderlinedWord>Rank</UnderlinedWord> everywhere.
-          <br />
-          <UnderlinedWord>Autonomously</UnderlinedWord>.
+          Rank everywhere.{" "}
+          <span className="relative inline-block text-[#2563EB]">
+            Autonomously
+            <svg
+              className="absolute -bottom-1 left-0 w-full overflow-visible"
+              viewBox="0 0 200 12"
+              preserveAspectRatio="none"
+              style={{ height: "0.12em" }}
+            >
+              <motion.path
+                d="M2,8 C40,3 80,11 120,6 C150,2 175,9 198,5"
+                stroke="#6EE7B7"
+                strokeWidth="3"
+                strokeLinecap="round"
+                fill="none"
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: 1, delay: 0.8, ease: "easeOut" }}
+              />
+            </svg>
+          </span>
+          .
         </motion.h1>
 
         {/* Subheadline */}
         <motion.p
-          className="mx-auto mt-6 max-w-xl text-center text-base leading-relaxed text-[#A1A1AA] sm:text-lg"
+          className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-[#6B6B6B] sm:text-lg"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.25 }}
@@ -239,37 +306,27 @@ export default function HeroSection() {
         >
           <a
             href="/onboarding"
-            className="group relative inline-flex items-center gap-2.5 overflow-hidden rounded-full px-7 py-3.5 text-sm font-semibold transition-all"
+            className="group inline-flex items-center gap-2.5 rounded-lg bg-[#2563EB] px-7 py-3.5 text-sm font-semibold text-white transition-all hover:bg-blue-700"
           >
-            <span className="absolute inset-0 rounded-full bg-[#6EE7B7] opacity-0 blur-md transition-opacity duration-500 group-hover:opacity-20" />
-            <span className="absolute inset-[1px] rounded-full bg-[#0A0A0B]" />
-            <span className="absolute inset-0 rounded-full border border-[#6EE7B7]/30 transition-colors duration-500 group-hover:border-[#6EE7B7]/60" />
-            <span className="absolute left-0 top-0 h-3 w-3 border-l border-t border-[#6EE7B7]/50 rounded-tl-full transition-colors group-hover:border-[#6EE7B7]" />
-            <span className="absolute right-0 top-0 h-3 w-3 border-r border-t border-[#6EE7B7]/50 rounded-tr-full transition-colors group-hover:border-[#6EE7B7]" />
-            <span className="absolute bottom-0 left-0 h-3 w-3 border-b border-l border-[#6EE7B7]/50 rounded-bl-full transition-colors group-hover:border-[#6EE7B7]" />
-            <span className="absolute bottom-0 right-0 h-3 w-3 border-b border-r border-[#6EE7B7]/50 rounded-br-full transition-colors group-hover:border-[#6EE7B7]" />
-            <span className="relative z-10 flex items-center gap-2.5 text-[#FAFAFA]">
-              Start ranking free
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-              >
-                <path d="M7 17L17 7" />
-                <path d="M7 7h10v10" />
-              </svg>
-            </span>
+            Start ranking free
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="transition-transform group-hover:translate-x-0.5"
+            >
+              <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
+            </svg>
           </a>
 
           <a
             href="#proof"
-            className="inline-flex items-center gap-2 rounded-full border border-[#27272A] bg-transparent px-6 py-3.5 text-sm font-medium text-[#A1A1AA] transition-colors hover:border-[#3F3F46] hover:text-[#FAFAFA]"
+            className="inline-flex items-center gap-2 rounded-lg border border-[#E8E5E0] bg-white px-6 py-3.5 text-sm font-medium text-[#6B6B6B] transition-colors hover:border-[#9B9B9B] hover:text-[#1A1A1A]"
           >
             See results
           </a>
@@ -277,7 +334,7 @@ export default function HeroSection() {
 
         {/* Trust line */}
         <motion.p
-          className="mt-5 text-center text-xs text-[#52525B]"
+          className="mt-5 text-xs text-[#9B9B9B]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.6 }}
@@ -287,23 +344,27 @@ export default function HeroSection() {
 
         {/* Platform row */}
         <motion.div
-          className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-3"
+          className="mt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-3"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.7, delay: 0.8 }}
         >
-          {["Google", "YouTube", "Amazon", "TikTok", "AI Search"].map(
-            (name) => (
-              <span
-                key={name}
-                className="text-xs font-medium tracking-wide text-[#52525B]"
-              >
-                {name}
-              </span>
-            )
-          )}
+          {["Google", "YouTube", "Amazon", "TikTok", "AI Search"].map((name) => (
+            <span
+              key={name}
+              className="text-xs font-medium tracking-wide text-[#9B9B9B]"
+            >
+              {name}
+            </span>
+          ))}
         </motion.div>
       </motion.div>
+
+      {/* Dashboard Mockup */}
+      <DashboardMockup />
+
+      {/* Social Proof */}
+      <SocialProof />
     </section>
   );
 }
