@@ -8,10 +8,12 @@ const supabaseAdmin = createClient(
 );
 
 /* ─── Configuration ──────────────────────────────────────────── */
-const FREE_CREDITS_PER_RESET = 25;
-const PRO_CREDITS_PER_RESET = 100;
+const BETA_MODE = process.env.NEXT_PUBLIC_BETA_MODE === "true";
+const FREE_CREDITS_PER_RESET = BETA_MODE ? 100 : 25;
+const PRO_CREDITS_PER_RESET = BETA_MODE ? 500 : 100;
 const ENTERPRISE_CREDITS_PER_RESET = 999;
 const RESET_INTERVAL_MS = 60 * 60 * 1000; // 1 hour
+const BETA_BONUS_CREDITS = 50; // Extra one-time credits for beta users
 
 type Tier = "free" | "pro" | "enterprise";
 
@@ -45,11 +47,12 @@ async function ensureCreditRecord(userId: string): Promise<{ record: CreditRecor
     // No record yet — create one
     const now = new Date().toISOString();
     const tier: Tier = "free";
+    const startingCredits = FREE_CREDITS_PER_RESET + (BETA_MODE ? BETA_BONUS_CREDITS : 0);
     const { data: newData, error: insertError } = await supabaseAdmin
       .from("user_credits")
       .insert({
         user_id: userId,
-        credits_remaining: FREE_CREDITS_PER_RESET,
+        credits_remaining: startingCredits,
         total_used: 0,
         total_refunded: 0,
         tier,
@@ -111,7 +114,18 @@ export async function GET(request: NextRequest) {
     const { record, error } = await ensureCreditRecord(userId);
 
     if (error || !record) {
-      // DENY on error — don't return fake credits
+      // In beta mode, be lenient — give default credits even on error
+      if (BETA_MODE) {
+        return NextResponse.json({
+          credits_remaining: FREE_CREDITS_PER_RESET,
+          total_used: 0,
+          total_refunded: 0,
+          tier: "free" as Tier,
+          max_credits: FREE_CREDITS_PER_RESET,
+          next_reset: new Date(Date.now() + RESET_INTERVAL_MS).toISOString(),
+          beta_fallback: true,
+        });
+      }
       return NextResponse.json(
         { error: error || "Unable to retrieve credits", credits_remaining: 0, total_used: 0, tier: "free" as Tier, max_credits: FREE_CREDITS_PER_RESET, next_reset: new Date(Date.now() + RESET_INTERVAL_MS).toISOString() },
         { status: 500 }
@@ -165,7 +179,16 @@ export async function POST(request: NextRequest) {
     return handleCheckAndDeduct(userId);
   } catch (err) {
     console.error("Credits POST error:", err);
-    // DENY on error — never allow through on failure
+    // In beta mode, allow through even on service failure
+    if (BETA_MODE) {
+      return NextResponse.json({
+        allowed: true,
+        credits_remaining: FREE_CREDITS_PER_RESET,
+        tier: "free" as Tier,
+        max_credits: FREE_CREDITS_PER_RESET,
+        beta_fallback: true,
+      });
+    }
     return NextResponse.json(
       { allowed: false, error: "Credits service unavailable", credits_remaining: 0 },
       { status: 503 }
@@ -178,6 +201,16 @@ async function handleCheckCredits(userId: string) {
   const { record, error } = await ensureCreditRecord(userId);
 
   if (error || !record) {
+    // In beta mode, allow through even if record creation fails
+    if (BETA_MODE) {
+      return NextResponse.json({
+        allowed: true,
+        credits_remaining: FREE_CREDITS_PER_RESET,
+        tier: "free" as Tier,
+        max_credits: FREE_CREDITS_PER_RESET,
+        beta_fallback: true,
+      });
+    }
     return NextResponse.json({
       allowed: false,
       error: error || "Unable to verify credits",

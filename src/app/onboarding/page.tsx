@@ -8,7 +8,7 @@ import { useAuth } from "@/hooks/use-auth";
 /* ─── Color System ───────────────────────────────────────────── */
 // Background: #0A0A0B  |  Surface: #18181B  |  Border: #27272A
 // Text: #FAFAFA  |  Secondary: #A1A1AA  |  Muted: #71717A
-// Accent: #6EE7B7 (emerald-300)
+// Accent: #00D4AA (turquoise)
 
 const TOTAL_STEPS = 4;
 
@@ -40,7 +40,7 @@ function UnderlinedWord({ children }: { children: React.ReactNode }) {
       >
         <motion.path
           d="M2,8 C40,3 80,11 120,6 C150,2 175,9 198,5"
-          stroke="#6EE7B7"
+          stroke="#00D4AA"
           strokeWidth="3"
           strokeLinecap="round"
           fill="none"
@@ -60,7 +60,7 @@ function ProgressBar({ step }: { step: number }) {
     <div className="mx-auto mb-10 flex items-center gap-3">
       <div className="h-[2px] flex-1 rounded-full bg-[#27272A]">
         <motion.div
-          className="h-[2px] rounded-full bg-[#6EE7B7]"
+          className="h-[2px] rounded-full bg-[#00D4AA]"
           initial={{ width: 0 }}
           animate={{ width: `${pct}%` }}
           transition={{ duration: 0.5, ease: [0.21, 0.47, 0.32, 0.98] }}
@@ -97,7 +97,7 @@ function Input({
       onChange={(e) => onChange(e.target.value)}
       onKeyDown={onKeyDown}
       autoFocus={autoFocus}
-      className="w-full rounded-xl border border-[#27272A] bg-[#18181B]/60 px-4 py-3.5 text-sm text-[#FAFAFA] placeholder:text-[#52525B] outline-none transition-all focus:border-[#6EE7B7]/40 focus:bg-[#18181B] focus:shadow-[0_0_20px_-5px_rgba(110,231,183,0.08)]"
+      className="w-full rounded-xl border border-[#27272A] bg-[#18181B]/60 px-4 py-3.5 text-sm text-[#FAFAFA] placeholder:text-[#52525B] outline-none transition-all focus:border-[#00D4AA]/40 focus:bg-[#18181B] focus:shadow-[0_0_20px_-5px_rgba(110,231,183,0.08)]"
     />
   );
 }
@@ -123,7 +123,7 @@ function CtaButton({
         isPrimary ? "w-full py-3.5" : "py-2 px-4"
       } ${
         isPrimary
-          ? "bg-[#6EE7B7] text-[#0A0A0B] hover:bg-[#6EE7B7]/90 disabled:opacity-30 disabled:hover:bg-[#6EE7B7]"
+          ? "bg-[#00D4AA] text-[#0A0A0B] hover:bg-[#00D4AA]/90 disabled:opacity-30 disabled:hover:bg-[#00D4AA]"
           : "text-[#52525B] hover:text-[#A1A1AA]"
       }`}
       whileHover={!disabled && isPrimary ? { scale: 1.01 } : {}}
@@ -134,18 +134,22 @@ function CtaButton({
   );
 }
 
-/* ─── Step 1: Name + Website ─────────────────────────────────── */
+/* ─── Step 1: Name + Website + Product ──────────────────────── */
 function StepIntro({
   name,
   setName,
   website,
   setWebsite,
+  product,
+  setProduct,
   onNext,
 }: {
   name: string;
   setName: (v: string) => void;
   website: string;
   setWebsite: (v: string) => void;
+  product: string;
+  setProduct: (v: string) => void;
   onNext: () => void;
 }) {
   const canContinue = name.trim().length > 0;
@@ -167,7 +171,7 @@ function StepIntro({
           Let&apos;s get you <UnderlinedWord>ranking</UnderlinedWord>
         </h1>
         <p className="mt-3 text-sm text-[#71717A]">
-          Tell us about you and your site. We&apos;ll do the heavy lifting.
+          Tell us about you and your business. We&apos;ll do the heavy lifting.
         </p>
       </div>
 
@@ -183,6 +187,21 @@ function StepIntro({
             autoFocus
             onKeyDown={handleKeyDown}
           />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-[11px] font-semibold uppercase tracking-wider text-[#71717A]">
+            Product or business name
+          </label>
+          <Input
+            placeholder="e.g. My SaaS Tool"
+            value={product}
+            onChange={setProduct}
+            onKeyDown={handleKeyDown}
+          />
+          <p className="text-[10px] text-[#3F3F46]">
+            What are you selling or promoting? This helps us tailor your SEO strategy.
+          </p>
         </div>
 
         <div className="space-y-2">
@@ -331,7 +350,7 @@ function StepScanner({
         <motion.button
           onClick={scanSite}
           disabled={scanning || !website.trim()}
-          className="shrink-0 rounded-xl bg-[#6EE7B7] px-5 py-3.5 text-sm font-semibold text-[#0A0A0B] transition-all hover:bg-[#6EE7B7]/90 disabled:opacity-40"
+          className="shrink-0 rounded-xl bg-[#00D4AA] px-5 py-3.5 text-sm font-semibold text-[#0A0A0B] transition-all hover:bg-[#00D4AA]/90 disabled:opacity-40"
           whileHover={!scanning ? { scale: 1.02 } : {}}
           whileTap={!scanning ? { scale: 0.98 } : {}}
         >
@@ -369,17 +388,17 @@ function StepScanner({
                 transition={{ delay: i * 0.15 }}
               >
                 {step.done ? (
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6EE7B7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00D4AA" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                 ) : (
                   <motion.div
-                    className="h-1.5 w-1.5 rounded-full bg-[#6EE7B7]"
+                    className="h-1.5 w-1.5 rounded-full bg-[#00D4AA]"
                     animate={{ scale: [1, 1.4, 1], opacity: [0.5, 1, 0.5] }}
                     transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.2 }}
                   />
                 )}
-                <span className={`text-[12px] ${step.done ? "text-[#6EE7B7]" : "text-[#71717A]"}`}>
+                <span className={`text-[12px] ${step.done ? "text-[#00D4AA]" : "text-[#71717A]"}`}>
                   {step.label}
                 </span>
               </motion.div>
@@ -475,7 +494,7 @@ function StepScanner({
                   </span>
                 )}
                 {siteData.ogImage && (
-                  <span className="rounded-full border border-[#6EE7B7]/20 bg-[#6EE7B7]/5 px-2.5 py-1 text-[10px] text-[#6EE7B7]">
+                  <span className="rounded-full border border-[#00D4AA]/20 bg-[#00D4AA]/5 px-2.5 py-1 text-[10px] text-[#00D4AA]">
                     OG Image found
                   </span>
                 )}
@@ -616,7 +635,7 @@ function StepPlatforms({
               onClick={() => onToggle(p.id)}
               className={`group relative flex items-center gap-3 rounded-xl border px-4 py-3.5 text-left transition-all ${
                 isActive
-                  ? "border-[#6EE7B7]/30 bg-[#6EE7B7]/[0.04]"
+                  ? "border-[#00D4AA]/30 bg-[#00D4AA]/[0.04]"
                   : "border-[#27272A] bg-[#18181B]/40 hover:border-[#3F3F46]"
               }`}
               initial={{ opacity: 0, y: 8 }}
@@ -637,7 +656,7 @@ function StepPlatforms({
               <div
                 className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-all duration-200 ${
                   isActive
-                    ? "border-[#6EE7B7] bg-[#6EE7B7]"
+                    ? "border-[#00D4AA] bg-[#00D4AA]"
                     : "border-[#27272A] bg-transparent"
                 }`}
               >
@@ -796,7 +815,7 @@ function StepKeyword({
             value={context}
             onChange={(e) => setContext(e.target.value)}
             rows={2}
-            className="w-full resize-none rounded-xl border border-[#27272A] bg-[#18181B]/60 px-4 py-3 text-sm text-[#FAFAFA] placeholder:text-[#52525B] outline-none transition-colors focus:border-[#6EE7B7]/40 focus:bg-[#18181B]"
+            className="w-full resize-none rounded-xl border border-[#27272A] bg-[#18181B]/60 px-4 py-3 text-sm text-[#FAFAFA] placeholder:text-[#52525B] outline-none transition-colors focus:border-[#00D4AA]/40 focus:bg-[#18181B]"
           />
         </div>
 
@@ -833,7 +852,7 @@ function StepKeyword({
 }
 
 /* ─── Step 5: Done ───────────────────────────────────────────── */
-function StepDone({ name, keyword, siteData, website, platforms, context }: { name: string; keyword: string; siteData: SiteData | null; website: string; platforms: string[]; context: string }) {
+function StepDone({ name, keyword, siteData, website, product, platforms, context }: { name: string; keyword: string; siteData: SiteData | null; website: string; product: string; platforms: string[]; context: string }) {
   const [phase, setPhase] = useState(0);
 
   useEffect(() => {
@@ -859,12 +878,12 @@ function StepDone({ name, keyword, siteData, website, platforms, context }: { na
             className="space-y-4"
           >
             <motion.div
-              className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-[#6EE7B7]/20 bg-[#6EE7B7]/5"
+              className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-[#00D4AA]/20 bg-[#00D4AA]/5"
               animate={{ scale: [1, 1.05, 1] }}
               transition={{ duration: 1.5, repeat: Infinity }}
             >
               <motion.div
-                className="h-6 w-6 rounded-full border-2 border-[#6EE7B7]/30 border-t-[#6EE7B7]"
+                className="h-6 w-6 rounded-full border-2 border-[#00D4AA]/30 border-t-[#00D4AA]"
                 animate={{ rotate: 360 }}
                 transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
               />
@@ -884,7 +903,7 @@ function StepDone({ name, keyword, siteData, website, platforms, context }: { na
                   transition={{ delay: 0.3 + i * 0.4 }}
                 >
                   <motion.div
-                    className="h-1.5 w-1.5 rounded-full bg-[#6EE7B7]"
+                    className="h-1.5 w-1.5 rounded-full bg-[#00D4AA]"
                     animate={{ scale: [1, 1.4, 1], opacity: [0.5, 1, 0.5] }}
                     transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.2 }}
                   />
@@ -902,7 +921,7 @@ function StepDone({ name, keyword, siteData, website, platforms, context }: { na
           >
             {/* Success check */}
             <motion.div
-              className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full border border-[#6EE7B7]/30 bg-[#6EE7B7]/5"
+              className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full border border-[#00D4AA]/30 bg-[#00D4AA]/5"
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: "spring", stiffness: 200, damping: 15 }}
@@ -912,7 +931,7 @@ function StepDone({ name, keyword, siteData, website, platforms, context }: { na
                 height="28"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="#6EE7B7"
+                stroke="#00D4AA"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -953,7 +972,7 @@ function StepDone({ name, keyword, siteData, website, platforms, context }: { na
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 + i * 0.1 }}
                 >
-                  <p className="font-heading text-xl font-bold text-[#6EE7B7]">{stat.value}</p>
+                  <p className="font-heading text-xl font-bold text-[#00D4AA]">{stat.value}</p>
                   <p className="text-[10px] text-[#52525B]">{stat.label}</p>
                 </motion.div>
               ))}
@@ -974,6 +993,7 @@ function StepDone({ name, keyword, siteData, website, platforms, context }: { na
                       JSON.stringify({
                         name: name,
                         website: website,
+                        product: product,
                         siteData: siteData,
                         platforms: platforms,
                         keyword: keyword,
@@ -1013,7 +1033,7 @@ function StepDone({ name, keyword, siteData, website, platforms, context }: { na
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 1.1 + i * 0.08 }}
                 >
-                  <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#6EE7B7]/10 text-[9px] font-bold text-[#6EE7B7] mt-0.5">
+                  <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#00D4AA]/10 text-[9px] font-bold text-[#00D4AA] mt-0.5">
                     {i + 1}
                   </span>
                   <span className="text-[11px] text-[#71717A]">{item}</span>
@@ -1034,6 +1054,7 @@ export default function OnboardingPage() {
   const [step, setStep] = useState(1);
   const [name, setName] = useState("");
   const [website, setWebsite] = useState("");
+  const [product, setProduct] = useState("");
   const [siteData, setSiteData] = useState<SiteData | null>(null);
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(["google"]);
   const [keyword, setKeyword] = useState("");
@@ -1064,7 +1085,7 @@ export default function OnboardingPage() {
   if (authLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: "#0A0A0B" }}>
-        <div className="h-6 w-6 rounded-full border-2 border-[#27272A] border-t-[#6EE7B7] animate-spin" />
+        <div className="h-6 w-6 rounded-full border-2 border-[#27272A] border-t-[#00D4AA] animate-spin" />
       </div>
     );
   }
@@ -1127,6 +1148,8 @@ export default function OnboardingPage() {
               setName={setName}
               website={website}
               setWebsite={setWebsite}
+              product={product}
+              setProduct={setProduct}
               onNext={() => setStep(2)}
             />
           )}
@@ -1161,7 +1184,7 @@ export default function OnboardingPage() {
             />
           )}
           {step === 5 && (
-            <StepDone name={name} keyword={keyword} siteData={siteData} website={website} platforms={selectedPlatforms} context={context} />
+            <StepDone name={name} keyword={keyword} siteData={siteData} website={website} product={product} platforms={selectedPlatforms} context={context} />
           )}
         </AnimatePresence>
       </div>

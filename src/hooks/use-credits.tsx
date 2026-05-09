@@ -19,7 +19,7 @@ interface CreditsState {
 
 const CreditsContext = createContext<CreditsState>({
   creditsRemaining: 0,
-  maxCredits: 25,
+  maxCredits: 100,
   totalUsed: 0,
   totalRefunded: 0,
   tier: "free",
@@ -31,7 +31,7 @@ const CreditsContext = createContext<CreditsState>({
 
 export function CreditsProvider({ children }: { children: ReactNode }) {
   const [creditsRemaining, setCreditsRemaining] = useState(0);
-  const [maxCredits, setMaxCredits] = useState(25);
+  const [maxCredits, setMaxCredits] = useState(100);
   const [totalUsed, setTotalUsed] = useState(0);
   const [totalRefunded, setTotalRefunded] = useState(0);
   const [tier, setTier] = useState<Tier>("free");
@@ -55,7 +55,7 @@ export function CreditsProvider({ children }: { children: ReactNode }) {
       if (res.ok) {
         const data = await res.json();
         setCreditsRemaining(data.credits_remaining);
-        setMaxCredits(data.max_credits ?? 25);
+        setMaxCredits(data.max_credits ?? 100);
         setTotalUsed(data.total_used ?? 0);
         setTotalRefunded(data.total_refunded ?? 0);
         setTier(data.tier ?? "free");
