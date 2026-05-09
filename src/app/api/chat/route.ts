@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import ZAI from "z-ai-web-dev-sdk";
 
-const LONGCAT_API_KEY = "ak_1Kc5610249yb6tQ4J98gE0sH6ca3Z";
-const LONGCAT_BASE_URL = "https://api.longcat.chat/openai";
-const LONGCAT_MODEL = "LongCat-Flash-Thinking-2601";
+const LONGCAT_API_KEY = process.env.LONGCAT_API_KEY || "";
+const LONGCAT_BASE_URL = process.env.LONGCAT_BASE_URL || "https://api.longcat.chat/openai";
+const LONGCAT_MODEL = process.env.LONGCAT_MODEL || "LongCat-Flash-Thinking-2601";
 
 interface AgentAction {
   type: string;

@@ -5,7 +5,7 @@
 
 import { Purchases } from "@revenuecat/purchases-js";
 
-const API_KEY = "test_tlRhcFQHyhurDBzpzNtNEEgOApR";
+const API_KEY = process.env.NEXT_PUBLIC_REVENUECAT_API_KEY || "";
 const ENTITLEMENT_NAME = "rankmebaddy Pro";
 
 let isInitialized = false;
