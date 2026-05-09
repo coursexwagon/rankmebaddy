@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Syne, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const syne = Syne({
   variable: "--font-syne",
@@ -43,8 +44,10 @@ export default function RootLayout({
       <body
         className={`${syne.variable} ${spaceGrotesk.variable} antialiased bg-background text-foreground`}
       >
-        {children}
-        <Toaster />
+        <ThemeProvider>
+          {children}
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );

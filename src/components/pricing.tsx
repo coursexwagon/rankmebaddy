@@ -103,8 +103,8 @@ function PricingCard({
       ref={ref}
       className={`relative overflow-hidden rounded-2xl border ${
         plan.highlighted
-          ? "border-[#2563EB]/30 bg-white shadow-lg shadow-blue-50"
-          : "border-[#E8E5E0] bg-white"
+          ? "border-[#2563EB]/30 bg-white shadow-lg shadow-blue-50 dark:bg-[#1E1E1E] dark:shadow-none"
+          : "border-[#E8E5E0] bg-white dark:border-[#333333] dark:bg-[#1E1E1E]"
       }`}
       style={{ marginTop: yOffset }}
       initial={{ opacity: 0, y: 60 }}
@@ -138,24 +138,24 @@ function PricingCard({
 
       <div className="relative p-6 sm:p-8">
         <div className="mb-1 flex items-center justify-between">
-          <h3 className="text-sm font-semibold uppercase tracking-wider text-[#6B6B6B]">
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-[#6B6B6B] dark:text-[#9B9B9B]">
             {plan.name}
           </h3>
           {plan.highlighted && (
-            <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-blue-600">
+            <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-blue-600 dark:bg-blue-900/20 dark:text-blue-400">
               Popular
             </span>
           )}
         </div>
 
         <div className="mt-3 flex items-baseline gap-1">
-          <span className="text-4xl font-bold text-[#1A1A1A] sm:text-5xl">
+          <span className="text-4xl font-bold text-[#1A1A1A] dark:text-[#E8E8E8] sm:text-5xl">
             ${plan.price}
           </span>
-          <span className="text-sm text-[#9B9B9B]">{plan.period}</span>
+          <span className="text-sm text-[#9B9B9B] dark:text-[#6B6B6B]">{plan.period}</span>
         </div>
 
-        <p className="mt-3 text-[13px] leading-relaxed text-[#6B6B6B]">
+        <p className="mt-3 text-[13px] leading-relaxed text-[#6B6B6B] dark:text-[#9B9B9B]">
           {plan.description}
         </p>
 
@@ -164,13 +164,13 @@ function PricingCard({
           className={`mt-6 block w-full rounded-full py-3 text-center text-sm font-semibold transition-all ${
             plan.highlighted
               ? "bg-[#2563EB] text-white hover:bg-blue-700"
-              : "border border-[#E8E5E0] bg-white text-[#1A1A1A] hover:border-[#9B9B9B] hover:bg-[#FAFAF7]"
+              : "border border-[#E8E5E0] bg-white text-[#1A1A1A] hover:border-[#9B9B9B] hover:bg-[#FAFAF7] dark:border-[#333333] dark:bg-[#1E1E1E] dark:text-[#E8E8E8] dark:hover:border-[#555555] dark:hover:bg-[#252525]"
           }`}
         >
           {plan.cta}
         </a>
 
-        <ul className="mt-6 space-y-3 border-t border-[#E8E5E0] pt-6">
+        <ul className="mt-6 space-y-3 border-t border-[#E8E5E0] pt-6 dark:border-[#333333]">
           {plan.features.map((feature, i) => (
             <motion.li
               key={feature.text}
@@ -189,7 +189,7 @@ function PricingCard({
                   strokeWidth="2.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="shrink-0"
+                  className="shrink-0 dark:stroke-blue-400"
                 >
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
@@ -203,7 +203,7 @@ function PricingCard({
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="shrink-0"
+                  className="shrink-0 dark:stroke-[#333333]"
                 >
                   <line x1="18" y1="6" x2="6" y2="18" />
                   <line x1="6" y1="6" x2="18" y2="18" />
@@ -211,7 +211,7 @@ function PricingCard({
               )}
               <span
                 className={
-                  feature.included ? "text-[#6B6B6B]" : "text-[#9B9B9B]"
+                  feature.included ? "text-[#6B6B6B] dark:text-[#9B9B9B]" : "text-[#9B9B9B] dark:text-[#6B6B6B]"
                 }
               >
                 {feature.text}
@@ -238,23 +238,22 @@ export default function PricingSection() {
     <section
       id="pricing"
       ref={sectionRef}
-      className="relative px-4 py-20 sm:px-6 sm:py-28"
-      style={{ backgroundColor: "#FAFAF7" }}
+      className="relative bg-[#FAFAF7] px-4 py-20 dark:bg-[#141414] sm:px-6 sm:py-28"
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E8E5E0] to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E8E5E0] to-transparent dark:via-[#333333]" />
 
       <div className="mx-auto max-w-5xl">
         <motion.div
           className="mb-14 flex flex-col items-center gap-3 text-center"
           style={{ y: labelY }}
         >
-          <span className="inline-flex items-center gap-2 rounded-full border border-[#E8E5E0] bg-white px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-[#6B6B6B]">
+          <span className="inline-flex items-center gap-2 rounded-full border border-[#E8E5E0] bg-white px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-[#6B6B6B] dark:border-[#333333] dark:bg-[#1E1E1E] dark:text-[#9B9B9B]">
             Pricing
           </span>
-          <h2 className="font-heading text-2xl font-bold text-[#1A1A1A] sm:text-3xl md:text-4xl">
+          <h2 className="font-heading text-2xl font-bold text-[#1A1A1A] dark:text-[#E8E8E8] sm:text-3xl md:text-4xl">
             <UnderlinedWord>Simple</UnderlinedWord> pricing. No surprises.
           </h2>
-          <p className="max-w-lg text-sm text-[#6B6B6B]">
+          <p className="max-w-lg text-sm text-[#6B6B6B] dark:text-[#9B9B9B]">
             Get the keywords, content strategy, and implementation guidance you
             need — across every platform. Start free, upgrade when you&apos;re ready.
           </p>
@@ -267,7 +266,7 @@ export default function PricingSection() {
         </div>
 
         <motion.p
-          className="mt-10 text-center text-xs text-[#9B9B9B]"
+          className="mt-10 text-center text-xs text-[#9B9B9B] dark:text-[#6B6B6B]"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}

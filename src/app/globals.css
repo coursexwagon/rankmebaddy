@@ -355,6 +355,46 @@
   margin: 1em 0;
 }
 
+.dark .markdown-content h1,
+.dark .markdown-content h2,
+.dark .markdown-content h3 {
+  color: #E8E8E8;
+}
+
+.dark .markdown-content p {
+  color: #C8C8C8;
+}
+
+.dark .markdown-content strong {
+  color: #E8E8E8;
+}
+
+.dark .markdown-content li {
+  color: #C8C8C8;
+}
+
+.dark .markdown-content code {
+  background: #2A2A2A;
+  color: #A78BFA;
+}
+
+.dark .markdown-content blockquote {
+  color: #9B9B9B;
+  border-left-color: #A78BFA;
+}
+
+.dark .markdown-content a {
+  color: #60A5FA;
+}
+
+.dark .markdown-content a:hover {
+  color: #93C5FD;
+}
+
+.dark .markdown-content hr {
+  border-top-color: #333333;
+}
+
 /* Custom scrollbar for chat areas */
 .custom-scrollbar::-webkit-scrollbar {
   width: 5px;
@@ -371,4 +411,11 @@
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #b0aca5;
+}
+
+.lab-bg::before {
+  overflow: hidden;
+  max-width: 100vw;
+  max-height: 100vh;
+  box-sizing: border-box;
 }

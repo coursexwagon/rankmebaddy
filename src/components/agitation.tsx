@@ -83,12 +83,11 @@ export default function AgitationSection() {
 
   return (
     <section
-      className="relative px-4 py-20 sm:px-6 sm:py-28"
-      style={{ backgroundColor: "#FAFAF7" }}
+      className="relative bg-[#FAFAF7] px-4 py-20 dark:bg-[#141414] sm:px-6 sm:py-28"
       ref={sectionRef}
     >
       {/* Top divider */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E8E5E0] to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E8E5E0] to-transparent dark:via-[#333333]" />
 
       <div className="mx-auto max-w-5xl">
         {/* Section label — parallax */}
@@ -96,13 +95,13 @@ export default function AgitationSection() {
           className="mb-14 flex flex-col items-center gap-3 text-center"
           style={{ y: headerY }}
         >
-          <span className="inline-flex items-center gap-2 rounded-full border border-[#E8E5E0] bg-white px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-[#6B6B6B]">
+          <span className="inline-flex items-center gap-2 rounded-full border border-[#E8E5E0] bg-white px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-[#6B6B6B] dark:border-[#333333] dark:bg-[#1E1E1E] dark:text-[#9B9B9B]">
             The Reality
           </span>
-          <h2 className="font-heading text-2xl font-bold text-[#1A1A1A] sm:text-3xl md:text-4xl">
+          <h2 className="font-heading text-2xl font-bold text-[#1A1A1A] dark:text-[#E8E8E8] sm:text-3xl md:text-4xl">
             Your week in SEO
           </h2>
-          <p className="max-w-md text-sm text-[#6B6B6B]">
+          <p className="max-w-md text-sm text-[#6B6B6B] dark:text-[#9B9B9B]">
             Hours poured in. Platforms juggled. Rankings barely moved.
           </p>
         </motion.div>
@@ -115,21 +114,21 @@ export default function AgitationSection() {
             {/* Left: The Problem Dashboard */}
             <div className="lg:col-span-3">
               <motion.div
-                className="relative overflow-hidden rounded-2xl border border-[#E8E5E0] bg-white shadow-sm"
+                className="relative overflow-hidden rounded-2xl border border-[#E8E5E0] bg-white shadow-sm dark:border-[#333333] dark:bg-[#1E1E1E] dark:shadow-none"
                 initial={{ opacity: 0, y: 30 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.7, delay: 0.2, ease: [0.21, 0.47, 0.32, 0.98] }}
               >
                 {/* Dashboard header */}
-                <div className="flex items-center justify-between border-b border-[#E8E5E0] px-5 py-3 bg-[#FAFAF7]">
+                <div className="flex items-center justify-between border-b border-[#E8E5E0] bg-[#FAFAF7] px-5 py-3 dark:border-[#333333] dark:bg-[#252525]">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-[#1A1A1A]">SEO Dashboard</span>
-                    <span className="rounded-full bg-red-50 px-2 py-0.5 text-[9px] font-medium text-red-500">This week</span>
+                    <span className="text-sm font-semibold text-[#1A1A1A] dark:text-[#E8E8E8]">SEO Dashboard</span>
+                    <span className="rounded-full bg-red-50 px-2 py-0.5 text-[9px] font-medium text-red-500 dark:bg-red-900/20 dark:text-red-400">This week</span>
                   </div>
                   <div className="flex gap-1.5">
-                    <div className="h-2.5 w-2.5 rounded-full bg-[#E8E5E0]" />
-                    <div className="h-2.5 w-2.5 rounded-full bg-[#E8E5E0]" />
-                    <div className="h-2.5 w-2.5 rounded-full bg-[#E8E5E0]" />
+                    <div className="h-2.5 w-2.5 rounded-full bg-[#E8E5E0] dark:bg-[#333333]" />
+                    <div className="h-2.5 w-2.5 rounded-full bg-[#E8E5E0] dark:bg-[#333333]" />
+                    <div className="h-2.5 w-2.5 rounded-full bg-[#E8E5E0] dark:bg-[#333333]" />
                   </div>
                 </div>
                 
@@ -137,39 +136,39 @@ export default function AgitationSection() {
                   {/* Status cards row */}
                   <div className="grid grid-cols-3 gap-3">
                     <motion.div
-                      className="rounded-xl border border-[#E8E5E0]/60 bg-[#FAFAF7] p-3"
+                      className="rounded-xl border border-[#E8E5E0]/60 bg-[#FAFAF7] p-3 dark:border-[#333333]/60 dark:bg-[#252525]"
                       initial={{ opacity: 0, y: 10 }}
                       animate={isInView ? { opacity: 1, y: 0 } : {}}
                       transition={{ duration: 0.4, delay: 0.4 }}
                     >
-                      <p className="text-[9px] uppercase tracking-wider text-[#9B9B9B]">Platforms</p>
-                      <p className="mt-1 text-lg font-bold text-[#1A1A1A]">5</p>
+                      <p className="text-[9px] uppercase tracking-wider text-[#9B9B9B] dark:text-[#6B6B6B]">Platforms</p>
+                      <p className="mt-1 text-lg font-bold text-[#1A1A1A] dark:text-[#E8E8E8]">5</p>
                       <div className="mt-1.5 flex -space-x-1">
                         {platforms.slice(0, 5).map((p, i) => (
-                          <span key={p.name} className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-white" style={{ backgroundColor: `${p.color}15`, zIndex: 5 - i }}>
+                          <span key={p.name} className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-white dark:border-[#1E1E1E]" style={{ backgroundColor: `${p.color}15`, zIndex: 5 - i }}>
                             <span className="text-[6px] font-bold" style={{ color: p.color }}>{p.name[0]}</span>
                           </span>
                         ))}
                       </div>
                     </motion.div>
                     <motion.div
-                      className="rounded-xl border border-red-100 bg-red-50/50 p-3"
+                      className="rounded-xl border border-red-100 bg-red-50/50 p-3 dark:border-red-900/30 dark:bg-red-900/20"
                       initial={{ opacity: 0, y: 10 }}
                       animate={isInView ? { opacity: 1, y: 0 } : {}}
                       transition={{ duration: 0.4, delay: 0.5 }}
                     >
-                      <p className="text-[9px] uppercase tracking-wider text-red-400">Hours Wasted</p>
-                      <p className="mt-1 text-lg font-bold text-red-600">{totalHours}h</p>
+                      <p className="text-[9px] uppercase tracking-wider text-red-400 dark:text-red-400">Hours Wasted</p>
+                      <p className="mt-1 text-lg font-bold text-red-600 dark:text-red-400">{totalHours}h</p>
                       <p className="text-[9px] text-red-400">/week</p>
                     </motion.div>
                     <motion.div
-                      className="rounded-xl border border-[#E8E5E0]/60 bg-[#FAFAF7] p-3"
+                      className="rounded-xl border border-[#E8E5E0]/60 bg-[#FAFAF7] p-3 dark:border-[#333333]/60 dark:bg-[#252525]"
                       initial={{ opacity: 0, y: 10 }}
                       animate={isInView ? { opacity: 1, y: 0 } : {}}
                       transition={{ duration: 0.4, delay: 0.6 }}
                     >
-                      <p className="text-[9px] uppercase tracking-wider text-[#9B9B9B]">Avg Position</p>
-                      <p className="mt-1 text-lg font-bold text-[#9B9B9B]">#47</p>
+                      <p className="text-[9px] uppercase tracking-wider text-[#9B9B9B] dark:text-[#6B6B6B]">Avg Position</p>
+                      <p className="mt-1 text-lg font-bold text-[#9B9B9B] dark:text-[#6B6B6B]">#47</p>
                       <p className="text-[9px] text-red-400">No change</p>
                     </motion.div>
                   </div>
@@ -181,7 +180,7 @@ export default function AgitationSection() {
                       return (
                         <motion.div
                           key={p.name}
-                          className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-[#FAFAF7]"
+                          className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-[#FAFAF7] dark:hover:bg-[#252525]"
                           initial={{ opacity: 0, x: -12 }}
                           animate={isInView ? { opacity: 1, x: 0 } : {}}
                           transition={{ duration: 0.4, delay: 0.5 + i * 0.08 }}
@@ -194,10 +193,10 @@ export default function AgitationSection() {
                           </span>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between mb-1">
-                              <span className="text-[12px] font-medium text-[#1A1A1A]">{p.name}</span>
+                              <span className="text-[12px] font-medium text-[#1A1A1A] dark:text-[#E8E8E8]">{p.name}</span>
                               <span className="text-[11px] font-semibold tabular-nums" style={{ color: `${p.color}CC` }}>{p.hours}h</span>
                             </div>
-                            <div className="h-1.5 rounded-full bg-[#F0EDE8]">
+                            <div className="h-1.5 rounded-full bg-[#F0EDE8] dark:bg-[#2A2A2A]">
                               <motion.div
                                 className="h-1.5 rounded-full"
                                 style={{ backgroundColor: `${p.color}40` }}
@@ -227,21 +226,21 @@ export default function AgitationSection() {
             <div className="lg:col-span-2 flex flex-col gap-4">
               {/* Time card */}
               <motion.div
-                className="relative overflow-hidden rounded-2xl border border-[#E8E5E0] bg-white p-5 shadow-sm"
+                className="relative overflow-hidden rounded-2xl border border-[#E8E5E0] bg-white p-5 shadow-sm dark:border-[#333333] dark:bg-[#1E1E1E] dark:shadow-none"
                 initial={{ opacity: 0, y: 30 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.7, delay: 0.3, ease: [0.21, 0.47, 0.32, 0.98] }}
               >
                 <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-50">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-50 dark:bg-red-900/20">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                       <circle cx="12" cy="12" r="10" />
                       <polyline points="12 6 12 12 16 14" />
                     </svg>
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-[#1A1A1A]">{totalHours}+ hours every week</p>
-                    <p className="mt-1 text-[12px] leading-relaxed text-[#6B6B6B]">
+                    <p className="text-sm font-semibold text-[#1A1A1A] dark:text-[#E8E8E8]">{totalHours}+ hours every week</p>
+                    <p className="mt-1 text-[12px] leading-relaxed text-[#6B6B6B] dark:text-[#9B9B9B]">
                       Juggling 5 platforms, manually researching keywords, writing content, tracking rankings — rinse and repeat.
                     </p>
                   </div>
@@ -250,13 +249,13 @@ export default function AgitationSection() {
 
               {/* No progress card */}
               <motion.div
-                className="relative overflow-hidden rounded-2xl border border-[#E8E5E0] bg-white p-5 shadow-sm"
+                className="relative overflow-hidden rounded-2xl border border-[#E8E5E0] bg-white p-5 shadow-sm dark:border-[#333333] dark:bg-[#1E1E1E] dark:shadow-none"
                 initial={{ opacity: 0, y: 30 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.7, delay: 0.45, ease: [0.21, 0.47, 0.32, 0.98] }}
               >
                 <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#FFF7ED]">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#FFF7ED] dark:bg-amber-900/20">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
                       <line x1="12" y1="9" x2="12" y2="13" />
@@ -264,8 +263,8 @@ export default function AgitationSection() {
                     </svg>
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-[#1A1A1A]">Zero ranking progress</p>
-                    <p className="mt-1 text-[12px] leading-relaxed text-[#6B6B6B]">
+                    <p className="text-sm font-semibold text-[#1A1A1A] dark:text-[#E8E8E8]">Zero ranking progress</p>
+                    <p className="mt-1 text-[12px] leading-relaxed text-[#6B6B6B] dark:text-[#9B9B9B]">
                       Despite all the hours, your positions stay the same. Google stays on page 2. YouTube views stay flat. Amazon stays invisible.
                     </p>
                   </div>
@@ -274,13 +273,13 @@ export default function AgitationSection() {
 
               {/* Burnout card */}
               <motion.div
-                className="relative overflow-hidden rounded-2xl border border-[#E8E5E0] bg-white p-5 shadow-sm"
+                className="relative overflow-hidden rounded-2xl border border-[#E8E5E0] bg-white p-5 shadow-sm dark:border-[#333333] dark:bg-[#1E1E1E] dark:shadow-none"
                 initial={{ opacity: 0, y: 30 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.7, delay: 0.6, ease: [0.21, 0.47, 0.32, 0.98] }}
               >
                 <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#F5F3FF]">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#F5F3FF] dark:bg-violet-900/20">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M8 2v4" /><path d="M16 2v4" />
                       <rect width="18" height="18" x="3" y="4" rx="2" />
@@ -289,8 +288,8 @@ export default function AgitationSection() {
                     </svg>
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-[#1A1A1A]">Repeating the same cycle</p>
-                    <p className="mt-1 text-[12px] leading-relaxed text-[#6B6B6B]">
+                    <p className="text-sm font-semibold text-[#1A1A1A] dark:text-[#E8E8E8]">Repeating the same cycle</p>
+                    <p className="mt-1 text-[12px] leading-relaxed text-[#6B6B6B] dark:text-[#9B9B9B]">
                       Every week you start over. Same research. Same optimization. Same disappointment. There has to be a better way.
                     </p>
                   </div>

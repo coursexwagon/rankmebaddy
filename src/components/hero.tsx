@@ -29,7 +29,6 @@ function AmazonIcon({ size = 24 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <path d="M.05 18.47c.08-.1.2-.1.36-.02 3.7 2.13 7.72 3.2 12.06 3.2 2.9 0 5.76-.54 8.58-1.63l.3-.13c.27-.12.45-.02.25.2-.2.2-.45.4-.7.6-2.64 1.96-5.73 2.93-9.24 2.93-4.05 0-7.77-1.36-11.17-4.09-.22-.17-.36-.3-.44-.36a.23.23 0 0 1 0-.3v-.4z" fill="#FF9900"/>
-      <path d="M15.35 16.01c.07-.09.18-.09.31-.03.93.45 2.14.68 3.36.68.6 0 1.25-.07 1.88-.22.07-.02.14-.03.2-.03.19 0 .29.12.29.27 0 .18-.09.36-.27.5-.77.59-2.22 1.05-3.65 1.05-1.01 0-1.98-.25-2.64-.7-.13-.09-.2-.2-.2-.32 0-.07.02-.13.07-.2h.65z" fill="#FF9900"/>
     </svg>
   );
 }
@@ -38,8 +37,6 @@ function TikTokIcon({ size = 24 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" fill="#010101"/>
-      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" fill="#25F4EE" opacity="0.3"/>
-      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" fill="#FE2C55" opacity="0.3"/>
     </svg>
   );
 }
@@ -49,8 +46,6 @@ function AISeoIcon({ size = 24 }: { size?: number }) {
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"/>
       <path d="M16 14H8a6 6 0 0 0-6 6v1h20v-1a6 6 0 0 0-6-6z"/>
-      <circle cx="12" cy="6" r="1.5" fill="#8B5CF6" stroke="none"/>
-      <path d="M9 6h1M14 6h1" strokeWidth="1"/>
     </svg>
   );
 }
@@ -58,9 +53,7 @@ function AISeoIcon({ size = 24 }: { size?: number }) {
 function KeywordIcon({ size = 24 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 7V4h16v3"/>
-      <path d="M9 20h6"/>
-      <path d="M12 4v16"/>
+      <path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/>
     </svg>
   );
 }
@@ -70,9 +63,7 @@ function ContentIcon({ size = 24 }: { size?: number }) {
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
       <polyline points="14 2 14 8 20 8"/>
-      <line x1="16" y1="13" x2="8" y2="13"/>
-      <line x1="16" y1="17" x2="8" y2="17"/>
-      <polyline points="10 9 9 9 8 9"/>
+      <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
     </svg>
   );
 }
@@ -80,8 +71,7 @@ function ContentIcon({ size = 24 }: { size?: number }) {
 function TechIcon({ size = 24 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#60A5FA" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
-      <polyline points="16 7 22 7 22 13"/>
+      <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>
     </svg>
   );
 }
@@ -89,8 +79,7 @@ function TechIcon({ size = 24 }: { size?: number }) {
 function SiteIcon({ size = 24 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#FB923C" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10"/>
-      <line x1="2" y1="12" x2="22" y2="12"/>
+      <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
       <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
     </svg>
   );
@@ -115,130 +104,168 @@ function ShopifyIcon({ size = 24 }: { size?: number }) {
 }
 
 /* ─── Orbit Visualization ──────────────────────────────────── */
+// Uses an SVG-based approach for perfect scaling and positioning
 function OrbitViz() {
+  // Node data: angle in degrees, orbit ring (1=inner, 2=main, 3=outer)
   const orbitNodes = [
-    { angle: 0, radius: 155, size: 48, delay: 0, icon: <GoogleIcon size={22} />, label: "Google", glow: "#4285F4" },
-    { angle: 60, radius: 155, size: 44, delay: 0.2, icon: <YouTubeIcon size={20} />, label: "YouTube", glow: "#FF0000" },
-    { angle: 120, radius: 155, size: 46, delay: 0.4, icon: <AmazonIcon size={20} />, label: "Amazon", glow: "#FF9900" },
-    { angle: 180, radius: 155, size: 42, delay: 0.6, icon: <TikTokIcon size={18} />, label: "TikTok", glow: "#FE2C55" },
-    { angle: 240, radius: 155, size: 44, delay: 0.8, icon: <AISeoIcon size={20} />, label: "AI Search", glow: "#8B5CF6" },
-    { angle: 300, radius: 155, size: 40, delay: 1.0, icon: <ShopifyIcon size={18} />, label: "Shopify", glow: "#95BF47" },
+    { angle: 0, ring: 2, size: 48, delay: 0, icon: <GoogleIcon size={22} />, label: "Google", glow: "#4285F4" },
+    { angle: 60, ring: 2, size: 44, delay: 0.2, icon: <YouTubeIcon size={20} />, label: "YouTube", glow: "#FF0000" },
+    { angle: 120, ring: 2, size: 46, delay: 0.4, icon: <AmazonIcon size={20} />, label: "Amazon", glow: "#FF9900" },
+    { angle: 180, ring: 2, size: 42, delay: 0.6, icon: <TikTokIcon size={18} />, label: "TikTok", glow: "#FE2C55" },
+    { angle: 240, ring: 2, size: 44, delay: 0.8, icon: <AISeoIcon size={20} />, label: "AI Search", glow: "#8B5CF6" },
+    { angle: 300, ring: 2, size: 40, delay: 1.0, icon: <ShopifyIcon size={18} />, label: "Shopify", glow: "#95BF47" },
     // Outer orbit — secondary SEO elements
-    { angle: 30, radius: 220, size: 36, delay: 0.3, icon: <KeywordIcon size={16} />, label: "Keywords", glow: "#10B981" },
-    { angle: 90, radius: 220, size: 34, delay: 0.5, icon: <ContentIcon size={16} />, label: "Content", glow: "#F59E0B" },
-    { angle: 150, radius: 220, size: 36, delay: 0.7, icon: <TechIcon size={16} />, label: "Analytics", glow: "#60A5FA" },
-    { angle: 210, radius: 220, size: 32, delay: 0.9, icon: <SiteIcon size={14} />, label: "Site Audit", glow: "#FB923C" },
-    { angle: 270, radius: 220, size: 34, delay: 1.1, icon: <BacklinkIcon size={16} />, label: "Backlinks", glow: "#A78BFA" },
-    { angle: 330, radius: 220, size: 32, delay: 1.3, icon: <AISeoIcon size={14} />, label: "On-Page", glow: "#EC4899" },
+    { angle: 30, ring: 3, size: 36, delay: 0.3, icon: <KeywordIcon size={16} />, label: "Keywords", glow: "#10B981" },
+    { angle: 90, ring: 3, size: 34, delay: 0.5, icon: <ContentIcon size={16} />, label: "Content", glow: "#F59E0B" },
+    { angle: 150, ring: 3, size: 36, delay: 0.7, icon: <TechIcon size={16} />, label: "Analytics", glow: "#60A5FA" },
+    { angle: 210, ring: 3, size: 32, delay: 0.9, icon: <SiteIcon size={14} />, label: "Site Audit", glow: "#FB923C" },
+    { angle: 270, ring: 3, size: 34, delay: 1.1, icon: <BacklinkIcon size={16} />, label: "Backlinks", glow: "#A78BFA" },
+    { angle: 330, ring: 3, size: 32, delay: 1.3, icon: <AISeoIcon size={14} />, label: "On-Page", glow: "#EC4899" },
   ];
+
+  // SVG viewBox is 500x500, center at 250,250
+  const cx = 250;
+  const cy = 250;
+  const ringRadii = { 1: 70, 2: 135, 3: 210 };
 
   return (
     <div className="relative mx-auto mt-8 h-[320px] w-[320px] sm:mt-12 sm:h-[460px] sm:w-[460px] md:h-[540px] md:w-[540px]">
-      {/* Concentric orbit rings */}
-      {[90, 155, 220].map((r, i) => (
-        <div
-          key={`ring-${r}`}
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
-          style={{
-            width: r * 2,
-            height: r * 2,
-            border: i === 1 ? "1.5px dashed rgba(255,255,255,0.12)" : "1px solid rgba(255,255,255,0.06)",
-            animation: i === 1 ? "ringRotate 60s linear infinite" : i === 0 ? "ringRotateReverse 45s linear infinite" : "ringRotate 80s linear infinite",
-          }}
-        >
-          {/* Orbit dot markers */}
-          {[0, 90, 180, 270].map((deg) => (
-            <div
-              key={deg}
-              className="absolute h-1 w-1 rounded-full bg-white/15"
-              style={{
-                left: `${50 + 50 * Math.cos((deg * Math.PI) / 180)}%`,
-                top: `${50 + 50 * Math.sin((deg * Math.PI) / 180)}%`,
-                transform: "translate(-50%, -50%)",
-              }}
-            />
-          ))}
-        </div>
-      ))}
-
-      {/* Center — RankMeBaddy logo mark */}
-      <motion.div
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 text-center"
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.8, delay: 0.5 }}
+      {/* Full SVG-based orbit — scales automatically */}
+      <svg
+        viewBox="0 0 500 500"
+        className="h-full w-full"
+        style={{ overflow: "visible" }}
       >
-        <div className="relative flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 shadow-[0_0_40px_rgba(37,99,235,0.15)]">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-          {/* Pulse ring around center */}
-          <div className="absolute inset-0 rounded-2xl border border-white/10 animate-pulse-glow" />
-        </div>
-      </motion.div>
+        {/* Orbit rings */}
+        <circle cx={cx} cy={cy} r={ringRadii[1]} fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
+        <circle cx={cx} cy={cy} r={ringRadii[2]} fill="none" stroke="rgba(255,255,255,0.10)" strokeWidth="1.5" strokeDasharray="6 4" />
+        <circle cx={cx} cy={cy} r={ringRadii[3]} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
 
-      {/* Floating platform nodes with professional icons */}
-      {orbitNodes.map((node, i) => {
-        const rad = (node.angle * Math.PI) / 180;
-        const x = Math.cos(rad) * node.radius;
-        const y = Math.sin(rad) * node.radius;
-        const floatClass = i % 3 === 0 ? "animate-float" : i % 3 === 1 ? "animate-float-slow" : "animate-float-reverse";
-
-        return (
-          <motion.div
-            key={i}
-            className={`absolute left-1/2 top-1/2 z-10 ${floatClass}`}
-            style={{
-              transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`,
-              animationDelay: `${node.delay}s`,
-            }}
-            initial={{ opacity: 0, scale: 0 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.4 + node.delay }}
-          >
-            <div
-              className="group relative flex flex-col items-center gap-1"
-            >
-              <div
-                className="flex items-center justify-center rounded-xl backdrop-blur-md border border-white/20 transition-all duration-300 group-hover:scale-110 group-hover:border-white/40"
-                style={{
-                  width: node.size,
-                  height: node.size,
-                  background: `linear-gradient(135deg, ${node.glow}18, ${node.glow}08)`,
-                  boxShadow: `0 0 24px ${node.glow}15, 0 0 48px ${node.glow}08`,
-                }}
-              >
-                {node.icon}
-              </div>
-              {/* Label that appears on hover */}
-              <span className="text-[8px] sm:text-[9px] font-medium text-white/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
-                {node.label}
-              </span>
-            </div>
-          </motion.div>
-        );
-      })}
-
-      {/* Connection lines (SVG) */}
-      <svg className="absolute inset-0 h-full w-full" style={{ zIndex: 1 }}>
-        {orbitNodes.slice(0, 6).map((node, i) => {
+        {/* Connection lines from center to main orbit nodes */}
+        {orbitNodes.filter(n => n.ring === 2).map((node, i) => {
           const rad = (node.angle * Math.PI) / 180;
-          const x = 50 + (Math.cos(rad) * node.radius) / 5.4;
-          const y = 50 + (Math.sin(rad) * node.radius) / 5.4;
+          const x = cx + Math.cos(rad) * ringRadii[2];
+          const y = cy + Math.sin(rad) * ringRadii[2];
           return (
             <motion.line
               key={`line-${i}`}
-              x1="50%"
-              y1="50%"
-              x2={`${x}%`}
-              y2={`${y}%`}
-              stroke="rgba(255,255,255,0.05)"
+              x1={cx} y1={cy} x2={x} y2={y}
+              stroke="rgba(255,255,255,0.04)"
               strokeWidth="1"
               strokeDasharray="4 4"
               initial={{ pathLength: 0, opacity: 0 }}
               animate={{ pathLength: 1, opacity: 1 }}
               transition={{ duration: 1.5, delay: 0.5 + i * 0.15 }}
             />
+          );
+        })}
+
+        {/* Center glow */}
+        <defs>
+          <radialGradient id="centerGlow">
+            <stop offset="0%" stopColor="rgba(37,99,235,0.2)" />
+            <stop offset="100%" stopColor="transparent" />
+          </radialGradient>
+        </defs>
+        <circle cx={cx} cy={cy} r="45" fill="url(#centerGlow)" />
+
+        {/* Center logo */}
+        <motion.g
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.5 }}
+        >
+          <rect
+            x={cx - 22} y={cy - 22}
+            width="44" height="44"
+            rx="10" ry="10"
+            fill="rgba(255,255,255,0.08)"
+            stroke="rgba(255,255,255,0.15)"
+            strokeWidth="1"
+          />
+          <polyline
+            points={`${cx - 6},${cy + 2} ${cx - 1},${cy + 7} ${cx + 6},${cy - 4}`}
+            fill="none"
+            stroke="white"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </motion.g>
+
+        {/* Orbit nodes */}
+        {orbitNodes.map((node, i) => {
+          const rad = (node.angle * Math.PI) / 180;
+          const r = ringRadii[node.ring as keyof typeof ringRadii];
+          const x = cx + Math.cos(rad) * r;
+          const y = cy + Math.sin(rad) * r;
+          const halfSize = node.size / 2;
+
+          return (
+            <motion.g
+              key={i}
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{
+                opacity: 1,
+                scale: 1,
+                // Gentle floating animation using Framer Motion
+                y: [0, -3, 0, 3, 0],
+              }}
+              transition={{
+                opacity: { duration: 0.6, delay: 0.4 + node.delay },
+                scale: { duration: 0.6, delay: 0.4 + node.delay },
+                y: {
+                  duration: 4 + (i % 3),
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay: node.delay,
+                },
+              }}
+              style={{ cursor: "pointer" }}
+            >
+              {/* Background circle for the icon */}
+              <rect
+                x={x - halfSize / 2} y={y - halfSize / 2}
+                width={node.size / 2} height={node.size / 2}
+                rx="6" ry="6"
+                fill={`linear-gradient(135deg, ${node.glow}18, ${node.glow}08)`}
+                stroke="rgba(255,255,255,0.20)"
+                strokeWidth="0.5"
+              />
+              {/* Use foreignObject to render React SVG icons inside SVG */}
+              <foreignObject
+                x={x - halfSize / 2}
+                y={y - halfSize / 2}
+                width={node.size / 2}
+                height={node.size / 2}
+              >
+                <div
+                  className="flex items-center justify-center w-full h-full rounded-lg"
+                  style={{
+                    background: `linear-gradient(135deg, ${node.glow}25, ${node.glow}10)`,
+                    border: "1px solid rgba(255,255,255,0.20)",
+                    backdropFilter: "blur(8px)",
+                  }}
+                >
+                  <div style={{ transform: `scale(${(node.size / 2) / 48})`, transformOrigin: "center" }}>
+                    {node.icon}
+                  </div>
+                </div>
+              </foreignObject>
+
+              {/* Label */}
+              <text
+                x={x}
+                y={y + halfSize / 2 + 10}
+                textAnchor="middle"
+                fill="rgba(255,255,255,0.4)"
+                fontSize="8"
+                fontFamily="system-ui, sans-serif"
+                fontWeight="500"
+              >
+                {node.label}
+              </text>
+            </motion.g>
           );
         })}
       </svg>
@@ -297,7 +324,6 @@ export default function HeroSection() {
     >
       {/* ── Rich gradient background ── */}
       <motion.div className="absolute inset-0" style={{ opacity: bgOpacity }}>
-        {/* Main gradient: warm peach → deep purple → dark navy */}
         <div
           className="absolute inset-0"
           style={{
@@ -309,8 +335,6 @@ export default function HeroSection() {
             `,
           }}
         />
-
-        {/* Animated gradient overlay that shifts */}
         <div
           className="absolute inset-0"
           style={{
@@ -319,43 +343,23 @@ export default function HeroSection() {
             animation: "gradientShift 15s ease infinite",
           }}
         />
-
-        {/* Floating orbs — subtle glow effects */}
         <motion.div
           className="absolute w-72 h-72 rounded-full"
-          style={{
-            background: "radial-gradient(circle, rgba(255,216,168,0.2) 0%, transparent 70%)",
-            left: "10%", top: "15%",
-          }}
+          style={{ background: "radial-gradient(circle, rgba(255,216,168,0.2) 0%, transparent 70%)", left: "10%", top: "15%" }}
           animate={{ x: [0, 30, -20, 0], y: [0, -20, 30, 0], scale: [1, 1.1, 0.9, 1] }}
           transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div
           className="absolute w-56 h-56 rounded-full"
-          style={{
-            background: "radial-gradient(circle, rgba(106,48,147,0.25) 0%, transparent 70%)",
-            right: "10%", top: "25%",
-          }}
+          style={{ background: "radial-gradient(circle, rgba(106,48,147,0.25) 0%, transparent 70%)", right: "10%", top: "25%" }}
           animate={{ x: [0, -25, 15, 0], y: [0, 25, -15, 0], scale: [1, 0.9, 1.1, 1] }}
           transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
         />
-        <motion.div
-          className="absolute w-44 h-44 rounded-full"
-          style={{
-            background: "radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%)",
-            right: "25%", bottom: "15%",
-          }}
-          animate={{ x: [0, 15, -10, 0], y: [0, -15, 10, 0] }}
-          transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
-        />
-
-        {/* Noise texture overlay */}
         <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E\")" }} />
       </motion.div>
 
       {/* ── Content ── */}
       <motion.div className="relative z-10 mx-auto max-w-3xl text-center" style={{ y: textY }}>
-        {/* Nav spacer */}
         <div className="h-24 sm:h-32 md:h-36" />
 
         {/* Badge */}
@@ -369,7 +373,7 @@ export default function HeroSection() {
           <span className="text-[11px] font-medium text-white/70">AI-powered multi-platform SEO</span>
         </motion.div>
 
-        {/* Headline — WHITE text on gradient */}
+        {/* Headline */}
         <motion.h1
           className="font-heading text-4xl font-bold leading-[1.08] tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl"
           initial={{ opacity: 0, y: 20 }}
@@ -379,22 +383,8 @@ export default function HeroSection() {
           Rank everywhere.{" "}
           <span className="relative inline-block">
             Autonomously
-            <svg
-              className="absolute -bottom-1 left-0 w-full overflow-visible"
-              viewBox="0 0 200 12"
-              preserveAspectRatio="none"
-              style={{ height: "0.12em" }}
-            >
-              <motion.path
-                d="M2,8 C40,3 80,11 120,6 C150,2 175,9 198,5"
-                stroke="#6EE7B7"
-                strokeWidth="3"
-                strokeLinecap="round"
-                fill="none"
-                initial={{ pathLength: 0 }}
-                animate={{ pathLength: 1 }}
-                transition={{ duration: 1, delay: 0.8, ease: "easeOut" }}
-              />
+            <svg className="absolute -bottom-1 left-0 w-full overflow-visible" viewBox="0 0 200 12" preserveAspectRatio="none" style={{ height: "0.12em" }}>
+              <motion.path d="M2,8 C40,3 80,11 120,6 C150,2 175,9 198,5" stroke="#6EE7B7" strokeWidth="3" strokeLinecap="round" fill="none" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1, delay: 0.8, ease: "easeOut" }} />
             </svg>
           </span>
           .
@@ -411,7 +401,7 @@ export default function HeroSection() {
           Google, YouTube, Amazon, TikTok, and AI Search.
         </motion.p>
 
-        {/* CTA — dark button with white text and arrow */}
+        {/* CTA */}
         <motion.div
           className="mt-9 flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-4"
           initial={{ opacity: 0, y: 16 }}
@@ -423,21 +413,10 @@ export default function HeroSection() {
             className="group inline-flex items-center gap-2.5 rounded-full bg-white px-8 py-4 text-sm font-semibold text-[#1A1A2E] shadow-lg shadow-black/20 transition-all hover:bg-white/90 hover:shadow-xl hover:shadow-black/30"
           >
             Start ranking free
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="transition-transform group-hover:translate-x-0.5"
-            >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform group-hover:translate-x-0.5">
               <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
             </svg>
           </a>
-
           <a
             href="#proof"
             className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-6 py-3.5 text-sm font-medium text-white/70 backdrop-blur-sm transition-colors hover:border-white/30 hover:text-white"
@@ -446,18 +425,12 @@ export default function HeroSection() {
           </a>
         </motion.div>
 
-        {/* Trust line */}
-        <motion.p
-          className="mt-5 text-xs text-white/40"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.6 }}
-        >
+        <motion.p className="mt-5 text-xs text-white/40" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.6 }}>
           Free to start · No credit card · Results in 2 weeks
         </motion.p>
       </motion.div>
 
-      {/* Orbit Visualization with professional icons */}
+      {/* Orbit Visualization */}
       <motion.div
         className="relative z-10"
         initial={{ opacity: 0 }}
@@ -467,7 +440,6 @@ export default function HeroSection() {
         <OrbitViz />
       </motion.div>
 
-      {/* Partner logos strip */}
       <PartnerStrip />
     </section>
   );

@@ -81,7 +81,7 @@ function TestimonialCard({
   return (
     <motion.div
       ref={ref}
-      className="relative overflow-hidden rounded-2xl border border-[#E8E5E0] bg-white"
+      className="relative overflow-hidden rounded-2xl border border-[#E8E5E0] bg-white dark:border-[#333333] dark:bg-[#1E1E1E]"
       initial={{ opacity: 0, y: 40, scale: 0.95 }}
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, margin: "-40px" }}
@@ -96,9 +96,9 @@ function TestimonialCard({
       }}
     >
       {/* Top section */}
-      <div className="border-b border-[#E8E5E0] p-5">
+      <div className="border-b border-[#E8E5E0] p-5 dark:border-[#333333]">
         <div className="flex items-start gap-3.5">
-          <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-[#E8E5E0]">
+          <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-[#E8E5E0] dark:border-[#333333]">
             <Image
               src={testimonial.photo}
               alt={testimonial.name}
@@ -110,10 +110,10 @@ function TestimonialCard({
           <div className="flex-1">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[13px] font-semibold text-[#1A1A1A]">
+                <p className="text-[13px] font-semibold text-[#1A1A1A] dark:text-[#E8E8E8]">
                   {testimonial.name}
                 </p>
-                <p className="text-[10px] text-[#9B9B9B]">
+                <p className="text-[10px] text-[#9B9B9B] dark:text-[#6B6B6B]">
                   {testimonial.role}, {testimonial.company}
                 </p>
               </div>
@@ -125,24 +125,24 @@ function TestimonialCard({
 
       {/* Quote */}
       <div className="p-5">
-        <p className="text-[12px] leading-relaxed text-[#6B6B6B]">
+        <p className="text-[12px] leading-relaxed text-[#6B6B6B] dark:text-[#9B9B9B]">
           &ldquo;{testimonial.quote}&rdquo;
         </p>
       </div>
 
       {/* Metrics */}
-      <div className="border-t border-[#E8E5E0] px-5 py-4">
+      <div className="border-t border-[#E8E5E0] px-5 py-4 dark:border-[#333333]">
         <div className="flex gap-4">
           {testimonial.metrics.map((m) => (
             <div key={m.label} className="flex-1">
-              <p className="text-[9px] uppercase tracking-wider text-[#9B9B9B]">
+              <p className="text-[9px] uppercase tracking-wider text-[#9B9B9B] dark:text-[#6B6B6B]">
                 {m.label}
               </p>
               <div className="mt-1 flex items-baseline gap-1.5">
-                <span className="text-lg font-bold text-[#2563EB]">
+                <span className="text-lg font-bold text-[#2563EB] dark:text-blue-400">
                   {m.value}
                 </span>
-                <span className="text-[9px] text-[#9B9B9B]">
+                <span className="text-[9px] text-[#9B9B9B] dark:text-[#6B6B6B]">
                   from {m.before}
                 </span>
               </div>
@@ -168,23 +168,22 @@ export default function ProofSection() {
     <section
       id="proof"
       ref={sectionRef}
-      className="relative px-4 py-20 sm:px-6 sm:py-28"
-      style={{ backgroundColor: "#FAFAF7" }}
+      className="relative bg-[#FAFAF7] px-4 py-20 dark:bg-[#141414] sm:px-6 sm:py-28"
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E8E5E0] to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E8E5E0] to-transparent dark:via-[#333333]" />
 
       <div className="mx-auto max-w-6xl">
         <motion.div
           className="mb-14 flex flex-col items-center gap-3 text-center"
           style={{ y: headerY }}
         >
-          <span className="inline-flex items-center gap-2 rounded-full border border-[#E8E5E0] bg-white px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-[#6B6B6B]">
+          <span className="inline-flex items-center gap-2 rounded-full border border-[#E8E5E0] bg-white px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-[#6B6B6B] dark:border-[#333333] dark:bg-[#1E1E1E] dark:text-[#9B9B9B]">
             Proof
           </span>
-          <h2 className="font-heading text-2xl font-bold text-[#1A1A1A] sm:text-3xl md:text-4xl">
+          <h2 className="font-heading text-2xl font-bold text-[#1A1A1A] dark:text-[#E8E8E8] sm:text-3xl md:text-4xl">
             Real results. Real people.
           </h2>
-          <p className="max-w-md text-sm text-[#6B6B6B]">
+          <p className="max-w-md text-sm text-[#6B6B6B] dark:text-[#9B9B9B]">
             Teams using RankMeBaddy get the exact keywords, content, and strategy they need to rank — then see results in under 14 days.
           </p>
         </motion.div>
