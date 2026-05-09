@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "skills": {
+    "mermaid-diagrams": {
+      "version": "0.1.0",
+      "installedAt": 1778331170523
+    },
+    "excalidraw-diagram-generator": {
+      "version": "1.0.0",
+      "installedAt": 1778331253410
+    },
+    "seo": {
+      "version": "1.0.3",
+      "installedAt": 1778331257943
+    },
+    "seo-keyword-researcher": {
+      "version": "1.0.0",
+      "installedAt": 1778331261528
+    },
+    "bytesagain-chart-generator": {
+      "version": "1.0.1",
+      "installedAt": 1778331275977
+    },
+    "deep-scraper": {
+      "version": "1.0.1",
+      "installedAt": 1778331280167
+    },
+    "seo-competitor-analysis": {
+      "version": "1.0.0",
+      "installedAt": 1778331286419
+    },
+    "architecture-diagram": {
+      "version": "2.0.0",
+      "installedAt": 1778331298491
+    },
+    "website-seo": {
+      "version": "1.0.0",
+      "installedAt": 1778331302378
+    },
+    "markdown-diagram-renderer": {
+      "version": "1.0.3",
+      "installedAt": 1778331308965
+    },
+    "geo-seo-optimizer": {
+      "version": "1.1.0",
+      "installedAt": 1778331323595
+    },
+    "youtube-seo": {
+      "version": "1.1.1",
+      "installedAt": 1778331327406
+    }
+  }
+}

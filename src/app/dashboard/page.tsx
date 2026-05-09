@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import { useSubscription, SubscriptionProvider } from "@/hooks/use-subscription";
 import { Paywall } from "@/components/paywall";
 import { CustomerCenter } from "@/components/customer-center";
 import { AnimatedAIChat } from "@/components/ui/animated-ai-chat";
+import { MermaidRenderer, parseContentBlocks, type ContentBlock } from "@/components/ui/mermaid-renderer";
 
 /* ─── Types ──────────────────────────────────────────────────── */
 interface SiteData {
@@ -148,18 +149,19 @@ const navItems = [
 /* ─── Quick Action Chips ────────────────────────────────────── */
 const quickActions = [
   { label: "Keyword gaps", icon: "🔍", prompt: "What keyword gaps should I target for my site?" },
-  { label: "Optimize titles", icon: "✏️", prompt: "Review and optimize my page titles for better SEO" },
+  { label: "SEO workflow", icon: "📊", prompt: "Show me the complete SEO workflow for my site as a visual diagram" },
   { label: "Competitor analysis", icon: "📊", prompt: "Who are my top SEO competitors and what are they ranking for?" },
-  { label: "Content ideas", icon: "💡", prompt: "Give me content ideas that could rank for my target keyword" },
+  { label: "Strategy timeline", icon: "🗓️", prompt: "Create a visual SEO strategy timeline showing month-by-month milestones" },
 ];
 
 /* ─── Agent Tools Indicator ─────────────────────────────────── */
 const agentTools = [
   { label: "Web Search", icon: "🌐" },
-  { label: "Site Audit", icon: "🏥" },
+  { label: "Diagrams", icon: "📊" },
   { label: "Keyword Analysis", icon: "🔑" },
   { label: "Content Score", icon: "📝" },
   { label: "SERP Check", icon: "📈" },
+  { label: "Site Audit", icon: "🏥" },
 ];
 
 /* ─── Agent Thinking Steps ──────────────────────────────────── */
@@ -476,9 +478,15 @@ function Sidebar({
   );
 }
 
-/* ─── Chat Bubble — redesigned ──────────────────────────────── */
+/* ─── Chat Bubble — with diagram support ─────────────────────── */
 function ChatBubble({ message, onAction }: { message: ChatMessage; onAction: (prompt: string) => void }) {
   const isUser = message.role === "user";
+
+  // Parse content blocks (text + mermaid diagrams)
+  const contentBlocks = useMemo(() => {
+    if (isUser) return [];
+    return parseContentBlocks(message.content);
+  }, [message.content, isUser]);
 
   return (
     <motion.div
@@ -505,6 +513,18 @@ function ChatBubble({ message, onAction }: { message: ChatMessage; onAction: (pr
         {isUser ? (
           <div className="text-[14px] leading-relaxed whitespace-pre-wrap">
             {message.content}
+          </div>
+        ) : contentBlocks.length > 0 ? (
+          <div>
+            {contentBlocks.map((block: ContentBlock, idx: number) =>
+              block.type === "mermaid" ? (
+                <MermaidRenderer key={`diagram-${idx}`} chart={block.content} />
+              ) : (
+                <div key={`text-${idx}`} className="markdown-content">
+                  <ReactMarkdown>{block.content}</ReactMarkdown>
+                </div>
+              )
+            )}
           </div>
         ) : (
           <div className="markdown-content">

@@ -27,6 +27,10 @@ const ACTION_PROMPTS: Record<string, string> = {
   "behavior-optimize": "Optimize behavioral signals using Module 5: CTR engineering, pogo-stick prevention, dwell time engineering, scroll depth engineering.",
   "authority-build": "Create an authority acquisition strategy using Module 6: Tier 1-4 link building, link velocity targets, and relationship-based outreach.",
   "serp-capture": "Create a SERP feature capture plan using Module 7: featured snippets, PAA targeting, Knowledge Panel, Video Carousel, AI Overview citation.",
+  "diagram-workflow": "Create a visual workflow diagram showing the SEO process for my site.",
+  "diagram-architecture": "Create a site architecture diagram showing the recommended structure for my site.",
+  "diagram-keyword-map": "Create a keyword mapping diagram showing how keywords map to pages on my site.",
+  "diagram-strategy": "Create a visual SEO strategy diagram showing the timeline and key milestones.",
 };
 
 function parseActions(text: string): { cleanReply: string; actions: AgentAction[] } {
@@ -52,7 +56,15 @@ function parseActions(text: string): { cleanReply: string; actions: AgentAction[
 }
 
 function cleanMarkdown(text: string): string {
-  return text
+  // Don't strip markdown inside [DIAGRAM] blocks
+  const diagramBlocks: string[] = [];
+  let processed = text.replace(/\[DIAGRAM\]([\s\S]*?)\[\/DIAGRAM\]/g, (match, content) => {
+    const placeholder = `__DIAGRAM_PLACEHOLDER_${diagramBlocks.length}__`;
+    diagramBlocks.push(match);
+    return placeholder;
+  });
+
+  processed = processed
     .replace(/#{1,6}\s+/g, "")
     .replace(/\*\*\*(.+?)\*\*\*/g, "$1")
     .replace(/\*\*(.+?)\*\*/g, "$1")
@@ -60,6 +72,13 @@ function cleanMarkdown(text: string): string {
     .replace(/`([^`]+)`/g, "$1")
     .replace(/^>\s+/gm, "")
     .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
+
+  // Restore diagram blocks
+  diagramBlocks.forEach((block, i) => {
+    processed = processed.replace(`__DIAGRAM_PLACEHOLDER_${i}__`, block);
+  });
+
+  return processed;
 }
 
 function buildSystemPrompt(siteData: Record<string, unknown> | null, keyword: string | undefined, platforms: string[] | undefined, userName: string | undefined): string {
@@ -116,8 +135,53 @@ OUTPUT FORMATTING RULES (CRITICAL — the user sees your response in a clean cha
 - Keep paragraphs short — 2-3 sentences max.
 - Use natural language, not markdown formatting.
 
+DIAGRAM GENERATION (CRITICAL — This is what makes you different from ChatGPT):
+When your response involves ANY of the following, you MUST include a Mermaid diagram using the [DIAGRAM]...[/DIAGRAM] format:
+- Steps, processes, workflows, or sequences
+- Strategy timelines or roadmaps
+- Site architecture or structure
+- Keyword mapping or content planning
+- Data flows or system interactions
+- Decision trees or conditional logic
+- Entity relationships or hierarchies
+- Comparisons or competitive analysis
+- Any multi-step process the user should follow
+
+DIAGRAM FORMAT:
+Wrap your Mermaid diagram code in [DIAGRAM] and [/DIAGRAM] tags. Use valid Mermaid syntax ONLY.
+
+Example for a workflow:
+[DIAGRAM]
+flowchart TD
+    A[Site Audit] --> B[Keyword Research]
+    B --> C[Content Strategy]
+    C --> D[On-Page Optimization]
+    D --> E[Technical Fixes]
+    E --> F[Link Building]
+    F --> G[Monitor Rankings]
+[/DIAGRAM]
+
+Example for a strategy timeline:
+[DIAGRAM]
+flowchart LR
+    M1[Month 1: Foundation] --> M2[Month 2: Content Engine]
+    M2 --> M3[Month 3: Authority Building]
+    M3 --> M4[Month 4: Scale]
+[/DIAGRAM]
+
+DIAGRAM RULES:
+- ALWAYS include a diagram when explaining a process, workflow, or strategy
+- Use flowchart TD (top-down) for workflows and processes
+- Use flowchart LR (left-right) for timelines and sequences
+- Use short, clear labels in nodes
+- Keep diagrams to 5-12 nodes for clarity
+- Every arrow should have a clear relationship
+- You can include text explanation BEFORE the diagram, then the diagram visualizes it
+- Do NOT use markdown inside [DIAGRAM] blocks — only valid Mermaid syntax
+
 AUTONOMOUS BEHAVIOR:
 - When the user asks about SEO, DON'T just give advice — give a complete execution plan with specific steps
+- ALWAYS include a visual diagram when explaining processes, workflows, or strategies — this is what makes you NOT ChatGPT
 - Always include web searches for current data when analyzing competitors, keywords, or rankings
 - Proactively identify issues and suggest fixes — don't wait for the user to ask
 - After each response, suggest 2-3 next actions using [ACTION:type] tags
@@ -153,6 +217,10 @@ Available action types:
 - [ACTION:behavior-optimize] — optimize behavioral signals (Module 5)
 - [ACTION:authority-build] — authority acquisition strategy (Module 6)
 - [ACTION:serp-capture] — SERP feature capture plan (Module 7)
+- [ACTION:diagram-workflow] — create a visual SEO workflow diagram
+- [ACTION:diagram-architecture] — create a site architecture diagram
+- [ACTION:diagram-keyword-map] — create a keyword mapping diagram
+- [ACTION:diagram-strategy] — create a visual SEO strategy timeline
 
 RULES:
 - Never say "As an AI" or "I'm here to help" — just help.
@@ -160,7 +228,8 @@ RULES:
 - If you don't have enough info, ask follow-up questions AND suggest an action to get that info.
 - When suggesting SEO changes, always explain the expected impact.
 - Be concise but thorough — quality over fluff.
-- Always be specific to the user's actual site data — not generic advice.`;
+- Always be specific to the user's actual site data — not generic advice.
+- ALWAYS include a diagram when your answer involves steps, processes, workflows, strategies, or anything visual — this is what makes you NOT just another ChatGPT clone.`;
 }
 
 async function callLongCatAPI(systemPrompt: string, messages: { role: string; content: string }[]): Promise<string> {
@@ -183,7 +252,7 @@ async function callLongCatAPI(systemPrompt: string, messages: { role: string; co
         })),
       ],
       temperature: 0.7,
-      max_tokens: 2500,
+      max_tokens: 3000,
     }),
     signal: controller.signal,
   });
@@ -239,13 +308,13 @@ export async function POST(request: NextRequest) {
     const searchMatches = [...rawReply.matchAll(webSearchRegex)];
 
     if (searchMatches.length > 0) {
-      // Execute all web searches
-      const searchResults: string[] = [];
-      for (const match of searchMatches) {
+      // Execute all web searches in parallel for speed
+      const searchPromises = searchMatches.map(async (match) => {
         const query = match[1].trim();
         const results = await executeWebSearch(query);
-        searchResults.push(`Search results for "${query}":\n${results}`);
-      }
+        return `Search results for "${query}":\n${results}`;
+      });
+      const searchResults = await Promise.all(searchPromises);
 
       // Remove [WEB_SEARCH:...] tags from the reply
       rawReply = rawReply.replace(webSearchRegex, "").trim();
@@ -257,14 +326,14 @@ export async function POST(request: NextRequest) {
         { role: "assistant" as const, content: rawReply },
         {
           role: "user" as const,
-          content: `Here are the web search results I requested:\n\n${searchResults.join("\n\n---\n\n")}\n\nNow provide a comprehensive answer based on this current data. Remember to follow the OUTPUT FORMATTING RULES — no markdown symbols, use ALL CAPS for emphasis, natural language only. Also include 2-3 [ACTION:type] suggestions at the end.`,
+          content: `Here are the web search results I requested:\n\n${searchResults.join("\n\n---\n\n")}\n\nNow provide a comprehensive answer based on this current data. Remember to follow the OUTPUT FORMATTING RULES — no markdown symbols, use ALL CAPS for emphasis, natural language only. If your response involves steps, processes, workflows, or strategies, include a Mermaid diagram in [DIAGRAM]...[/DIAGRAM] tags. Also include 2-3 [ACTION:type] suggestions at the end.`,
         },
       ];
 
       rawReply = await callLongCatAPI(systemPrompt, augmentedMessages);
     }
 
-    // Clean markdown from the final response
+    // Clean markdown from the final response (but preserve diagram blocks)
     rawReply = cleanMarkdown(rawReply);
 
     // Parse actions
