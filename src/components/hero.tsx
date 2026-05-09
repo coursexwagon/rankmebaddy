@@ -107,26 +107,60 @@ function ShopifyIcon({ size = 24 }: { size?: number }) {
 // Uses an SVG-based approach for perfect scaling and positioning
 function OrbitViz() {
   // Node data: angle in degrees, orbit ring (1=inner, 2=main, 3=outer)
+  // Sizes increased for proper visibility: ring 2 = 56px, ring 3 = 44px
   const orbitNodes = [
-    { angle: 0, ring: 2, size: 48, delay: 0, icon: <GoogleIcon size={22} />, label: "Google", glow: "#4285F4" },
-    { angle: 60, ring: 2, size: 44, delay: 0.2, icon: <YouTubeIcon size={20} />, label: "YouTube", glow: "#FF0000" },
-    { angle: 120, ring: 2, size: 46, delay: 0.4, icon: <AmazonIcon size={20} />, label: "Amazon", glow: "#FF9900" },
-    { angle: 180, ring: 2, size: 42, delay: 0.6, icon: <TikTokIcon size={18} />, label: "TikTok", glow: "#FE2C55" },
-    { angle: 240, ring: 2, size: 44, delay: 0.8, icon: <AISeoIcon size={20} />, label: "AI Search", glow: "#8B5CF6" },
-    { angle: 300, ring: 2, size: 40, delay: 1.0, icon: <ShopifyIcon size={18} />, label: "Shopify", glow: "#95BF47" },
+    { angle: 0, ring: 2, size: 56, delay: 0, icon: <GoogleIcon size={24} />, label: "Google", glow: "#4285F4" },
+    { angle: 60, ring: 2, size: 56, delay: 0.2, icon: <YouTubeIcon size={24} />, label: "YouTube", glow: "#FF0000" },
+    { angle: 120, ring: 2, size: 56, delay: 0.4, icon: <AmazonIcon size={24} />, label: "Amazon", glow: "#FF9900" },
+    { angle: 180, ring: 2, size: 56, delay: 0.6, icon: <TikTokIcon size={22} />, label: "TikTok", glow: "#FE2C55" },
+    { angle: 240, ring: 2, size: 56, delay: 0.8, icon: <AISeoIcon size={22} />, label: "AI Search", glow: "#8B5CF6" },
+    { angle: 300, ring: 2, size: 56, delay: 1.0, icon: <ShopifyIcon size={22} />, label: "Shopify", glow: "#95BF47" },
     // Outer orbit — secondary SEO elements
-    { angle: 30, ring: 3, size: 36, delay: 0.3, icon: <KeywordIcon size={16} />, label: "Keywords", glow: "#10B981" },
-    { angle: 90, ring: 3, size: 34, delay: 0.5, icon: <ContentIcon size={16} />, label: "Content", glow: "#F59E0B" },
-    { angle: 150, ring: 3, size: 36, delay: 0.7, icon: <TechIcon size={16} />, label: "Analytics", glow: "#60A5FA" },
-    { angle: 210, ring: 3, size: 32, delay: 0.9, icon: <SiteIcon size={14} />, label: "Site Audit", glow: "#FB923C" },
-    { angle: 270, ring: 3, size: 34, delay: 1.1, icon: <BacklinkIcon size={16} />, label: "Backlinks", glow: "#A78BFA" },
-    { angle: 330, ring: 3, size: 32, delay: 1.3, icon: <AISeoIcon size={14} />, label: "On-Page", glow: "#EC4899" },
+    { angle: 30, ring: 3, size: 44, delay: 0.3, icon: <KeywordIcon size={20} />, label: "Keywords", glow: "#10B981" },
+    { angle: 90, ring: 3, size: 44, delay: 0.5, icon: <ContentIcon size={20} />, label: "Content", glow: "#F59E0B" },
+    { angle: 150, ring: 3, size: 44, delay: 0.7, icon: <TechIcon size={20} />, label: "Analytics", glow: "#60A5FA" },
+    { angle: 210, ring: 3, size: 44, delay: 0.9, icon: <SiteIcon size={18} />, label: "Site Audit", glow: "#FB923C" },
+    { angle: 270, ring: 3, size: 44, delay: 1.1, icon: <BacklinkIcon size={20} />, label: "Backlinks", glow: "#A78BFA" },
+    { angle: 330, ring: 3, size: 44, delay: 1.3, icon: <AISeoIcon size={18} />, label: "On-Page", glow: "#EC4899" },
   ];
 
   // SVG viewBox is 500x500, center at 250,250
   const cx = 250;
   const cy = 250;
   const ringRadii = { 1: 70, 2: 135, 3: 210 };
+
+  // Helper: get position for a node
+  const getPos = (node: typeof orbitNodes[number]) => {
+    const rad = (node.angle * Math.PI) / 180;
+    const r = ringRadii[node.ring as keyof typeof ringRadii];
+    return { x: cx + Math.cos(rad) * r, y: cy + Math.sin(rad) * r };
+  };
+
+  // Find outer node that shares angle range with each inner node (nearest 30° offset)
+  const getConnectionPairs = () => {
+    const pairs: { inner: typeof orbitNodes[number]; outer: typeof orbitNodes[number] }[] = [];
+    const ring2Nodes = orbitNodes.filter((n) => n.ring === 2);
+    const ring3Nodes = orbitNodes.filter((n) => n.ring === 3);
+    for (const inner of ring2Nodes) {
+      // Find outer node closest in angle
+      let closest = ring3Nodes[0];
+      let minDiff = 360;
+      for (const outer of ring3Nodes) {
+        const diff = Math.abs(inner.angle - outer.angle);
+        const wrappedDiff = Math.min(diff, 360 - diff);
+        if (wrappedDiff < minDiff) {
+          minDiff = wrappedDiff;
+          closest = outer;
+        }
+      }
+      if (minDiff <= 60) {
+        pairs.push({ inner, outer: closest });
+      }
+    }
+    return pairs;
+  };
+
+  const connectionPairs = getConnectionPairs();
 
   return (
     <div className="relative mx-auto mt-8 h-[320px] w-[320px] sm:mt-12 sm:h-[460px] sm:w-[460px] md:h-[540px] md:w-[540px]">
@@ -136,20 +170,31 @@ function OrbitViz() {
         className="h-full w-full"
         style={{ overflow: "visible" }}
       >
-        {/* Orbit rings */}
-        <circle cx={cx} cy={cy} r={ringRadii[1]} fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
-        <circle cx={cx} cy={cy} r={ringRadii[2]} fill="none" stroke="rgba(255,255,255,0.10)" strokeWidth="1.5" strokeDasharray="6 4" />
-        <circle cx={cx} cy={cy} r={ringRadii[3]} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+        <defs>
+          <radialGradient id="centerGlow">
+            <stop offset="0%" stopColor="rgba(37,99,235,0.2)" />
+            <stop offset="100%" stopColor="transparent" />
+          </radialGradient>
+        </defs>
+
+        {/* Rotating orbit rings */}
+        <g style={{ transformOrigin: `${cx}px ${cy}px` }} className="animate-ring-rotate">
+          <circle cx={cx} cy={cy} r={ringRadii[1]} fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
+        </g>
+        <g style={{ transformOrigin: `${cx}px ${cy}px` }} className="animate-ring-rotate-reverse">
+          <circle cx={cx} cy={cy} r={ringRadii[2]} fill="none" stroke="rgba(255,255,255,0.10)" strokeWidth="1.5" strokeDasharray="6 4" />
+        </g>
+        <g style={{ transformOrigin: `${cx}px ${cy}px` }} className="animate-ring-rotate">
+          <circle cx={cx} cy={cy} r={ringRadii[3]} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+        </g>
 
         {/* Connection lines from center to main orbit nodes */}
         {orbitNodes.filter(n => n.ring === 2).map((node, i) => {
-          const rad = (node.angle * Math.PI) / 180;
-          const x = cx + Math.cos(rad) * ringRadii[2];
-          const y = cy + Math.sin(rad) * ringRadii[2];
+          const pos = getPos(node);
           return (
             <motion.line
-              key={`line-${i}`}
-              x1={cx} y1={cy} x2={x} y2={y}
+              key={`center-line-${i}`}
+              x1={cx} y1={cy} x2={pos.x} y2={pos.y}
               stroke="rgba(255,255,255,0.04)"
               strokeWidth="1"
               strokeDasharray="4 4"
@@ -160,13 +205,25 @@ function OrbitViz() {
           );
         })}
 
+        {/* Connecting lines between inner and outer orbit nodes */}
+        {connectionPairs.map((pair, i) => {
+          const innerPos = getPos(pair.inner);
+          const outerPos = getPos(pair.outer);
+          return (
+            <motion.line
+              key={`pair-line-${i}`}
+              x1={innerPos.x} y1={innerPos.y} x2={outerPos.x} y2={outerPos.y}
+              stroke="rgba(255,255,255,0.06)"
+              strokeWidth="0.8"
+              strokeDasharray="3 5"
+              initial={{ pathLength: 0, opacity: 0 }}
+              animate={{ pathLength: 1, opacity: 1 }}
+              transition={{ duration: 1.2, delay: 1.0 + i * 0.1 }}
+            />
+          );
+        })}
+
         {/* Center glow */}
-        <defs>
-          <radialGradient id="centerGlow">
-            <stop offset="0%" stopColor="rgba(37,99,235,0.2)" />
-            <stop offset="100%" stopColor="transparent" />
-          </radialGradient>
-        </defs>
         <circle cx={cx} cy={cy} r="45" fill="url(#centerGlow)" />
 
         {/* Center logo */}
@@ -193,12 +250,9 @@ function OrbitViz() {
           />
         </motion.g>
 
-        {/* Orbit nodes */}
+        {/* Orbit nodes — fixed sizing: rect/foreignObject are node.size x node.size */}
         {orbitNodes.map((node, i) => {
-          const rad = (node.angle * Math.PI) / 180;
-          const r = ringRadii[node.ring as keyof typeof ringRadii];
-          const x = cx + Math.cos(rad) * r;
-          const y = cy + Math.sin(rad) * r;
+          const pos = getPos(node);
           const halfSize = node.size / 2;
 
           return (
@@ -208,14 +262,13 @@ function OrbitViz() {
               animate={{
                 opacity: 1,
                 scale: 1,
-                // Gentle floating animation using Framer Motion
-                y: [0, -3, 0, 3, 0],
+                y: [0, -2, 0, 2, 0],
               }}
               transition={{
                 opacity: { duration: 0.6, delay: 0.4 + node.delay },
                 scale: { duration: 0.6, delay: 0.4 + node.delay },
                 y: {
-                  duration: 4 + (i % 3),
+                  duration: 5 + (i % 3),
                   repeat: Infinity,
                   ease: "easeInOut",
                   delay: node.delay,
@@ -223,43 +276,42 @@ function OrbitViz() {
               }}
               style={{ cursor: "pointer" }}
             >
-              {/* Background circle for the icon */}
+              {/* Background rect — full node.size, positioned centered */}
               <rect
-                x={x - halfSize / 2} y={y - halfSize / 2}
-                width={node.size / 2} height={node.size / 2}
-                rx="6" ry="6"
-                fill={`linear-gradient(135deg, ${node.glow}18, ${node.glow}08)`}
-                stroke="rgba(255,255,255,0.20)"
+                x={pos.x - halfSize} y={pos.y - halfSize}
+                width={node.size} height={node.size}
+                rx="8" ry="8"
+                fill="rgba(255,255,255,0.06)"
+                stroke="rgba(255,255,255,0.15)"
                 strokeWidth="0.5"
               />
-              {/* Use foreignObject to render React SVG icons inside SVG */}
+              {/* foreignObject to render React icons — full node.size */}
               <foreignObject
-                x={x - halfSize / 2}
-                y={y - halfSize / 2}
-                width={node.size / 2}
-                height={node.size / 2}
+                x={pos.x - halfSize}
+                y={pos.y - halfSize}
+                width={node.size}
+                height={node.size}
               >
                 <div
                   className="flex items-center justify-center w-full h-full rounded-lg"
                   style={{
                     background: `linear-gradient(135deg, ${node.glow}25, ${node.glow}10)`,
-                    border: "1px solid rgba(255,255,255,0.20)",
+                    border: "1px solid rgba(255,255,255,0.15)",
                     backdropFilter: "blur(8px)",
+                    borderRadius: "8px",
                   }}
                 >
-                  <div style={{ transform: `scale(${(node.size / 2) / 48})`, transformOrigin: "center" }}>
-                    {node.icon}
-                  </div>
+                  {node.icon}
                 </div>
               </foreignObject>
 
-              {/* Label */}
+              {/* Label — positioned below the node */}
               <text
-                x={x}
-                y={y + halfSize / 2 + 10}
+                x={pos.x}
+                y={pos.y + halfSize + 12}
                 textAnchor="middle"
-                fill="rgba(255,255,255,0.4)"
-                fontSize="8"
+                fill="rgba(255,255,255,0.45)"
+                fontSize="9"
                 fontFamily="system-ui, sans-serif"
                 fontWeight="500"
               >

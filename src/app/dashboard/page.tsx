@@ -3,6 +3,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
+import { useSubscription, SubscriptionProvider } from "@/hooks/use-subscription";
+import { Paywall } from "@/components/paywall";
+import { CustomerCenter } from "@/components/customer-center";
+import { AnimatedAIChat } from "@/components/ui/animated-ai-chat";
 
 /* ─── Types ──────────────────────────────────────────────────── */
 interface SiteData {
@@ -117,6 +121,15 @@ const navItems = [
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
         <polyline points="14 2 14 8 20 8" />
+      </svg>
+    ),
+  },
+  {
+    id: "pro",
+    label: "Pro",
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
       </svg>
     ),
   },
@@ -267,8 +280,7 @@ function SetupScreen({ onComplete }: { onComplete: () => void }) {
 
   return (
     <motion.div
-      className="flex min-h-screen items-center justify-center px-4"
-      style={{ backgroundColor: "#FAFAF7" }}
+      className="flex min-h-screen items-center justify-center px-4 bg-[#FAFAF7] dark:bg-[#0F0F11]"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -342,6 +354,7 @@ function Sidebar({
   platforms,
   mobileOpen,
   onMobileClose,
+  isPro,
 }: {
   siteData: SiteData | null;
   activeSection: string;
@@ -350,46 +363,47 @@ function Sidebar({
   platforms: string[];
   mobileOpen: boolean;
   onMobileClose: () => void;
+  isPro?: boolean;
 }) {
   const sidebarContent = (
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-2.5 px-4 py-4 sm:py-5">
-        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50">
+        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-900/30">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="20 6 9 17 4 12" />
           </svg>
         </div>
-        <span className="font-heading text-sm font-bold text-[#1A1A1A]">
+        <span className="font-heading text-sm font-bold text-[#1A1A1A] dark:text-white">
           RankMeBaddy
         </span>
       </div>
 
       {siteData && (
-        <div className="mx-3 mb-3 overflow-hidden rounded-xl border border-[#E8E5E0] bg-white shadow-sm">
+        <div className="mx-3 mb-3 overflow-hidden rounded-xl border border-[#E8E5E0] dark:border-[#2A2A2E] bg-white dark:bg-[#1A1A1E] shadow-sm">
           <div className="flex items-center gap-2.5 px-3 py-2.5">
             {siteData.favicon ? (
               <img src={siteData.favicon} alt="" className="h-5 w-5 rounded" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
             ) : (
-              <div className="flex h-5 w-5 items-center justify-center rounded bg-[#F5F5F0]">
+              <div className="flex h-5 w-5 items-center justify-center rounded bg-[#F5F5F0] dark:bg-[#252528]">
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="2">
                   <circle cx="12" cy="12" r="10" /><path d="M2 12h20" />
                 </svg>
               </div>
             )}
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[12px] font-medium text-[#1A1A1A]">{siteData.domain}</p>
-              <p className="truncate text-[10px] text-[#9B9B9B]">
+              <p className="truncate text-[12px] font-medium text-[#1A1A1A] dark:text-white">{siteData.domain}</p>
+              <p className="truncate text-[10px] text-[#9B9B9B] dark:text-[#9B9B9B]">
                 {siteData.title ? siteData.title.slice(0, 28) + (siteData.title.length > 28 ? "..." : "") : "No title detected"}
               </p>
             </div>
             <div className="h-1.5 w-1.5 rounded-full bg-[#16A34A]" title="Connected" />
           </div>
           {platforms.length > 0 && (
-            <div className="flex items-center gap-1.5 border-t border-[#E8E5E0] px-3 py-2">
+            <div className="flex items-center gap-1.5 border-t border-[#E8E5E0] dark:border-[#2A2A2E] px-3 py-2">
               {platforms.map((p) => (
                 <PlatformIcon key={p} platform={p} />
               ))}
-              <span className="ml-1 text-[9px] text-[#9B9B9B]">
+              <span className="ml-1 text-[9px] text-[#9B9B9B] dark:text-[#9B9B9B]">
                 {platforms.length} platform{platforms.length !== 1 ? "s" : ""}
               </span>
             </div>
@@ -406,25 +420,25 @@ function Sidebar({
               onClick={() => { onSectionChange(item.id); onMobileClose(); }}
               className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] transition-all ${
                 isActive
-                  ? "bg-blue-50 text-blue-600 font-medium"
-                  : "text-[#6B6B6B] hover:bg-[#F5F5F0] hover:text-[#1A1A1A]"
+                  ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-medium"
+                  : "text-[#6B6B6B] dark:text-[#9B9B9B] hover:bg-[#F5F5F0] dark:hover:bg-[#252528] hover:text-[#1A1A1A] dark:hover:text-white"
               }`}
             >
-              <span className={isActive ? "text-blue-600" : "text-[#9B9B9B]"}>{item.icon}</span>
+              <span className={isActive ? "text-blue-600 dark:text-blue-400" : "text-[#9B9B9B] dark:text-[#6B6B6B]"}>{item.icon}</span>
               {item.label}
             </button>
           );
         })}
       </nav>
 
-      <div className="border-t border-[#E8E5E0] px-4 py-3">
+      <div className="border-t border-[#E8E5E0] dark:border-[#2A2A2E] px-4 py-3">
         <div className="flex items-center gap-2.5">
           <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600 text-[11px] font-bold text-white">
             {userName ? userName[0].toUpperCase() : "U"}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[12px] font-medium text-[#1A1A1A]">{userName || "User"}</p>
-            <p className="text-[10px] text-[#9B9B9B]">Free plan</p>
+            <p className="truncate text-[12px] font-medium text-[#1A1A1A] dark:text-white">{userName || "User"}</p>
+            <p className="text-[10px] text-[#9B9B9B] dark:text-[#9B9B9B]">{isPro ? "Pro plan ✦" : "Free plan"}</p>
           </div>
         </div>
       </div>
@@ -433,7 +447,7 @@ function Sidebar({
 
   return (
     <>
-      <aside className="hidden w-[220px] shrink-0 border-r border-[#E8E5E0] bg-white sm:flex sm:flex-col">
+      <aside className="hidden w-[220px] shrink-0 border-r border-[#E8E5E0] dark:border-[#2A2A2E] bg-white dark:bg-[#1A1A1E] sm:flex sm:flex-col">
         {sidebarContent}
       </aside>
       <AnimatePresence>
@@ -447,7 +461,7 @@ function Sidebar({
               onClick={onMobileClose}
             />
             <motion.aside
-              className="fixed inset-y-0 left-0 z-50 w-[260px] bg-white shadow-xl sm:hidden"
+              className="fixed inset-y-0 left-0 z-50 w-[260px] bg-white dark:bg-[#1A1A1E] shadow-xl sm:hidden"
               initial={{ x: -260 }}
               animate={{ x: 0 }}
               exit={{ x: -260 }}
@@ -476,8 +490,8 @@ function ChatBubble({ message, onAction }: { message: ChatMessage; onAction: (pr
       <div
         className={`max-w-[85%] ${
           isUser
-            ? "rounded-2xl bg-[#F5F0EB] text-[#1A1A1A] px-5 py-3.5"
-            : "rounded-2xl bg-white text-[#1A1A1A] px-5 py-3.5 shadow-sm border border-[#E8E5E0]/50"
+            ? "rounded-2xl bg-[#F5F0EB] dark:bg-[#252528] text-[#1A1A1A] dark:text-[#E8E8E8] px-5 py-3.5"
+            : "rounded-2xl bg-white dark:bg-[#1A1A1E] text-[#1A1A1A] dark:text-[#E8E8E8] px-5 py-3.5 shadow-sm border border-[#E8E5E0]/50 dark:border-[#2A2A2E]/50"
         }`}
       >
         {/* Assistant indicator — small blue dot + label */}
@@ -843,7 +857,7 @@ function ContentSection({ siteData, keyword, onAskAI }: { siteData: SiteData; ke
 }
 
 /* ─── Settings Section ──────────────────────────────────────── */
-function SettingsSection({ onboardingData, onUpdateData }: { onboardingData: OnboardingData; onUpdateData: (data: OnboardingData) => void }) {
+function SettingsSection({ onboardingData, onUpdateData, onUpgrade }: { onboardingData: OnboardingData; onUpdateData: (data: OnboardingData) => void; onUpgrade: () => void }) {
   const [name, setName] = useState(onboardingData.name);
   const [keyword, setKeyword] = useState(onboardingData.keyword);
   const [saved, setSaved] = useState(false);
@@ -859,33 +873,36 @@ function SettingsSection({ onboardingData, onUpdateData }: { onboardingData: Onb
   return (
     <div className="mx-auto max-w-2xl space-y-6 p-4 sm:p-6">
       <div>
-        <h2 className="font-heading text-lg font-bold text-[#1A1A1A]">Settings</h2>
-        <p className="text-[12px] text-[#6B6B6B]">Manage your campaign and profile</p>
+        <h2 className="font-heading text-lg font-bold text-[#1A1A1A] dark:text-white">Settings</h2>
+        <p className="text-[12px] text-[#6B6B6B] dark:text-[#9B9B9B]">Manage your campaign and profile</p>
       </div>
 
-      <div className="space-y-4 rounded-2xl border border-[#E8E5E0] bg-white p-4 shadow-sm">
-        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[#9B9B9B]">Profile</h3>
+      {/* Subscription */}
+      <CustomerCenter onUpgrade={onUpgrade} />
+
+      <div className="space-y-4 rounded-2xl border border-[#E8E5E0] dark:border-[#2A2A2E] bg-white dark:bg-[#1A1A1E] p-4 shadow-sm">
+        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[#9B9B9B] dark:text-[#9B9B9B]">Profile</h3>
         <div className="space-y-2">
-          <label className="text-[10px] font-semibold uppercase tracking-wider text-[#6B6B6B]">Name</label>
-          <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full rounded-xl border border-[#E8E5E0] bg-white px-3 py-2.5 text-[13px] text-[#1A1A1A] outline-none transition-colors focus:border-blue-300 focus:ring-1 focus:ring-blue-100" />
+          <label className="text-[10px] font-semibold uppercase tracking-wider text-[#6B6B6B] dark:text-[#9B9B9B]">Name</label>
+          <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full rounded-xl border border-[#E8E5E0] dark:border-[#2A2A2E] bg-white dark:bg-[#252528] px-3 py-2.5 text-[13px] text-[#1A1A1A] dark:text-white outline-none transition-colors focus:border-blue-300 dark:focus:border-blue-600 focus:ring-1 focus:ring-blue-100 dark:focus:ring-blue-900" />
         </div>
       </div>
 
-      <div className="space-y-4 rounded-2xl border border-[#E8E5E0] bg-white p-4 shadow-sm">
-        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[#9B9B9B]">Campaign</h3>
+      <div className="space-y-4 rounded-2xl border border-[#E8E5E0] dark:border-[#2A2A2E] bg-white dark:bg-[#1A1A1E] p-4 shadow-sm">
+        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[#9B9B9B] dark:text-[#9B9B9B]">Campaign</h3>
         <div className="space-y-2">
-          <label className="text-[10px] font-semibold uppercase tracking-wider text-[#6B6B6B]">Primary Keyword</label>
-          <input type="text" value={keyword} onChange={(e) => setKeyword(e.target.value)} className="w-full rounded-xl border border-[#E8E5E0] bg-white px-3 py-2.5 text-[13px] text-[#1A1A1A] outline-none transition-colors focus:border-blue-300 focus:ring-1 focus:ring-blue-100" />
+          <label className="text-[10px] font-semibold uppercase tracking-wider text-[#6B6B6B] dark:text-[#9B9B9B]">Primary Keyword</label>
+          <input type="text" value={keyword} onChange={(e) => setKeyword(e.target.value)} className="w-full rounded-xl border border-[#E8E5E0] dark:border-[#2A2A2E] bg-white dark:bg-[#252528] px-3 py-2.5 text-[13px] text-[#1A1A1A] dark:text-white outline-none transition-colors focus:border-blue-300 dark:focus:border-blue-600 focus:ring-1 focus:ring-blue-100 dark:focus:ring-blue-900" />
         </div>
         <div className="space-y-2">
-          <label className="text-[10px] font-semibold uppercase tracking-wider text-[#6B6B6B]">Website</label>
-          <input type="text" value={onboardingData.website} readOnly className="w-full rounded-xl border border-[#E8E5E0] bg-[#F5F5F0] px-3 py-2.5 text-[13px] text-[#9B9B9B] outline-none" />
+          <label className="text-[10px] font-semibold uppercase tracking-wider text-[#6B6B6B] dark:text-[#9B9B9B]">Website</label>
+          <input type="text" value={onboardingData.website} readOnly className="w-full rounded-xl border border-[#E8E5E0] dark:border-[#2A2A2E] bg-[#F5F5F0] dark:bg-[#252528] px-3 py-2.5 text-[13px] text-[#9B9B9B] outline-none" />
         </div>
         <div className="space-y-2">
-          <label className="text-[10px] font-semibold uppercase tracking-wider text-[#6B6B6B]">Platforms</label>
+          <label className="text-[10px] font-semibold uppercase tracking-wider text-[#6B6B6B] dark:text-[#9B9B9B]">Platforms</label>
           <div className="flex flex-wrap gap-2">
             {onboardingData.platforms.map((p) => (
-              <span key={p} className="flex items-center gap-1.5 rounded-full border border-[#E8E5E0] bg-[#F5F5F0] px-3 py-1 text-[11px] text-[#6B6B6B]">
+              <span key={p} className="flex items-center gap-1.5 rounded-full border border-[#E8E5E0] dark:border-[#2A2A2E] bg-[#F5F5F0] dark:bg-[#252528] px-3 py-1 text-[11px] text-[#6B6B6B] dark:text-[#9B9B9B]">
                 <PlatformIcon platform={p} size={12} />
                 {p === "aisearch" ? "AI Search" : p.charAt(0).toUpperCase() + p.slice(1)}
               </span>
@@ -898,10 +915,10 @@ function SettingsSection({ onboardingData, onUpdateData }: { onboardingData: Onb
         {saved ? "Saved ✓" : "Save changes"}
       </button>
 
-      <div className="space-y-3 rounded-2xl border border-red-200 bg-red-50 p-4">
-        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-red-600">Danger zone</h3>
-        <p className="text-[11px] text-[#6B6B6B]">Reset all onboarding data and start over.</p>
-        <button onClick={() => { localStorage.removeItem("rankmebaddy_onboarding"); window.location.href = "/onboarding"; }} className="rounded-full border border-red-300 px-3 py-1.5 text-[11px] text-red-600 transition-colors hover:bg-red-100">Reset everything</button>
+      <div className="space-y-3 rounded-2xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 p-4">
+        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-red-600 dark:text-red-400">Danger zone</h3>
+        <p className="text-[11px] text-[#6B6B6B] dark:text-[#9B9B9B]">Reset all onboarding data and start over.</p>
+        <button onClick={() => { localStorage.removeItem("rankmebaddy_onboarding"); window.location.href = "/onboarding"; }} className="rounded-full border border-red-300 dark:border-red-800 px-3 py-1.5 text-[11px] text-red-600 dark:text-red-400 transition-colors hover:bg-red-100 dark:hover:bg-red-900/30">Reset everything</button>
       </div>
     </div>
   );
@@ -917,9 +934,11 @@ export default function DashboardPage() {
   const [isSending, setIsSending] = useState(false);
   const [mobileSidebar, setMobileSidebar] = useState(false);
   const [agentStep, setAgentStep] = useState(0);
+  const [paywallOpen, setPaywallOpen] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const agentStepIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const { isPro } = useSubscription();
 
   useEffect(() => {
     try {
@@ -1031,8 +1050,8 @@ export default function DashboardPage() {
 
   if (!onboardingData) {
     return (
-      <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: "#FAFAF7" }}>
-        <motion.div className="h-6 w-6 rounded-full border-2 border-[#E8E5E0] border-t-blue-600" animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }} />
+      <div className="flex min-h-screen items-center justify-center bg-[#FAFAF7] dark:bg-[#0F0F11]">
+        <motion.div className="h-6 w-6 rounded-full border-2 border-[#E8E5E0] dark:border-[#2A2A2E] border-t-blue-600" animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }} />
       </div>
     );
   }
@@ -1040,24 +1059,28 @@ export default function DashboardPage() {
   const siteData = onboardingData.siteData;
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ backgroundColor: "#FAFAF7" }}>
-      <Sidebar siteData={siteData} activeSection={activeSection} onSectionChange={setActiveSection} userName={onboardingData.name} platforms={onboardingData.platforms || []} mobileOpen={mobileSidebar} onMobileClose={() => setMobileSidebar(false)} />
+    <SubscriptionProvider>
+    <div className="flex h-screen overflow-hidden bg-[#FAFAF7] dark:bg-[#0F0F11]">
+      <Sidebar siteData={siteData} activeSection={activeSection} onSectionChange={setActiveSection} userName={onboardingData.name} platforms={onboardingData.platforms || []} mobileOpen={mobileSidebar} onMobileClose={() => setMobileSidebar(false)} isPro={isPro} />
+
+      {/* Paywall Modal */}
+      <Paywall open={paywallOpen} onClose={() => setPaywallOpen(false)} />
 
       <main className="flex min-w-0 flex-1 flex-col">
         {/* Top Bar */}
-        <header className="flex items-center justify-between border-b border-[#E8E5E0] bg-white px-4 py-3 sm:px-6">
+        <header className="flex items-center justify-between border-b border-[#E8E5E0] dark:border-[#2A2A2E] bg-white dark:bg-[#1A1A1E] px-4 py-3 sm:px-6">
           <div className="flex items-center gap-3">
-            <button className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#E8E5E0] bg-white sm:hidden" onClick={() => setMobileSidebar(true)}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B6B6B" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
+            <button className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#E8E5E0] dark:border-[#2A2A2E] bg-white dark:bg-[#1E1E22] sm:hidden" onClick={() => setMobileSidebar(true)}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B6B6B" className="dark:stroke-[#9B9B9B]" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
             </button>
             <div>
-              <h1 className="font-heading text-sm font-bold text-[#1A1A1A] capitalize">{activeSection === "chat" ? "Chat" : activeSection}</h1>
+              <h1 className="font-heading text-sm font-bold text-[#1A1A1A] dark:text-white capitalize">{activeSection === "chat" ? "Chat" : activeSection === "pro" ? "rankmebaddy Pro" : activeSection}</h1>
               <p className="text-[10px] text-[#9B9B9B]">{siteData?.domain || "No site connected"}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             {activeSection === "chat" && (
-              <button onClick={() => setMessages([])} className="flex items-center gap-1.5 rounded-full border border-[#E8E5E0] bg-white px-2.5 py-1.5 text-[11px] text-[#6B6B6B] transition-colors hover:text-[#1A1A1A] hover:border-[#9B9B9B]">
+              <button onClick={() => setMessages([])} className="flex items-center gap-1.5 rounded-full border border-[#E8E5E0] dark:border-[#2A2A2E] bg-white dark:bg-[#1E1E22] px-2.5 py-1.5 text-[11px] text-[#6B6B6B] dark:text-[#9B9B9B] transition-colors hover:text-[#1A1A1A] dark:hover:text-white hover:border-[#9B9B9B] dark:hover:border-[#444]">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14" /><path d="M5 12h14" /></svg>
                 New chat
               </button>
@@ -1082,7 +1105,7 @@ export default function DashboardPage() {
                     >
                       <span className="text-[10px] font-medium uppercase tracking-wider text-[#9B9B9B]">Tools:</span>
                       {agentTools.map((tool) => (
-                        <span key={tool.label} className="inline-flex items-center gap-1 rounded-full bg-[#F5F0EB] px-2.5 py-1 text-[10px] text-[#6B6B6B]">
+                        <span key={tool.label} className="inline-flex items-center gap-1 rounded-full bg-[#F5F0EB] dark:bg-[#252528] px-2.5 py-1 text-[10px] text-[#6B6B6B] dark:text-[#9B9B9B]">
                           <span>{tool.icon}</span>
                           {tool.label}
                         </span>
@@ -1095,10 +1118,10 @@ export default function DashboardPage() {
 
                     {isSending && (
                       <motion.div className="flex justify-start" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-                        <div className="max-w-[85%] rounded-2xl bg-white px-5 py-3.5 shadow-sm border border-[#E8E5E0]/50">
+                        <div className="max-w-[85%] rounded-2xl bg-white dark:bg-[#1A1A1E] px-5 py-3.5 shadow-sm border border-[#E8E5E0]/50 dark:border-[#2A2A2E]/50">
                           <div className="mb-2 flex items-center gap-1.5">
                             <div className="h-1.5 w-1.5 rounded-full bg-[#2563EB]" />
-                            <span className="text-[10px] font-medium text-[#2563EB]">RankMeBaddy</span>
+                            <span className="text-[10px] font-medium text-[#2563EB] dark:text-blue-400">RankMeBaddy</span>
                           </div>
                           <AgentStepIndicator steps={agentThinkingSteps} currentStep={agentStep} />
                         </div>
@@ -1110,14 +1133,14 @@ export default function DashboardPage() {
 
                 {/* Quick actions */}
                 {messages.length <= 1 && (
-                  <div className="border-t border-[#E8E5E0] px-4 py-3 sm:px-6 bg-white">
+                  <div className="border-t border-[#E8E5E0] dark:border-[#2A2A2E] px-4 py-3 sm:px-6 bg-white dark:bg-[#1A1A1E]">
                     <div className="mx-auto flex max-w-2xl flex-wrap gap-2">
                       {quickActions.map((action) => (
                         <button
                           key={action.label}
                           onClick={() => sendMessage(action.prompt)}
                           disabled={isSending}
-                          className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#F5F0EB] to-[#EDE8E2] px-4 py-1.5 text-[11px] text-[#1A1A1A] transition-all hover:from-[#EDE8E2] hover:to-[#E5DFD8] disabled:opacity-40 shadow-sm"
+                          className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#F5F0EB] to-[#EDE8E2] dark:from-[#252528] dark:to-[#2A2A2E] px-4 py-1.5 text-[11px] text-[#1A1A1A] dark:text-[#C8C8C8] transition-all hover:from-[#EDE8E2] hover:to-[#E5DFD8] dark:hover:from-[#2A2A2E] dark:hover:to-[#333] disabled:opacity-40 shadow-sm"
                         >
                           <span>{action.icon}</span>
                           {action.label}
@@ -1127,31 +1150,10 @@ export default function DashboardPage() {
                   </div>
                 )}
 
-                {/* Input */}
-                <div className="border-t border-[#E8E5E0] bg-white px-4 py-3 sm:px-6">
+                {/* Input — Animated AI Chat */}
+                <div className="border-t border-[#E8E5E0] dark:border-[#2A2A2E] bg-white dark:bg-[#1A1A1E] px-4 py-3 sm:px-6">
                   <div className="mx-auto max-w-2xl">
-                    <div className="flex items-end gap-2 rounded-2xl border border-[#E8E5E0] bg-[#FAFAF7] px-4 py-3 transition-colors focus-within:border-[#2563EB]/30 focus-within:ring-1 focus-within:ring-[#2563EB]/10">
-                      <textarea
-                        ref={inputRef}
-                        value={inputValue}
-                        onChange={handleInputChange}
-                        onKeyDown={handleKeyDown}
-                        placeholder="Ask RankMeBaddy to rank anything..."
-                        rows={1}
-                        className="max-h-[120px] min-h-[20px] flex-1 resize-none bg-transparent text-[14px] text-[#1A1A1A] outline-none placeholder:text-[#9B9B9B]"
-                      />
-                      <motion.button
-                        onClick={() => sendMessage(inputValue)}
-                        disabled={!inputValue.trim() || isSending}
-                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#2563EB] to-[#6A3093] text-white transition-all disabled:opacity-30"
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="m5 12h14" /><path d="m12 5 7 7-7 7" />
-                        </svg>
-                      </motion.button>
-                    </div>
+                    <AnimatedAIChat onSendMessage={sendMessage} isTyping={isSending} />
                   </div>
                 </div>
               </motion.div>
@@ -1181,14 +1183,37 @@ export default function DashboardPage() {
               </motion.div>
             )}
 
+            {activeSection === "pro" && (
+              <motion.div key="pro" className="flex items-center justify-center min-h-[50vh]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <div className="text-center space-y-4 p-8">
+                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#2563EB] to-[#6A3093] shadow-lg">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                    </svg>
+                  </div>
+                  <h2 className="font-heading text-2xl font-bold text-[#1A1A1A] dark:text-white">rankmebaddy Pro</h2>
+                  <p className="text-sm text-[#6B6B6B] dark:text-[#9B9B9B] max-w-sm mx-auto">Unlock unlimited SEO campaigns, all platforms, AI optimization, and priority support.</p>
+                  <motion.button
+                    onClick={() => setPaywallOpen(true)}
+                    className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#2563EB] to-[#6A3093] px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:shadow-xl"
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                  >
+                    {isPro ? "Manage Subscription" : "Upgrade to Pro"}
+                  </motion.button>
+                </div>
+              </motion.div>
+            )}
+
             {activeSection === "settings" && (
               <motion.div key="settings" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <SettingsSection onboardingData={onboardingData} onUpdateData={updateOnboardingData} />
+                <SettingsSection onboardingData={onboardingData} onUpdateData={updateOnboardingData} onUpgrade={() => setPaywallOpen(true)} />
               </motion.div>
             )}
           </AnimatePresence>
         </div>
       </main>
     </div>
+    </SubscriptionProvider>
   );
 }
