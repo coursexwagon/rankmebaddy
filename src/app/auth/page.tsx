@@ -1,30 +1,50 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/use-auth";
 
 export default function AuthPage() {
-  const { signInWithEmail, signUp, signInWithGoogle } = useAuth();
+  const { signInWithEmail, signUp, signInWithGoogle, user, loading: authLoading } = useAuth();
+  const router = useRouter();
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState("");
+
+  // If already logged in, redirect to onboarding or dashboard
+  useEffect(() => {
+    if (!authLoading && user) {
+      const onboarding = typeof window !== "undefined" ? localStorage.getItem("rankmebaddy_onboarding") : null;
+      router.replace(onboarding ? "/dashboard" : "/onboarding");
+    }
+  }, [user, authLoading, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setSuccess("");
     setLoading(true);
 
     try {
       if (mode === "login") {
         const { error: err } = await signInWithEmail(email, password);
-        if (err) setError(err);
+        if (err) {
+          setError(err);
+        } else {
+          setSuccess("Welcome back! Redirecting...");
+        }
       } else {
         const { error: err } = await signUp(email, password, name);
-        if (err) setError(err);
+        if (err) {
+          setError(err);
+        } else {
+          setSuccess("Account created! Check your email to confirm, then you'll be redirected.");
+        }
       }
     } finally {
       setLoading(false);
@@ -127,6 +147,17 @@ export default function AuthPage() {
               >
                 {error}
               </motion.p>
+            )}
+
+            {success && (
+              <motion.div
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center gap-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 px-3 py-2"
+              >
+                <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <p className="text-[12px] text-emerald-600 dark:text-emerald-400">{success}</p>
+              </motion.div>
             )}
 
             <button

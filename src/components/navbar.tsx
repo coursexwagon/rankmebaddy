@@ -79,7 +79,7 @@ export default function Navbar() {
         {/* CTA + Theme Toggle */}
         <div className="flex items-center gap-3">
           <a
-            href="/dashboard"
+            href="/auth"
             className={`hidden rounded-lg border px-4 py-2 text-[12px] font-medium transition-all sm:inline-flex ${
               isHero
                 ? "border-white/20 text-white/70 hover:border-white/30 hover:text-white bg-white/5"
@@ -91,7 +91,7 @@ export default function Navbar() {
             Log in
           </a>
           <a
-            href="/onboarding"
+            href="/auth"
             className={`rounded-lg px-4 py-2 text-[12px] font-semibold transition-all ${
               isHero
                 ? "bg-white/15 text-white backdrop-blur-sm border border-white/20 hover:bg-white/25"

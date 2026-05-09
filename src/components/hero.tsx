@@ -461,7 +461,7 @@ export default function HeroSection() {
           transition={{ duration: 0.5, delay: 0.4 }}
         >
           <a
-            href="/onboarding"
+            href="/auth"
             className="group inline-flex items-center gap-2.5 rounded-full bg-white px-8 py-4 text-sm font-semibold text-[#1A1A2E] shadow-lg shadow-black/20 transition-all hover:bg-white/90 hover:shadow-xl hover:shadow-black/30"
           >
             Start ranking free

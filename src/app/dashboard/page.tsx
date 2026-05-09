@@ -361,6 +361,7 @@ function Sidebar({
   mobileOpen,
   onMobileClose,
   isPro,
+  onSignOut,
 }: {
   siteData: SiteData | null;
   activeSection: string;
@@ -370,6 +371,7 @@ function Sidebar({
   mobileOpen: boolean;
   onMobileClose: () => void;
   isPro?: boolean;
+  onSignOut: () => void;
 }) {
   const sidebarContent = (
     <div className="flex h-full flex-col">
@@ -444,8 +446,19 @@ function Sidebar({
           </div>
           <div className="min-w-0 flex-1">
             <p className="truncate text-[12px] font-medium text-[#1A1A1A] dark:text-white">{userName || "User"}</p>
-            <p className="text-[10px] text-[#9B9B9B] dark:text-[#9B9B9B]">{isPro ? "Pro plan ✦" : BETA_MODE ? "Beta — Free" : "Free plan"}</p>
+            <p className="text-[10px] text-[#9B9B9B] dark:text-[#9B9B9B]">{isPro ? "Pro plan" : BETA_MODE ? "Beta - Free" : "Free plan"}</p>
           </div>
+          <button
+            onClick={onSignOut}
+            className="flex h-6 w-6 items-center justify-center rounded-md text-[#9B9B9B] hover:bg-[#F5F5F0] dark:hover:bg-[#252528] hover:text-[#6B6B6B] dark:hover:text-white transition-colors"
+            title="Sign out"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+          </button>
         </div>
       </div>
     </div>
@@ -881,7 +894,7 @@ function ContentSection({ siteData, keyword, onAskAI }: { siteData: SiteData; ke
 }
 
 /* ─── Settings Section ──────────────────────────────────────── */
-function SettingsSection({ onboardingData, onUpdateData, onUpgrade }: { onboardingData: OnboardingData; onUpdateData: (data: OnboardingData) => void; onUpgrade: () => void }) {
+function SettingsSection({ onboardingData, onUpdateData, onUpgrade, onSignOut }: { onboardingData: OnboardingData; onUpdateData: (data: OnboardingData) => void; onUpgrade: () => void; onSignOut: () => void }) {
   const [name, setName] = useState(onboardingData.name);
   const [keyword, setKeyword] = useState(onboardingData.keyword);
   const [saved, setSaved] = useState(false);
@@ -942,7 +955,7 @@ function SettingsSection({ onboardingData, onUpdateData, onUpgrade }: { onboardi
       <div className="space-y-3 rounded-2xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 p-4">
         <h3 className="text-[11px] font-semibold uppercase tracking-wider text-red-600 dark:text-red-400">Danger zone</h3>
         <p className="text-[11px] text-[#6B6B6B] dark:text-[#9B9B9B]">Reset all onboarding data and start over.</p>
-        <button onClick={() => { localStorage.removeItem("rankmebaddy_onboarding"); window.location.href = "/onboarding"; }} className="rounded-full border border-red-300 dark:border-red-800 px-3 py-1.5 text-[11px] text-red-600 dark:text-red-400 transition-colors hover:bg-red-100 dark:hover:bg-red-900/30">Reset everything</button>
+        <button onClick={() => { localStorage.removeItem("rankmebaddy_onboarding"); onSignOut(); }} className="rounded-full border border-red-300 dark:border-red-800 px-3 py-1.5 text-[11px] text-red-600 dark:text-red-400 transition-colors hover:bg-red-100 dark:hover:bg-red-900/30">Reset everything</button>
       </div>
     </div>
   );
@@ -963,7 +976,7 @@ export default function DashboardPage() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const agentStepIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const { isPro } = useSubscription();
-  const { user, signOut } = useAuth();
+  const { user, signOut, loading } = useAuth();
 
   // In beta mode, everyone is "pro"
   const effectiveIsPro = BETA_MODE || isPro;
@@ -1064,19 +1077,35 @@ export default function DashboardPage() {
   const askInChat = useCallback((prompt: string) => { setActiveSection("chat"); setTimeout(() => sendMessage(prompt), 100); }, [sendMessage]);
   const updateOnboardingData = useCallback((data: OnboardingData) => { setOnboardingData(data); }, []);
 
+  // Auth check — redirect to /auth if not logged in
+  useEffect(() => {
+    if (!user && !loading) {
+      window.location.href = "/auth";
+    }
+  }, [user, loading]);
+
+  // Onboarding data check — redirect if no onboarding data
   useEffect(() => {
     const timer = setTimeout(() => {
       const stored = localStorage.getItem("rankmebaddy_onboarding");
-      if (!stored) window.location.href = "/onboarding";
+      if (!stored && user) window.location.href = "/onboarding";
     }, 3000);
     return () => clearTimeout(timer);
-  }, []);
+  }, [user]);
 
   if (setup && onboardingData) {
     return (<AnimatePresence><SetupScreen onComplete={() => setSetup(false)} /></AnimatePresence>);
   }
 
   if (!onboardingData) {
+    // Show loading while auth is being checked
+    if (loading) {
+      return (
+        <div className="flex min-h-screen items-center justify-center bg-[#FAFAF7] dark:bg-[#0F0F11]">
+          <motion.div className="h-6 w-6 rounded-full border-2 border-[#E8E5E0] dark:border-[#2A2A2E] border-t-blue-600" animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }} />
+        </div>
+      );
+    }
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#FAFAF7] dark:bg-[#0F0F11]">
         <motion.div className="h-6 w-6 rounded-full border-2 border-[#E8E5E0] dark:border-[#2A2A2E] border-t-blue-600" animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }} />
@@ -1089,7 +1118,7 @@ export default function DashboardPage() {
   return (
     <SubscriptionProvider>
     <div className="flex h-screen overflow-hidden bg-[#FAFAF7] dark:bg-[#0F0F11]">
-      <Sidebar siteData={siteData} activeSection={activeSection} onSectionChange={setActiveSection} userName={user?.email?.split("@")[0] || onboardingData.name} platforms={onboardingData.platforms || []} mobileOpen={mobileSidebar} onMobileClose={() => setMobileSidebar(false)} isPro={effectiveIsPro} />
+      <Sidebar siteData={siteData} activeSection={activeSection} onSectionChange={setActiveSection} userName={user?.email?.split("@")[0] || onboardingData.name} platforms={onboardingData.platforms || []} mobileOpen={mobileSidebar} onMobileClose={() => setMobileSidebar(false)} isPro={effectiveIsPro} onSignOut={async () => { await signOut(); window.location.href = "/auth"; }} />
 
       {/* Paywall Modal */}
       <Paywall open={paywallOpen} onClose={() => setPaywallOpen(false)} />
@@ -1247,7 +1276,7 @@ export default function DashboardPage() {
 
             {activeSection === "settings" && (
               <motion.div key="settings" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <SettingsSection onboardingData={onboardingData} onUpdateData={updateOnboardingData} onUpgrade={() => setPaywallOpen(true)} />
+                <SettingsSection onboardingData={onboardingData} onUpdateData={updateOnboardingData} onUpgrade={() => setPaywallOpen(true)} onSignOut={async () => { await signOut(); window.location.href = "/auth"; }} />
               </motion.div>
             )}
           </AnimatePresence>

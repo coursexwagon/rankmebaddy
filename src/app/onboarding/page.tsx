@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/hooks/use-auth";
 
 /* ─── Color System ───────────────────────────────────────────── */
 // Background: #0A0A0B  |  Surface: #18181B  |  Border: #27272A
@@ -1027,6 +1029,8 @@ function StepDone({ name, keyword, siteData, website, platforms, context }: { na
 
 /* ─── Main Onboarding Page ───────────────────────────────────── */
 export default function OnboardingPage() {
+  const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
   const [step, setStep] = useState(1);
   const [name, setName] = useState("");
   const [website, setWebsite] = useState("");
@@ -1035,11 +1039,39 @@ export default function OnboardingPage() {
   const [keyword, setKeyword] = useState("");
   const [context, setContext] = useState("");
 
+  // Auth check — redirect to /auth if not logged in
+  useEffect(() => {
+    if (!user && !authLoading) {
+      router.replace("/auth");
+    }
+  }, [user, authLoading, router]);
+
+  // Pre-fill name from auth user metadata
+  useEffect(() => {
+    if (user && !name) {
+      const authName = user.user_metadata?.full_name || user.email?.split("@")[0] || "";
+      if (authName) setName(authName);
+    }
+  }, [user, name]);
+
   const togglePlatform = (id: string) => {
     setSelectedPlatforms((prev) =>
       prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
     );
   };
+
+  // Show loading while checking auth
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: "#0A0A0B" }}>
+        <div className="h-6 w-6 rounded-full border-2 border-[#27272A] border-t-[#6EE7B7] animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null; // Will redirect via useEffect
+  }
 
   return (
     <section
