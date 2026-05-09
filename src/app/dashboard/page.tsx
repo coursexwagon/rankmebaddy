@@ -86,10 +86,10 @@ const topBarTabs = [
 
 /* ─── Suggested Prompt Cards ────────────────────────────────── */
 const suggestedPrompts = [
-  { title: "Keyword gaps", subtitle: "Find keyword opportunities", prompt: "What keyword gaps should I target for my site?" },
-  { title: "SEO audit", subtitle: "Run a full site audit", prompt: "Run a comprehensive SEO audit on my site covering technical SEO, content, and authority factors." },
-  { title: "Competitor analysis", subtitle: "Analyze your competition", prompt: "Who are my top SEO competitors and what are they ranking for?" },
-  { title: "Strategy timeline", subtitle: "Plan your SEO roadmap", prompt: "Create a visual SEO strategy timeline showing month-by-month milestones" },
+  { title: "Audit my site", prompt: "Run a comprehensive SEO audit on my site covering technical SEO, content, and authority factors." },
+  { title: "Find keyword gaps", prompt: "What keyword gaps should I target for my site?" },
+  { title: "Analyze competitors", prompt: "Who are my top SEO competitors and what are they ranking for?" },
+  { title: "SEO roadmap", prompt: "Create a visual SEO strategy timeline showing month-by-month milestones" },
 ];
 
 /* ─── Platform Icons ────────────────────────────────────────── */
@@ -324,17 +324,16 @@ function ThinkingIndicator() {
   );
 }
 
-/* ─── Suggested Prompt Card — clean, text-only ─────────────── */
-function SuggestedPromptCard({ title, subtitle, onClick }: { title: string; subtitle: string; onClick: () => void }) {
+/* ─── Suggested Prompt Chip — minimal ────────────────────── */
+function SuggestedPromptChip({ title, onClick }: { title: string; onClick: () => void }) {
   return (
     <motion.button
       onClick={onClick}
-      className="flex-shrink-0 rounded-xl border border-[#2A2A2E] bg-[#1A1A1E] px-4 py-3 text-left transition-all hover:border-[#3A3A3E] hover:bg-[#1E1E22] min-w-[160px]"
+      className="rounded-full border border-[#2A2A2E] bg-[#1A1A1E] px-4 py-2 text-[12px] text-[#9B9B9B] transition-all hover:border-[#3A3A3E] hover:text-white hover:bg-[#1E1E22]"
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
     >
-      <p className="text-[12px] font-medium text-white">{title}</p>
-      <p className="text-[10px] text-[#6B6B6B] mt-0.5">{subtitle}</p>
+      {title}
     </motion.button>
   );
 }
@@ -830,14 +829,7 @@ export default function DashboardPage() {
 
   const siteData = onboardingData.siteData;
   const userName = user?.email?.split("@")[0] || onboardingData.name;
-  const greetingName = onboardingData.name?.split(" ")[0] || userName || "there";
 
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return "Good Morning";
-    if (hour < 18) return "Good Afternoon";
-    return "Good Evening";
-  };
 
   return (
     <SubscriptionProvider>
@@ -982,88 +974,40 @@ export default function DashboardPage() {
           {activeSection === "chat" && (
             <motion.div key="chat" className="flex h-full flex-col" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
               {messages.length === 0 ? (
-                /* Centered welcome state */
+                /* Clean welcome — straight to the point */
                 <div className="flex-1 flex flex-col justify-center items-center px-4 sm:px-6">
                   <motion.div
                     className="w-full max-w-2xl flex flex-col items-center"
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
+                    transition={{ duration: 0.3 }}
                   >
-                    {/* Small label */}
-                    <motion.p
-                      className="text-[10px] font-medium uppercase tracking-[0.25em] text-[#6B6B6B] mb-4"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.1 }}
-                    >
-                      RankMeBaddy AI
-                    </motion.p>
-
-                    {/* Greeting with gradient glow */}
-                    <div className="relative">
-                      <div className="absolute inset-0 blur-3xl bg-white/[0.03] rounded-full scale-150" />
-                      <motion.h1
-                        className="relative font-heading text-3xl sm:text-4xl font-bold text-white text-center mb-2"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2 }}
-                      >
-                        {getGreeting()}, {greetingName}!
-                      </motion.h1>
-                    </div>
-
-                    <motion.p
-                      className="text-[15px] text-[#9B9B9B] text-center mb-8"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.3 }}
-                    >
-                      I am ready to help you rank
-                    </motion.p>
-
-                    {/* Input area */}
+                    {/* Input area — front and center */}
                     <motion.div
-                      className="w-full max-w-2xl mb-6"
-                      initial={{ opacity: 0, y: 10 }}
+                      className="w-full mb-5"
+                      initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.4 }}
+                      transition={{ delay: 0.1 }}
                     >
                       <AnimatedAIChat onSendMessage={sendMessage} isTyping={isSending} />
                     </motion.div>
 
-                    {/* Quick action cards — horizontal scrollable row */}
+                    {/* Quick action chips */}
                     <motion.div
-                      className="w-full max-w-2xl flex gap-2.5 overflow-x-auto pb-2 scrollbar-none"
+                      className="flex flex-wrap justify-center gap-2"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      transition={{ delay: 0.5 }}
+                      transition={{ delay: 0.2 }}
                     >
-                      {suggestedPrompts.map((prompt, i) => (
-                        <motion.div
+                      {suggestedPrompts.map((prompt) => (
+                        <SuggestedPromptChip
                           key={prompt.title}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.5 + i * 0.08 }}
-                        >
-                          <SuggestedPromptCard
-                            title={prompt.title}
-                            subtitle={prompt.subtitle}
-                            onClick={() => sendMessage(prompt.prompt)}
-                          />
-                        </motion.div>
+                          title={prompt.title}
+                          onClick={() => sendMessage(prompt.prompt)}
+                        />
                       ))}
                     </motion.div>
                   </motion.div>
-
-                  {/* Footer links */}
-                  <div className="mt-auto pt-6 pb-4 flex items-center gap-4 text-[10px] text-[#4A4A4E]">
-                    <span>24/7 Help Chat</span>
-                    <span>·</span>
-                    <button className="hover:text-[#6B6B6B] transition-colors">Terms of Service</button>
-                    <span>·</span>
-                    <button className="hover:text-[#6B6B6B] transition-colors">Privacy Policy</button>
-                  </div>
                 </div>
               ) : (
                 <>
