@@ -31,7 +31,7 @@ Stage Summary:
 ---
 Task ID: 2
 Agent: Main Agent
-Task: Add auto-confirm for beta mode + configure Vercel env vars
+Task: Add auto-confirm for beta mode + configure Vercel env vars + deploy
 
 Work Log:
 - Verified Supabase service role key has full admin access
@@ -39,16 +39,18 @@ Work Log:
 - Discovered Google OAuth is DISABLED in Supabase project settings
 - Discovered email verification is REQUIRED (blocks instant sign-in)
 - Created /api/auth/auto-confirm route using service role key to bypass email verification during beta
-- Updated AuthProvider to automatically call auto-confirm after signup
-- After auto-confirm, user is automatically signed in
+- Updated AuthProvider to automatically call auto-confirm after signup and auto-sign-in
 - Updated auth page with graceful Google OAuth fallback when provider is disabled
 - Added better error messages for common auth failures
-- Tested full auth flow end-to-end: signup → auto-confirm → sign-in → SUCCESS
+- Tested full auth flow end-to-end: signup -> auto-confirm -> sign-in -> SUCCESS
 - Configured Vercel env vars via API: SUPABASE_SERVICE_ROLE_KEY added to both production and preview
 - All env vars verified on Vercel
+- Pushed to GitHub, deployment triggered and completed (READY)
+- Production site verified: https://my-project-brown-iota.vercel.app/auth returns 200
 
 Stage Summary:
-- Full auth flow works: user signs up → auto-confirmed via service role key → signed in automatically
+- Full auth flow works: user signs up -> auto-confirmed via service role key -> signed in automatically
 - Google OAuth shows friendly error when not enabled in Supabase
 - Email auth is the primary sign-in method during beta
-- All Vercel env vars properly configured
+- All Vercel env vars properly configured including service role key
+- Deployment is LIVE and ready to use
