@@ -17,6 +17,7 @@ function AuthForm() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
+  const [googleError, setGoogleError] = useState(false);
 
   const nextPath = searchParams.get("next") || "/onboarding";
 
@@ -39,16 +40,37 @@ function AuthForm() {
       if (mode === "login") {
         const { error: err } = await signInWithEmail(email, password);
         if (err) {
-          setError(err);
+          // Show friendly error messages
+          if (err.includes("Invalid login credentials")) {
+            setError("Wrong email or password. Try again or create a new account.");
+          } else if (err.includes("Email not confirmed")) {
+            setError("Please check your email and click the confirmation link first, then sign in.");
+          } else {
+            setError(err);
+          }
         } else {
           setSuccess("Welcome back! Redirecting...");
         }
       } else {
         const { error: err } = await signUp(email, password, name);
         if (err) {
-          setError(err);
+          if (err.includes("already registered")) {
+            setError("This email is already registered. Try signing in instead.");
+          } else {
+            setError(err);
+          }
         } else {
-          setSuccess("Account created! Check your email to confirm, then you'll be redirected.");
+          // During beta, try to auto-confirm via our API
+          try {
+            await fetch("/api/auth/auto-confirm", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email }),
+            });
+          } catch {
+            // Auto-confirm may fail, that's ok
+          }
+          setSuccess("Account created! Redirecting...");
         }
       }
     } finally {
@@ -58,10 +80,17 @@ function AuthForm() {
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
+    setGoogleError(false);
     try {
       await signInWithGoogle();
+      // If Google OAuth is not enabled, this will throw or redirect won't happen
+      // Give it a moment, then check if we're still on the page
+      setTimeout(() => {
+        setGoogleError(true);
+        setLoading(false);
+      }, 3000);
     } catch {
-      setError("Google sign-in failed. Please try again.");
+      setGoogleError(true);
       setLoading(false);
     }
   };
@@ -122,9 +151,19 @@ function AuthForm() {
             Continue with Google
           </button>
 
+          {googleError && (
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="mt-2 text-[11px] text-amber-600 dark:text-amber-400 text-center"
+            >
+              Google sign-in isn&apos;t available yet. Use email/password below.
+            </motion.p>
+          )}
+
           <div className="my-4 flex items-center gap-3">
             <div className="h-px flex-1 bg-[#E8E5E0] dark:bg-[#2A2A2E]" />
-            <span className="text-[11px] text-[#9B9B9B]">or</span>
+            <span className="text-[11px] text-[#9B9B9B]">or use email</span>
             <div className="h-px flex-1 bg-[#E8E5E0] dark:bg-[#2A2A2E]" />
           </div>
 
@@ -159,7 +198,7 @@ function AuthForm() {
             />
             <input
               type="password"
-              placeholder="Password"
+              placeholder="Password (6+ characters)"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -201,7 +240,7 @@ function AuthForm() {
           <p className="mt-4 text-center text-[12px] text-[#6B6B6B]">
             {mode === "login" ? "Don't have an account?" : "Already have an account?"}{" "}
             <button
-              onClick={() => { setMode(mode === "login" ? "signup" : "login"); setError(""); }}
+              onClick={() => { setMode(mode === "login" ? "signup" : "login"); setError(""); setSuccess(""); }}
               className="font-medium text-blue-600 hover:text-blue-700"
             >
               {mode === "login" ? "Sign up free" : "Sign in"}

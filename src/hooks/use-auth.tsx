@@ -1,8 +1,10 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { User, Session, SupabaseClient } from "@supabase/supabase-js";
+
+const BETA_MODE = process.env.NEXT_PUBLIC_BETA_MODE === "true";
 
 interface AuthContextType {
   user: User | null;
@@ -56,32 +58,59 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, [supabase]);
 
-  const signInWithEmail = async (email: string, password: string) => {
+  const signInWithEmail = useCallback(async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     return { error: error?.message || null };
-  };
+  }, [supabase]);
 
-  const signUp = async (email: string, password: string, name: string) => {
-    const { error } = await supabase.auth.signUp({
+  const signUp = useCallback(async (email: string, password: string, name: string) => {
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: { data: { full_name: name } },
     });
-    return { error: error?.message || null };
-  };
 
-  const signInWithGoogle = async () => {
+    if (error) {
+      return { error: error.message };
+    }
+
+    // During beta, auto-confirm the user so they can sign in immediately
+    if (BETA_MODE && data.user && !data.user.email_confirmed_at) {
+      try {
+        const confirmRes = await fetch("/api/auth/auto-confirm", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        });
+
+        if (confirmRes.ok) {
+          // Auto-confirm succeeded — now sign the user in
+          const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+          if (signInError) {
+            // Auto sign-in failed, but account was created and confirmed
+            return { error: null };
+          }
+        }
+      } catch {
+        // Auto-confirm API call failed, user will need to confirm via email
+      }
+    }
+
+    return { error: null };
+  }, [supabase]);
+
+  const signInWithGoogle = useCallback(async () => {
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
       },
     });
-  };
+  }, [supabase]);
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     await supabase.auth.signOut();
-  };
+  }, [supabase]);
 
   return (
     <AuthContext.Provider
