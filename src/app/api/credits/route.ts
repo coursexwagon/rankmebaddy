@@ -9,11 +9,11 @@ const supabaseAdmin = createClient(
 
 /* ─── Configuration ──────────────────────────────────────────── */
 const BETA_MODE = process.env.NEXT_PUBLIC_BETA_MODE === "true";
-const FREE_CREDITS_PER_RESET = BETA_MODE ? 100 : 25;
-const PRO_CREDITS_PER_RESET = BETA_MODE ? 500 : 100;
+const FREE_CREDITS_PER_RESET = BETA_MODE ? 500 : 25;
+const PRO_CREDITS_PER_RESET = BETA_MODE ? 1000 : 100;
 const ENTERPRISE_CREDITS_PER_RESET = 999;
 const RESET_INTERVAL_MS = 60 * 60 * 1000; // 1 hour
-const BETA_BONUS_CREDITS = 50; // Extra one-time credits for beta users
+const BETA_BONUS_CREDITS = 200; // Extra one-time credits for beta users
 
 type Tier = "free" | "pro" | "enterprise";
 

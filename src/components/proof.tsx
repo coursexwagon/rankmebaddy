@@ -2,15 +2,14 @@
 
 import { useRef } from "react";
 import { motion, useScroll, useTransform, useInView } from "framer-motion";
-import Image from "next/image";
 
-/* ─── Testimonial Data ───────────────────────────────────────── */
+/* ─── Testimonial Data ──────────────────────────────────────── */
 const testimonials = [
   {
     name: "Sarah Chen",
+    initials: "SC",
     role: "Head of Content",
     company: "FitContent",
-    photo: "/people/sarah.jpg",
     quote:
       "RankMeBaddy told us exactly which keywords to target and gave us the optimized copy to implement. We just pasted it in and two weeks later we were on page 1. It doesn\u2019t auto-rank you — it gives you the exact words and strategy so you can rank yourself.",
     metrics: [
@@ -21,9 +20,9 @@ const testimonials = [
   },
   {
     name: "Marcus Davis",
+    initials: "MD",
     role: "SEO Manager",
     company: "HealthStack",
-    photo: "/people/marcus.jpg",
     quote:
       "I told it \u201crank best protein powder\u201d and it gave me a full keyword plan, optimized titles, and the exact content changes to make for Google, YouTube, and Amazon. I just implemented what it suggested. Page 1 in 14 days without writing anything from scratch.",
     metrics: [
@@ -34,9 +33,9 @@ const testimonials = [
   },
   {
     name: "Jake Morales",
+    initials: "JM",
     role: "Growth Lead",
     company: "VegaFit",
-    photo: "/people/jake.jpg",
     quote:
       "The chat gives you implementation-ready content — titles, descriptions, keyword placements — you just apply it. Our TikTok went from zero to 15K views after following its content plan. It\u2019s like having an SEO expert tell you exactly what to write.",
     metrics: [
@@ -47,7 +46,7 @@ const testimonials = [
   },
 ];
 
-/* ─── Star Rating ────────────────────────────────────────────── */
+/* ─── Star Rating ──────────────────────────────────────────── */
 function Stars({ count }: { count: number }) {
   return (
     <div className="flex gap-0.5">
@@ -67,7 +66,7 @@ function Stars({ count }: { count: number }) {
   );
 }
 
-/* ─── Testimonial Card ───────────────────────────────────────── */
+/* ─── Testimonial Card ──────────────────────────────────────── */
 function TestimonialCard({
   testimonial,
   index,
@@ -81,7 +80,7 @@ function TestimonialCard({
   return (
     <motion.div
       ref={ref}
-      className="relative overflow-hidden rounded-2xl border border-[#E8E5E0] bg-white dark:border-[#333333] dark:bg-[#1E1E1E]"
+      className="relative overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl"
       initial={{ opacity: 0, y: 40, scale: 0.95 }}
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, margin: "-40px" }}
@@ -95,25 +94,22 @@ function TestimonialCard({
         transition: { duration: 0.2 },
       }}
     >
+      {/* Top gradient highlight */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+
       {/* Top section */}
-      <div className="border-b border-[#E8E5E0] p-5 dark:border-[#333333]">
+      <div className="border-b border-white/[0.04] p-5">
         <div className="flex items-start gap-3.5">
-          <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-[#E8E5E0] dark:border-[#333333]">
-            <Image
-              src={testimonial.photo}
-              alt={testimonial.name}
-              fill
-              className="object-cover"
-              sizes="48px"
-            />
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#00D4AA]/10 border border-[#00D4AA]/15">
+            <span className="text-[11px] font-bold text-[#00D4AA]">{testimonial.initials}</span>
           </div>
           <div className="flex-1">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[13px] font-semibold text-[#1A1A1A] dark:text-[#E8E8E8]">
+                <p className="text-[13px] font-semibold text-white/80">
                   {testimonial.name}
                 </p>
-                <p className="text-[10px] text-[#9B9B9B] dark:text-[#6B6B6B]">
+                <p className="text-[10px] text-[#52525B]">
                   {testimonial.role}, {testimonial.company}
                 </p>
               </div>
@@ -125,24 +121,24 @@ function TestimonialCard({
 
       {/* Quote */}
       <div className="p-5">
-        <p className="text-[12px] leading-relaxed text-[#6B6B6B] dark:text-[#9B9B9B]">
+        <p className="text-[12px] leading-[1.7] text-[#71717A]">
           &ldquo;{testimonial.quote}&rdquo;
         </p>
       </div>
 
       {/* Metrics */}
-      <div className="border-t border-[#E8E5E0] px-5 py-4 dark:border-[#333333]">
+      <div className="border-t border-white/[0.04] px-5 py-4">
         <div className="flex gap-4">
           {testimonial.metrics.map((m) => (
             <div key={m.label} className="flex-1">
-              <p className="text-[9px] uppercase tracking-wider text-[#9B9B9B] dark:text-[#6B6B6B]">
+              <p className="text-[9px] uppercase tracking-[0.12em] text-[#3F3F46]">
                 {m.label}
               </p>
               <div className="mt-1 flex items-baseline gap-1.5">
-                <span className="text-lg font-bold text-[#2563EB] dark:text-blue-400">
+                <span className="text-lg font-bold text-[#00D4AA]">
                   {m.value}
                 </span>
-                <span className="text-[9px] text-[#9B9B9B] dark:text-[#6B6B6B]">
+                <span className="text-[9px] text-[#3F3F46]">
                   from {m.before}
                 </span>
               </div>
@@ -154,7 +150,7 @@ function TestimonialCard({
   );
 }
 
-/* ─── Proof Section ──────────────────────────────────────────── */
+/* ─── Proof Section ────────────────────────────────────────── */
 export default function ProofSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
@@ -168,29 +164,29 @@ export default function ProofSection() {
     <section
       id="proof"
       ref={sectionRef}
-      className="relative bg-[#FAFAF7] px-4 py-20 dark:bg-[#141414] sm:px-6 sm:py-28"
+      className="relative bg-[#0A0A0B] px-4 py-20 sm:px-6 sm:py-28"
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E8E5E0] to-transparent dark:via-[#333333]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/[0.05] to-transparent" />
 
       <div className="mx-auto max-w-6xl">
         <motion.div
-          className="mb-14 flex flex-col items-center gap-3 text-center"
+          className="mb-14 flex flex-col items-center gap-4 text-center"
           style={{ y: headerY }}
         >
-          <span className="inline-flex items-center gap-2 rounded-full border border-[#E8E5E0] bg-white px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-[#6B6B6B] dark:border-[#333333] dark:bg-[#1E1E1E] dark:text-[#9B9B9B]">
+          <span className="inline-flex items-center gap-2 rounded-full border border-[#00D4AA]/15 bg-[#00D4AA]/5 px-3 py-1 text-[11px] font-medium text-[#00D4AA]/70">
             Proof
           </span>
-          <h2 className="font-heading text-2xl font-bold text-[#1A1A1A] dark:text-[#E8E8E8] sm:text-3xl md:text-4xl">
-            Real results. Real people.
+          <h2 className="font-heading text-3xl font-bold text-white sm:text-4xl md:text-5xl">
+            Real results. Real rankings.
           </h2>
-          <p className="max-w-md text-sm text-[#6B6B6B] dark:text-[#9B9B9B]">
+          <p className="max-w-md text-[15px] leading-relaxed text-white/40">
             Teams using RankMeBaddy get the exact keywords, content, and strategy they need to rank — then see results in under 14 days.
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3 md:gap-5">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
           {testimonials.map((t, i) => (
-            <div key={t.name} className={i === 1 ? "md:mt-6" : ""}>
+            <div key={t.name} className={i === 1 ? "md:mt-5" : ""}>
               <TestimonialCard testimonial={t} index={i} />
             </div>
           ))}

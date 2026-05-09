@@ -3,46 +3,50 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 
-/* ─── Floating Glass Cards (like ChronoTask reference) ─────── */
+/* ─── Floating Glass Cards ────────────────────────────────── */
 function FloatingCards() {
   return (
-    <div className="relative mx-auto mt-8 h-[380px] max-w-3xl sm:mt-12 sm:h-[440px] md:h-[480px]">
-      {/* Card: Keywords - top left */}
+    <div className="relative mx-auto mt-10 h-[360px] max-w-3xl sm:mt-14 sm:h-[420px] md:h-[460px]">
+      {/* Card: Keywords — top left */}
       <motion.div
-        className="absolute left-[2%] top-[5%] w-[180px] rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4 backdrop-blur-xl sm:left-[5%] sm:w-[200px]"
+        className="absolute left-[2%] top-[5%] w-[175px] rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 backdrop-blur-xl sm:left-[5%] sm:w-[195px]"
         initial={{ opacity: 0, y: 20, x: -20 }}
         animate={{ opacity: 1, y: 0, x: 0 }}
-        transition={{ duration: 0.6, delay: 0.8 }}
+        transition={{ duration: 0.7, delay: 0.8 }}
+        whileHover={{ y: -2, transition: { duration: 0.2 } }}
       >
-        <div className="mb-2 flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#00D4AA]/15">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px rounded-t-2xl bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+        <div className="mb-2.5 flex items-center gap-2">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#00D4AA]/12">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00D4AA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M4 7V4h16v3" /><path d="M9 20h6" /><path d="M12 4v16" />
             </svg>
           </div>
-          <span className="text-[11px] font-semibold text-white/80">Keywords</span>
+          <span className="text-[11px] font-semibold text-white/75">Keywords</span>
         </div>
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           {["best seo tool", "rank on google", "seo strategy"].map((kw, i) => (
-            <div key={i} className="flex items-center justify-between rounded-lg bg-white/[0.04] px-2.5 py-1.5">
-              <span className="text-[10px] text-white/60">{kw}</span>
+            <div key={i} className="flex items-center justify-between rounded-lg bg-white/[0.03] px-2.5 py-1.5">
+              <span className="text-[10px] text-white/50">{kw}</span>
               <span className="text-[9px] font-bold text-[#00D4AA]">{["4.2k", "2.8k", "1.9k"][i]}</span>
             </div>
           ))}
         </div>
       </motion.div>
 
-      {/* Card: SEO Score - top right */}
+      {/* Card: SEO Score — top right */}
       <motion.div
-        className="absolute right-[2%] top-[2%] w-[160px] rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4 backdrop-blur-xl sm:right-[5%] sm:w-[180px]"
+        className="absolute right-[2%] top-[2%] w-[155px] rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 backdrop-blur-xl sm:right-[5%] sm:w-[175px]"
         initial={{ opacity: 0, y: 20, x: 20 }}
         animate={{ opacity: 1, y: 0, x: 0 }}
-        transition={{ duration: 0.6, delay: 1.0 }}
+        transition={{ duration: 0.7, delay: 1.0 }}
+        whileHover={{ y: -2, transition: { duration: 0.2 } }}
       >
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px rounded-t-2xl bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
         <div className="mb-3 text-center">
           <div className="relative mx-auto flex h-16 w-16 items-center justify-center">
             <svg className="h-16 w-16 -rotate-90" viewBox="0 0 80 80">
-              <circle cx="40" cy="40" r="34" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="5" />
+              <circle cx="40" cy="40" r="34" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="5" />
               <motion.circle
                 cx="40" cy="40" r="34" fill="none"
                 stroke="#00D4AA"
@@ -56,24 +60,26 @@ function FloatingCards() {
             </svg>
             <span className="absolute font-heading text-lg font-bold text-white">78</span>
           </div>
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-white/40">SEO Score</p>
+          <p className="text-[9px] font-semibold uppercase tracking-[0.15em] text-white/30">SEO Score</p>
         </div>
       </motion.div>
 
-      {/* Card: Today&apos;s Tasks - bottom left */}
+      {/* Card: Today's Tasks — bottom left */}
       <motion.div
-        className="absolute bottom-[5%] left-[5%] w-[200px] rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4 backdrop-blur-xl sm:left-[8%] sm:w-[220px]"
+        className="absolute bottom-[5%] left-[5%] w-[195px] rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 backdrop-blur-xl sm:left-[8%] sm:w-[215px]"
         initial={{ opacity: 0, y: -20, x: -20 }}
         animate={{ opacity: 1, y: 0, x: 0 }}
-        transition={{ duration: 0.6, delay: 1.2 }}
+        transition={{ duration: 0.7, delay: 1.2 }}
+        whileHover={{ y: -2, transition: { duration: 0.2 } }}
       >
-        <div className="mb-2 flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-500/15">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px rounded-t-2xl bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+        <div className="mb-2.5 flex items-center gap-2">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#00D4AA]/12">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00D4AA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="3" width="18" height="18" rx="2" /><path d="m9 12 2 2 4-4" />
             </svg>
           </div>
-          <span className="text-[11px] font-semibold text-white/80">Today&apos;s Tasks</span>
+          <span className="text-[11px] font-semibold text-white/75">Today&apos;s Tasks</span>
         </div>
         <div className="space-y-1.5">
           {[
@@ -82,28 +88,30 @@ function FloatingCards() {
             { text: "Submit sitemap", done: false },
           ].map((task, i) => (
             <div key={i} className="flex items-center gap-2 px-1 py-0.5">
-              <div className={`h-3.5 w-3.5 rounded-full border flex items-center justify-center ${task.done ? "bg-[#00D4AA]/20 border-[#00D4AA]/30" : "border-white/10"}`}>
+              <div className={`h-3.5 w-3.5 rounded-full border flex items-center justify-center ${task.done ? "bg-[#00D4AA]/15 border-[#00D4AA]/25" : "border-white/[0.08]"}`}>
                 {task.done && (
                   <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#00D4AA" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                 )}
               </div>
-              <span className={`text-[10px] ${task.done ? "text-white/50 line-through" : "text-white/70"}`}>{task.text}</span>
+              <span className={`text-[10px] ${task.done ? "text-white/40 line-through" : "text-white/60"}`}>{task.text}</span>
             </div>
           ))}
         </div>
       </motion.div>
 
-      {/* Card: Integrations - bottom right */}
+      {/* Card: Integrations — bottom right */}
       <motion.div
-        className="absolute bottom-[8%] right-[5%] w-[180px] rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4 backdrop-blur-xl sm:right-[8%] sm:w-[200px]"
+        className="absolute bottom-[8%] right-[5%] w-[175px] rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 backdrop-blur-xl sm:right-[8%] sm:w-[195px]"
         initial={{ opacity: 0, y: -20, x: 20 }}
         animate={{ opacity: 1, y: 0, x: 0 }}
-        transition={{ duration: 0.6, delay: 1.4 }}
+        transition={{ duration: 0.7, delay: 1.4 }}
+        whileHover={{ y: -2, transition: { duration: 0.2 } }}
       >
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px rounded-t-2xl bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
         <div className="mb-2 text-center">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-white/40">5+ Platforms</span>
+          <span className="text-[9px] font-semibold uppercase tracking-[0.15em] text-white/30">5+ Platforms</span>
         </div>
         <div className="flex flex-wrap items-center justify-center gap-2">
           {[
@@ -111,9 +119,9 @@ function FloatingCards() {
             { icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.38.55A3.02 3.02 0 0 0 .5 6.19 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.81 3.02 3.02 0 0 0 2.12 2.14c1.88.55 9.38.55 9.38.55s7.5 0 9.38-.55a3.02 3.02 0 0 0 2.12-2.14A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.81z" fill="#FF0000" /><path d="M9.75 15.02 15.75 12 9.75 8.98v6.04z" fill="#FFF" /></svg>, label: "YouTube" },
             { icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M.05 18.47c.08-.1.2-.1.36-.02 3.7 2.13 7.72 3.2 12.06 3.2 2.9 0 5.76-.54 8.58-1.63l.3-.13c.27-.12.45-.02.25.2-.2.2-.45.4-.7.6-2.64 1.96-5.73 2.93-9.24 2.93-4.05 0-7.77-1.36-11.17-4.09-.22-.17-.36-.3-.44-.36a.23.23 0 0 1 0-.3v-.4z" fill="#FF9900" /></svg>, label: "Amazon" },
             { icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" fill="#FE2C55" /></svg>, label: "TikTok" },
-            { icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></svg>, label: "AI" },
+            { icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></svg>, label: "AI" },
           ].map((p, i) => (
-            <div key={i} className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.06] border border-white/[0.08]">
+            <div key={i} className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.06]">
               {p.icon}
             </div>
           ))}
@@ -127,7 +135,7 @@ function FloatingCards() {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.8, delay: 0.6 }}
       >
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#00D4AA]/25 to-emerald-600/15 border border-[#00D4AA]/20 backdrop-blur-xl shadow-lg shadow-[#00D4AA]/10 sm:h-20 sm:w-20">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#00D4AA]/20 to-emerald-600/10 border border-[#00D4AA]/15 backdrop-blur-xl shadow-lg shadow-[#00D4AA]/8 sm:h-20 sm:w-20">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#00D4AA" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="20 6 9 17 4 12" />
           </svg>
@@ -137,7 +145,7 @@ function FloatingCards() {
   );
 }
 
-/* ─── Partner Logos Strip ────────────────────────────────────── */
+/* ─── Partner Logos Strip ──────────────────────────────────── */
 function PartnerStrip() {
   const partners = [
     "Shopify", "Webflow", "WordPress", "Wix", "Squarespace", "Ghost", "Next.js",
@@ -145,19 +153,19 @@ function PartnerStrip() {
 
   return (
     <motion.div
-      className="relative z-10 mt-12 border-t border-white/10 pt-8 pb-4 sm:mt-16"
+      className="relative z-10 mt-12 border-t border-white/[0.05] pt-8 pb-4 sm:mt-16"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8, delay: 1.2 }}
     >
-      <p className="mb-5 text-center text-[10px] uppercase tracking-[0.2em] text-white/30">
-        Trusted by teams on
+      <p className="mb-5 text-center text-[10px] uppercase tracking-[0.2em] text-white/20">
+        Works with your stack
       </p>
       <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 px-4">
         {partners.map((name, i) => (
           <motion.span
             key={name}
-            className="text-sm font-medium text-white/25 transition-colors hover:text-white/40"
+            className="text-sm font-medium text-white/20 transition-colors hover:text-white/35"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 1.4 + i * 0.05 }}
@@ -170,7 +178,7 @@ function PartnerStrip() {
   );
 }
 
-/* ─── Hero Section ───────────────────────────────────────────── */
+/* ─── Hero Section ─────────────────────────────────────────── */
 export default function HeroSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
@@ -192,8 +200,8 @@ export default function HeroSection() {
           className="absolute inset-0"
           style={{
             background: `
-              radial-gradient(ellipse 80% 60% at 20% 30%, rgba(0,212,170,0.15) 0%, transparent 50%),
-              radial-gradient(ellipse 60% 50% at 80% 20%, rgba(106,48,147,0.2) 0%, transparent 50%),
+              radial-gradient(ellipse 80% 60% at 20% 30%, rgba(0,212,170,0.12) 0%, transparent 50%),
+              radial-gradient(ellipse 60% 50% at 80% 20%, rgba(0,212,170,0.06) 0%, transparent 50%),
               radial-gradient(ellipse 90% 70% at 50% 80%, rgba(26,26,46,0.9) 0%, transparent 60%),
               linear-gradient(160deg, #0A0A0B 0%, #0D1117 30%, #1A1A2E 70%, #0A0A0B 100%)
             `,
@@ -201,22 +209,22 @@ export default function HeroSection() {
         />
         <motion.div
           className="absolute w-72 h-72 rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(0,212,170,0.15) 0%, transparent 70%)", left: "10%", top: "15%" }}
+          style={{ background: "radial-gradient(circle, rgba(0,212,170,0.12) 0%, transparent 70%)", left: "10%", top: "15%" }}
           animate={{ x: [0, 30, -20, 0], y: [0, -20, 30, 0], scale: [1, 1.1, 0.9, 1] }}
-          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+          transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div
           className="absolute w-56 h-56 rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(106,48,147,0.2) 0%, transparent 70%)", right: "10%", top: "25%" }}
+          style={{ background: "radial-gradient(circle, rgba(0,212,170,0.08) 0%, transparent 70%)", right: "10%", top: "25%" }}
           animate={{ x: [0, -25, 15, 0], y: [0, 25, -15, 0], scale: [1, 0.9, 1.1, 1] }}
           transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
         />
         {/* Subtle grid */}
         <div
-          className="absolute inset-0 opacity-[0.02]"
+          className="absolute inset-0 opacity-[0.015]"
           style={{
             backgroundImage: "linear-gradient(#FAFAFA 1px, transparent 1px), linear-gradient(90deg, #FAFAFA 1px, transparent 1px)",
-            backgroundSize: "60px 60px",
+            backgroundSize: "48px 48px",
           }}
         />
       </motion.div>
@@ -227,18 +235,18 @@ export default function HeroSection() {
 
         {/* Badge */}
         <motion.div
-          className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#00D4AA]/20 bg-[#00D4AA]/5 px-4 py-1.5 backdrop-blur-sm"
+          className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#00D4AA]/15 bg-[#00D4AA]/5 px-4 py-1.5 backdrop-blur-sm"
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.05 }}
         >
           <span className="h-1.5 w-1.5 rounded-full bg-[#00D4AA] animate-pulse" />
-          <span className="text-[11px] font-medium text-[#00D4AA]/80">AI-powered multi-platform SEO</span>
+          <span className="text-[11px] font-medium text-[#00D4AA]/70">AI-powered multi-platform SEO</span>
         </motion.div>
 
         {/* Headline */}
         <motion.h1
-          className="font-heading text-4xl font-bold leading-[1.08] tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl"
+          className="font-heading text-4xl font-bold leading-[1.05] tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
@@ -255,7 +263,7 @@ export default function HeroSection() {
 
         {/* Subheadline */}
         <motion.p
-          className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-white/60 sm:text-lg"
+          className="mx-auto mt-5 max-w-lg text-[15px] leading-[1.7] text-white/50 sm:text-base sm:leading-[1.75]"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.25 }}
@@ -265,29 +273,29 @@ export default function HeroSection() {
 
         {/* CTA */}
         <motion.div
-          className="mt-9 flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-4"
+          className="mt-9 flex flex-col items-center gap-3.5 sm:flex-row sm:justify-center sm:gap-4"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
         >
           <a
             href="/auth"
-            className="group inline-flex items-center gap-2.5 rounded-full bg-[#00D4AA] px-8 py-4 text-sm font-semibold text-[#0A0A0B] shadow-lg shadow-[#00D4AA]/20 transition-all hover:bg-[#00D4AA]/90 hover:shadow-xl hover:shadow-[#00D4AA]/30"
+            className="group inline-flex items-center gap-2.5 rounded-full bg-[#00D4AA] px-8 py-3.5 text-sm font-semibold text-[#0A0A0B] shadow-lg shadow-[#00D4AA]/15 transition-all duration-200 hover:bg-[#00D4AA]/90 hover:shadow-xl hover:shadow-[#00D4AA]/25"
           >
-            Get free demo
+            Get started free
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform group-hover:translate-x-0.5">
               <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
             </svg>
           </a>
           <a
             href="#proof"
-            className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-6 py-3.5 text-sm font-medium text-white/70 backdrop-blur-sm transition-colors hover:border-white/30 hover:text-white"
+            className="inline-flex items-center gap-2 rounded-full border border-white/[0.1] bg-white/[0.03] px-6 py-3.5 text-sm font-medium text-white/60 backdrop-blur-sm transition-colors duration-200 hover:border-white/[0.15] hover:text-white/80 hover:bg-white/[0.05]"
           >
             See results
           </a>
         </motion.div>
 
-        <motion.p className="mt-5 text-xs text-white/40" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.6 }}>
+        <motion.p className="mt-5 text-xs text-white/30" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.6 }}>
           Free to start · No credit card · 100 credits/hour in beta
         </motion.p>
       </motion.div>

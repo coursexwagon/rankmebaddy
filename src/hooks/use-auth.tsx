@@ -48,6 +48,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(session?.user ?? null);
       setEmailVerified(!!session?.user?.email_confirmed_at);
       setLoading(false);
+      // Store user ID for credits tracking on initial load too
+      if (session?.user?.id) {
+        localStorage.setItem("rankmebaddy_user_id", session.user.id);
+      }
     });
 
     // Listen for auth changes

@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-/* ─── Animated Card ──────────────────────────────────────────── */
+/* ─── Animated Card ────────────────────────────────────────── */
 interface CardProps {
   children: React.ReactNode;
   className?: string;
@@ -15,7 +15,8 @@ function Card({ children, className, delay = 0 }: CardProps) {
   return (
     <motion.div
       className={cn(
-        "relative overflow-hidden rounded-2xl border border-[#E8E5E0] bg-white shadow-sm dark:border-[#333333] dark:bg-[#1E1E1E] dark:shadow-none",
+        "relative overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl",
+        "transition-colors duration-300 hover:border-white/[0.1] hover:bg-white/[0.05]",
         className
       )}
       initial={{ opacity: 0, y: 30 }}
@@ -24,16 +25,17 @@ function Card({ children, className, delay = 0 }: CardProps) {
       transition={{ duration: 0.7, delay, ease: [0.21, 0.47, 0.32, 0.98] }}
       whileHover={{
         y: -3,
-        borderColor: "rgba(37,99,235,0.2)",
         transition: { duration: 0.2 },
       }}
     >
+      {/* Subtle gradient border at top */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
       {children}
     </motion.div>
   );
 }
 
-/* ─── Chat Interface ─────────────────────────────────────────── */
+/* ─── Chat Interface ───────────────────────────────────────── */
 function ChatInterfaceBox() {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-80px" });
@@ -43,25 +45,25 @@ function ChatInterfaceBox() {
       <div ref={ref} className="flex flex-col">
         <div className="flex">
           {/* Sidebar */}
-          <div className="hidden w-14 shrink-0 flex-col items-center gap-3 border-r border-[#E8E5E0] bg-[#FAFAF7] pt-4 dark:border-[#333333] dark:bg-[#252525] sm:flex">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#2563EB] to-[#6A3093]">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <div className="hidden w-14 shrink-0 flex-col items-center gap-3 border-r border-white/[0.06] bg-[#0A0A0B]/50 pt-4 sm:flex">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#00D4AA]/30 to-emerald-600/20">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00D4AA" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="20 6 9 17 4 12" />
               </svg>
             </div>
             <div className="space-y-2.5 px-2.5">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-900/20">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="dark:text-blue-400">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#00D4AA]/10">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00D4AA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                 </svg>
               </div>
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#F5F5F0] dark:bg-[#252525]">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6B6B6B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="dark:text-[#9B9B9B]">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/[0.04]">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#52525B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
                 </svg>
               </div>
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#F5F5F0] dark:bg-[#252525]">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="dark:text-[#6B6B6B]">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/[0.04]">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3F3F46" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="11" cy="11" r="8" />
                   <path d="m21 21-4.3-4.3" />
                 </svg>
@@ -71,20 +73,20 @@ function ChatInterfaceBox() {
 
           {/* Main chat area */}
           <div className="flex flex-1 flex-col">
-            <div className="flex items-center justify-between border-b border-[#E8E5E0] bg-white px-4 py-2.5 dark:border-[#333333] dark:bg-[#1E1E1E]">
+            <div className="flex items-center justify-between border-b border-white/[0.06] bg-[#0A0A0B]/30 px-4 py-2.5">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-[#1A1A1A] dark:text-[#E8E8E8]">Best Protein Powder</span>
-                <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-1.5 py-0.5 text-[9px] font-medium text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400">
-                  <span className="h-1 w-1 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-sm font-medium text-white/80">Best Protein Powder</span>
+                <span className="flex items-center gap-1 rounded-full bg-[#00D4AA]/10 px-1.5 py-0.5 text-[9px] font-medium text-[#00D4AA]">
+                  <span className="h-1 w-1 rounded-full bg-[#00D4AA] animate-pulse" />
                   Live
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="rounded-full border border-[#E8E5E0] bg-[#FAFAF7] px-2 py-0.5 text-[9px] text-[#6B6B6B] dark:border-[#333333] dark:bg-[#252525] dark:text-[#9B9B9B]">Day 14</span>
+                <span className="rounded-full border border-white/[0.06] bg-white/[0.03] px-2 py-0.5 text-[9px] text-[#52525B]">Day 14</span>
               </div>
             </div>
 
-            <div className="flex-1 space-y-4 bg-[#FAFAF7] p-4 dark:bg-[#252525] sm:p-5">
+            <div className="flex-1 space-y-4 bg-[#0A0A0B]/40 p-4 sm:p-5">
               {/* User message */}
               <motion.div
                 className="flex justify-end"
@@ -92,7 +94,7 @@ function ChatInterfaceBox() {
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.4, delay: 0.3 }}
               >
-                <div className="max-w-[80%] rounded-2xl rounded-tr-sm bg-[#2563EB] px-4 py-2.5 text-[12px] leading-relaxed text-white shadow-sm">
+                <div className="max-w-[80%] rounded-2xl rounded-tr-sm bg-[#00D4AA]/15 border border-[#00D4AA]/10 px-4 py-2.5 text-[12px] leading-relaxed text-white/90 shadow-sm">
                   I want to rank for &quot;best protein powder&quot; on Google, YouTube, and Amazon. Can you handle all three?
                 </div>
               </motion.div>
@@ -104,16 +106,16 @@ function ChatInterfaceBox() {
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.4, delay: 0.8 }}
               >
-                <div className="max-w-[92%] rounded-2xl rounded-tl-sm bg-white px-4 py-3 shadow-sm border border-[#E8E5E0]/50 dark:bg-[#1E1E1E] dark:border-[#333333]/50 dark:shadow-none">
+                <div className="max-w-[92%] rounded-2xl rounded-tl-sm border border-white/[0.06] bg-[#0F0F11]/80 px-4 py-3 shadow-sm backdrop-blur-xl">
                   <div className="mb-2 flex items-center gap-1.5">
-                    <div className="flex h-5 w-5 items-center justify-center rounded-md bg-gradient-to-br from-[#2563EB] to-[#6A3093]">
-                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <div className="flex h-5 w-5 items-center justify-center rounded-md bg-gradient-to-br from-[#00D4AA]/30 to-emerald-600/20">
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#00D4AA" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="20 6 9 17 4 12" />
                       </svg>
                     </div>
-                    <span className="text-[10px] font-semibold text-[#2563EB] dark:text-blue-400">RankMeBaddy</span>
+                    <span className="text-[10px] font-semibold text-[#00D4AA]">RankMeBaddy</span>
                   </div>
-                  <p className="text-[12px] leading-relaxed text-[#1A1A1A] dark:text-[#E8E8E8]">
+                  <p className="text-[12px] leading-relaxed text-white/70">
                     On it. Three campaigns launched in parallel:
                   </p>
 
@@ -127,17 +129,17 @@ function ChatInterfaceBox() {
                       <motion.div
                         key={p.letter}
                         className="rounded-xl border p-2.5"
-                        style={{ borderColor: `${p.color}20`, backgroundColor: `${p.color}05` }}
+                        style={{ borderColor: `${p.color}15`, backgroundColor: `${p.color}05` }}
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={isInView ? { opacity: 1, scale: 1 } : {}}
                         transition={{ duration: 0.3, delay: p.delay }}
                       >
                         <div className="flex items-center gap-1.5 mb-2">
                           <span className="flex h-5 w-5 items-center justify-center rounded-md text-[8px] font-bold" style={{ color: p.color, backgroundColor: `${p.color}15` }}>{p.letter}</span>
-                          <span className="text-[9px] font-medium text-[#1A1A1A] dark:text-[#E8E8E8]">{p.name}</span>
+                          <span className="text-[9px] font-medium text-white/70">{p.name}</span>
                           <span className="ml-auto text-[9px] font-bold" style={{ color: p.color }}>{p.pct}</span>
                         </div>
-                        <div className="h-1 rounded-full bg-[#E8E5E0] dark:bg-[#333333]">
+                        <div className="h-1 rounded-full bg-white/[0.04]">
                           <motion.div
                             className="h-1 rounded-full"
                             style={{ backgroundColor: p.color }}
@@ -146,12 +148,12 @@ function ChatInterfaceBox() {
                             transition={{ duration: 1, delay: p.delay + 0.2 }}
                           />
                         </div>
-                        <p className="mt-1.5 text-[8px] text-[#9B9B9B] dark:text-[#6B6B6B]">{p.detail}</p>
+                        <p className="mt-1.5 text-[8px] text-[#52525B]">{p.detail}</p>
                       </motion.div>
                     ))}
                   </div>
 
-                  <p className="mt-3 text-[11px] text-[#9B9B9B] dark:text-[#6B6B6B]">
+                  <p className="mt-3 text-[11px] text-[#52525B]">
                     Full report in ~48 hours. I&apos;ll notify you when each one completes.
                   </p>
                 </div>
@@ -164,18 +166,18 @@ function ChatInterfaceBox() {
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.4, delay: 2.0 }}
               >
-                <div className="max-w-[80%] rounded-2xl rounded-tr-sm bg-[#2563EB] px-4 py-2.5 text-[12px] leading-relaxed text-white shadow-sm">
+                <div className="max-w-[80%] rounded-2xl rounded-tr-sm bg-[#00D4AA]/15 border border-[#00D4AA]/10 px-4 py-2.5 text-[12px] leading-relaxed text-white/90 shadow-sm">
                   Also check TikTok — our competitor just ranked there last week.
                 </div>
               </motion.div>
             </div>
 
             {/* Input bar */}
-            <div className="border-t border-[#E8E5E0] bg-white px-4 py-3 dark:border-[#333333] dark:bg-[#1E1E1E]">
-              <div className="flex items-center gap-2 rounded-full border border-[#E8E5E0] bg-[#FAFAF7] px-4 py-2.5 dark:border-[#333333] dark:bg-[#252525]">
-                <span className="text-[11px] text-[#9B9B9B] dark:text-[#6B6B6B]">Ask RankMeBaddy to rank anything...</span>
-                <div className="ml-auto flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-[#2563EB] to-[#6A3093]">
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round">
+            <div className="border-t border-white/[0.06] bg-[#0A0A0B]/30 px-4 py-3">
+              <div className="flex items-center gap-2 rounded-full border border-white/[0.06] bg-[#0A0A0B]/50 px-4 py-2.5">
+                <span className="text-[11px] text-[#3F3F46]">Ask RankMeBaddy to rank anything...</span>
+                <div className="ml-auto flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-[#00D4AA]/30 to-emerald-600/20">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#00D4AA" strokeWidth="3" strokeLinecap="round">
                     <path d="m5 12h14" /><path d="m12 5 7 7-7 7" />
                   </svg>
                 </div>
@@ -188,7 +190,7 @@ function ChatInterfaceBox() {
   );
 }
 
-/* ─── Rankings Snapshot Card ─────────────────────────────────── */
+/* ─── Rankings Snapshot Card ────────────────────────────────── */
 function RankingsCard() {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-80px" });
@@ -205,57 +207,57 @@ function RankingsCard() {
       <div ref={ref} className="flex flex-col p-5 sm:p-6">
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-[#2563EB] to-[#6A3093]">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-[#00D4AA]/30 to-emerald-600/20">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00D4AA" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
               </svg>
             </span>
-            <span className="text-sm font-semibold text-[#1A1A1A] dark:text-[#E8E8E8]">Rankings</span>
+            <span className="text-sm font-semibold text-white/80">Rankings</span>
           </div>
-          <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-medium text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400">Live</span>
+          <span className="rounded-full bg-[#00D4AA]/10 px-2 py-0.5 text-[9px] font-medium text-[#00D4AA]">Live</span>
         </div>
 
         <div className="flex-1 space-y-2">
           {rankings.map((r, i) => (
             <motion.div
               key={r.platform}
-              className="group flex items-center gap-3 rounded-xl border border-[#E8E5E0]/60 bg-[#FAFAF7] px-3 py-2.5 transition-all hover:border-[#9B9B9B]/40 hover:bg-white dark:border-[#333333]/60 dark:bg-[#252525] dark:hover:border-[#555555]/40 dark:hover:bg-[#1E1E1E]"
+              className="group flex items-center gap-3 rounded-xl border border-white/[0.04] bg-white/[0.02] px-3 py-2.5 transition-all hover:border-white/[0.08] hover:bg-white/[0.04]"
               initial={{ opacity: 0, x: -10 }}
               animate={isInView ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 0.35, delay: 0.4 + i * 0.12 }}
             >
               <span
                 className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-[8px] font-bold"
-                style={{ color: r.color, backgroundColor: `${r.color}15` }}
+                style={{ color: r.color, backgroundColor: `${r.color}12` }}
               >
                 {r.icon}
               </span>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[10px] text-[#9B9B9B] dark:text-[#6B6B6B]">{r.keyword}</p>
+                <p className="truncate text-[10px] text-[#52525B]">{r.keyword}</p>
               </div>
               <div className="flex items-center gap-1.5 text-[11px] tabular-nums">
-                <span className="text-[#9B9B9B] line-through dark:text-[#6B6B6B]">{r.before}</span>
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <span className="text-[#3F3F46] line-through">{r.before}</span>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#00D4AA" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="m5 12 7-7 7 7" />
                 </svg>
-                <span className="font-bold text-[#1A1A1A] dark:text-[#E8E8E8]">{r.after}</span>
+                <span className="font-bold text-white/80">{r.after}</span>
               </div>
             </motion.div>
           ))}
         </div>
 
         {/* Summary */}
-        <div className="mt-4 rounded-xl border border-emerald-100 bg-gradient-to-r from-emerald-50 to-emerald-50/50 p-3 dark:border-emerald-900/30 dark:from-emerald-900/20 dark:to-emerald-900/10">
+        <div className="mt-4 rounded-xl border border-[#00D4AA]/10 bg-gradient-to-r from-[#00D4AA]/8 to-[#00D4AA]/3 p-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#00D4AA]/15">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#00D4AA" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
               </div>
-              <span className="text-[10px] text-emerald-700 dark:text-emerald-400">Avg improvement</span>
+              <span className="text-[10px] text-[#00D4AA]/70">Avg improvement</span>
             </div>
-            <span className="text-[12px] font-bold text-emerald-700 dark:text-emerald-400">+35 positions</span>
+            <span className="text-[12px] font-bold text-[#00D4AA]">+35 positions</span>
           </div>
         </div>
       </div>
@@ -263,15 +265,15 @@ function RankingsCard() {
   );
 }
 
-/* ─── Score Ring Card ────────────────────────────────────────── */
+/* ─── Score Ring Card ──────────────────────────────────────── */
 function ScoreRingCard() {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-80px" });
 
   const metrics = [
-    { label: "Keywords", value: 12, max: 12, color: "#2563EB" },
-    { label: "Content", value: 94, max: 100, color: "#10B981" },
-    { label: "Authority", value: 78, max: 100, color: "#FF9900" },
+    { label: "Keywords", value: 12, max: 12, color: "#00D4AA" },
+    { label: "Content", value: 94, max: 100, color: "#4ADE80" },
+    { label: "Authority", value: 78, max: 100, color: "#F59E0B" },
   ];
 
   return (
@@ -279,21 +281,21 @@ function ScoreRingCard() {
       <div ref={ref} className="flex flex-col p-5 sm:p-6">
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-[#2563EB] to-[#6A3093]">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-[#00D4AA]/30 to-emerald-600/20">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00D4AA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 20h9" />
                 <path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.855z" />
               </svg>
             </span>
-            <span className="text-sm font-semibold text-[#1A1A1A] dark:text-[#E8E8E8]">Content Score</span>
+            <span className="text-sm font-semibold text-white/80">Content Score</span>
           </div>
-          <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-medium text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400">Excellent</span>
+          <span className="rounded-full bg-[#4ADE80]/10 px-2 py-0.5 text-[9px] font-medium text-[#4ADE80]">Excellent</span>
         </div>
 
         <div className="flex items-center justify-center py-2">
           <div className="relative flex h-28 w-28 items-center justify-center">
             <svg className="absolute h-28 w-28 -rotate-90" viewBox="0 0 112 112">
-              <circle cx="56" cy="56" r="48" stroke="#E8E5E0" strokeWidth="6" fill="none" className="dark:stroke-[#333333]" />
+              <circle cx="56" cy="56" r="48" stroke="rgba(255,255,255,0.04)" strokeWidth="6" fill="none" />
               <motion.circle
                 cx="56" cy="56" r="48"
                 stroke="url(#scoreGradient)"
@@ -307,21 +309,21 @@ function ScoreRingCard() {
               />
               <defs>
                 <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#2563EB" />
-                  <stop offset="100%" stopColor="#6A3093" />
+                  <stop offset="0%" stopColor="#00D4AA" />
+                  <stop offset="100%" stopColor="#4ADE80" />
                 </linearGradient>
               </defs>
             </svg>
             <div className="relative text-center">
               <motion.span
-                className="block text-2xl font-bold text-[#1A1A1A] dark:text-[#E8E8E8]"
+                className="block text-2xl font-bold text-white/90"
                 initial={{ opacity: 0 }}
                 animate={isInView ? { opacity: 1 } : {}}
                 transition={{ duration: 0.5, delay: 1 }}
               >
                 94
               </motion.span>
-              <span className="block text-[9px] text-[#9B9B9B] dark:text-[#6B6B6B]">out of 100</span>
+              <span className="block text-[9px] text-[#52525B]">out of 100</span>
             </div>
           </div>
         </div>
@@ -335,9 +337,9 @@ function ScoreRingCard() {
               animate={isInView ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 0.3, delay: 0.8 + i * 0.1 }}
             >
-              <span className="w-16 text-[10px] text-[#9B9B9B] dark:text-[#6B6B6B]">{m.label}</span>
+              <span className="w-16 text-[10px] text-[#52525B]">{m.label}</span>
               <div className="flex-1">
-                <div className="h-2 rounded-full bg-[#E8E5E0] dark:bg-[#333333]">
+                <div className="h-2 rounded-full bg-white/[0.04]">
                   <motion.div
                     className="h-2 rounded-full"
                     style={{ backgroundColor: m.color }}
@@ -347,7 +349,7 @@ function ScoreRingCard() {
                   />
                 </div>
               </div>
-              <span className="w-8 text-right text-[10px] font-semibold tabular-nums text-[#1A1A1A] dark:text-[#E8E8E8]">
+              <span className="w-8 text-right text-[10px] font-semibold tabular-nums text-white/70">
                 {m.value}
               </span>
             </motion.div>
@@ -358,7 +360,7 @@ function ScoreRingCard() {
   );
 }
 
-/* ─── Section Title ─────────────────────────────────────────── */
+/* ─── Section Title ────────────────────────────────────────── */
 function SectionTitle() {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
@@ -370,30 +372,36 @@ function SectionTitle() {
   return (
     <motion.div
       ref={ref}
-      className="mb-12 flex flex-col items-center gap-4 text-center"
+      className="mb-14 flex flex-col items-center gap-4 text-center"
       style={{ y }}
     >
-      <span className="inline-flex items-center gap-2 rounded-full border border-[#E8E5E0] bg-white px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-[#6B6B6B] dark:border-[#333333] dark:bg-[#1E1E1E] dark:text-[#9B9B9B]">
+      <span className="inline-flex items-center gap-2 rounded-full border border-[#00D4AA]/15 bg-[#00D4AA]/5 px-3 py-1 text-[11px] font-medium text-[#00D4AA]/70">
         The Solution
       </span>
-      <h2 className="font-heading text-3xl font-bold text-[#1A1A1A] dark:text-[#E8E8E8] sm:text-4xl md:text-5xl">
-        Just tell it what to rank
+      <h2 className="font-heading text-3xl font-bold text-white sm:text-4xl md:text-5xl">
+        Just tell it what to{" "}
+        <span className="relative inline-block">
+          rank
+          <svg className="absolute -bottom-1 left-0 w-full overflow-visible" viewBox="0 0 200 12" preserveAspectRatio="none" style={{ height: "0.12em" }}>
+            <motion.path d="M2,8 C40,3 80,11 120,6 C150,2 175,9 198,5" stroke="#00D4AA" strokeWidth="3" strokeLinecap="round" fill="none" initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} viewport={{ once: true }} transition={{ duration: 1, ease: "easeOut" }} />
+          </svg>
+        </span>
       </h2>
-      <p className="max-w-lg text-sm text-[#6B6B6B] dark:text-[#9B9B9B] sm:text-base">
+      <p className="max-w-lg text-[15px] leading-relaxed text-white/40 sm:text-base">
         Chat with your AI SEO partner. It handles keyword research, content optimization, and ranking — across every platform at once.
       </p>
     </motion.div>
   );
 }
 
-/* ─── Main Solution Section ─────────────────────────────────── */
+/* ─── Main Solution Section ────────────────────────────────── */
 export default function SolutionSection() {
   return (
     <section
       id="solution"
-      className="relative bg-[#FAFAF7] px-4 py-20 dark:bg-[#141414] sm:px-6 sm:py-28"
+      className="relative bg-[#09090B] px-4 py-20 sm:px-6 sm:py-28"
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E8E5E0] to-transparent dark:via-[#333333]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/[0.05] to-transparent" />
 
       <div className="mx-auto max-w-5xl">
         <SectionTitle />

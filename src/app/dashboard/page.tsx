@@ -842,6 +842,8 @@ function DashboardInner() {
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const pendingMessageRef = useRef<string | null>(null);
+  const isSendingRef = useRef(false);
   const { isPro } = useSubscription();
   const { user, signOut, loading, emailVerified } = useAuth();
   const { creditsRemaining, refreshCredits } = useCredits();
@@ -920,7 +922,24 @@ function DashboardInner() {
     [messages, isSending, onboardingData, creditsRemaining, refreshCredits]
   );
 
-  const askInChat = useCallback((prompt: string) => { setActiveSection("chat"); setTimeout(() => sendMessage(prompt), 100); }, [sendMessage]);
+  // Keep isSendingRef in sync so the retry loop always reads the latest value
+  useEffect(() => { isSendingRef.current = isSending; }, [isSending]);
+
+  const askInChat = useCallback((prompt: string) => {
+    setActiveSection("chat");
+    pendingMessageRef.current = prompt;
+    const trySend = (attempt: number) => {
+      setTimeout(() => {
+        if (isSendingRef.current && attempt < 5) {
+          trySend(attempt + 1);
+        } else {
+          sendMessage(pendingMessageRef.current || prompt);
+          pendingMessageRef.current = null;
+        }
+      }, 300);
+    };
+    trySend(0);
+  }, [sendMessage]);
   const updateOnboardingData = useCallback((data: OnboardingData) => { setOnboardingData(data); }, []);
 
   useEffect(() => {

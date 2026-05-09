@@ -961,9 +961,9 @@ function StepDone({ name, keyword, siteData, website, product, platforms, contex
               transition={{ delay: 0.3 }}
             >
               {[
-                { label: "Keywords", value: "147" },
-                { label: "Gaps found", value: "23" },
-                { label: "Content pieces", value: "12" },
+                { label: "Keywords", value: "—" },
+                { label: "Gaps found", value: "—" },
+                { label: "Content pieces", value: "—" },
               ].map((stat, i) => (
                 <motion.div
                   key={stat.label}

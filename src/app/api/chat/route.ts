@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 import ZAI from "z-ai-web-dev-sdk";
 
 const LONGCAT_API_KEY = process.env.LONGCAT_API_KEY || "";
@@ -11,6 +12,30 @@ const OLOSTEP_BASE_URL = "https://api.olostep.com/v1/scrapes";
 const NVIDIA_API_KEY = process.env.NVIDIA_API_KEY || "";
 const NVIDIA_BASE_URL = process.env.NVIDIA_BASE_URL || "https://integrate.api.nvidia.com/v1";
 const NVIDIA_MODEL = process.env.NVIDIA_MODEL || "nvidia/nemotron-3-super-120b-a12b";
+
+/* ─── Direct Supabase Admin Client for Credits ──────────────── */
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  { auth: { autoRefreshToken: false, persistSession: false } }
+);
+
+const BETA_MODE = process.env.NEXT_PUBLIC_BETA_MODE === "true";
+const FREE_CREDITS_PER_RESET = BETA_MODE ? 500 : 25;
+const PRO_CREDITS_PER_RESET = BETA_MODE ? 1000 : 100;
+const ENTERPRISE_CREDITS_PER_RESET = 999;
+const RESET_INTERVAL_MS = 60 * 60 * 1000; // 1 hour
+const BETA_BONUS_CREDITS = 200;
+
+type Tier = "free" | "pro" | "enterprise";
+
+function getCreditsForTier(tier: Tier): number {
+  switch (tier) {
+    case "pro": return PRO_CREDITS_PER_RESET;
+    case "enterprise": return ENTERPRISE_CREDITS_PER_RESET;
+    default: return FREE_CREDITS_PER_RESET;
+  }
+}
 
 interface AgentAction {
   type: string;
@@ -96,19 +121,30 @@ function cleanMarkdown(text: string): string {
  * Auto-fix common Mermaid syntax issues in diagrams:
  * 1. Subgraph IDs that conflict with node IDs (e.g., subgraph A[...] when A[Node] exists)
  * 2. Special characters in node labels that break parsing
+ * 3. Long labels truncated to 25 chars
+ * 4. Markdown artifacts stripped from Mermaid code
+ * 5. AI-generated gibberish patterns cleaned up
  */
 function fixMermaidSyntax(diagram: string): string {
-  const lines = diagram.split("\n");
+  let code = diagram;
+
+  // 1. Remove markdown artifacts that may have slipped in
+  code = code.replace(/\*\*/g, "");           // bold markers
+  code = code.replace(/##/g, "");             // heading markers
+  code = code.replace(/__/g, "");             // italic markers
+  code = code.replace(/`{1,3}/g, "");         // code backticks
+
+  // 2. Remove leftover markdown link syntax inside labels
+  code = code.replace(/\[([^\]]*)\]\([^)]*\)/g, "$1");
+
+  const lines = code.split("\n");
   const nodeIds = new Set<string>();
   const subgraphLines: { index: number; oldId: string; newId: string }[] = [];
 
-  // First pass: collect all node IDs (e.g., A[Label] or A["Label"] or A{Label})
-  const nodeIdRegex = /^(\s*)([A-Za-z_][A-Za-z0-9_]*)\s*[\[{]/;
-  // Also catch arrow definitions: A --> B or A[Label] --> B[Label]
+  // 3. First pass: collect all node IDs (e.g., A[Label] or A["Label"] or A{Label})
   const arrowNodeRegex = /([A-Za-z_][A-Za-z0-9_]*)\s*[\[{]/g;
 
   for (const line of lines) {
-    // Skip subgraph lines for node ID collection
     if (/^\s*subgraph\s+/i.test(line)) continue;
     if (/^\s*end\s*$/i.test(line)) continue;
 
@@ -118,7 +154,7 @@ function fixMermaidSyntax(diagram: string): string {
     }
   }
 
-  // Second pass: find subgraph lines with conflicting IDs
+  // 4. Second pass: find subgraph lines with conflicting IDs
   let sgCounter = 1;
   const subgraphRegex = /^(\s*subgraph\s+)([A-Za-z_][A-Za-z0-9_]*)\s*(\[.*\])/i;
 
@@ -127,7 +163,6 @@ function fixMermaidSyntax(diagram: string): string {
     if (match) {
       const subgraphId = match[2];
       if (nodeIds.has(subgraphId)) {
-        // This subgraph ID conflicts with a node ID — rename it
         const newId = `sg${sgCounter}`;
         subgraphLines.push({ index: i, oldId: subgraphId, newId });
         sgCounter++;
@@ -143,21 +178,56 @@ function fixMermaidSyntax(diagram: string): string {
     }
   }
 
-  // Fix node labels with unquoted colons (e.g., A[Module 1: Site] -> A["Module 1: Site"])
+  // 5. Fix node labels — clean up and truncate
   for (let i = 0; i < lines.length; i++) {
-    // Match node definitions with brackets that contain colons but aren't quoted
     const nodeLabelRegex = /^(\s*[A-Za-z_][A-Za-z0-9_]*\s*\[)([^\]]*)(\]\s*)/;
     const match = lines[i].match(nodeLabelRegex);
     if (match) {
-      const label = match[2];
+      let label = match[2];
+
+      // Strip any remaining markdown symbols
+      label = label.replace(/\*\*/g, "").replace(/##/g, "").replace(/`/g, "");
+
+      // Remove emojis and special Unicode characters
+      label = label.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{1F900}-\u{1F9FF}\u{200D}\u{20E3}\u{E0020}-\u{E007F}]/gu, "");
+
+      // Fix labels with colons — wrap in quotes
       if (label.includes(":") && !label.startsWith('"')) {
-        lines[i] = `${match[1]}"${label}"${match[3]}`;
+        label = `"${label}"`;
       }
-      // Also fix labels with parentheses
+
+      // Fix labels with parentheses — remove them and wrap in quotes
       if ((label.includes("(") || label.includes(")")) && !label.startsWith('"')) {
-        lines[i] = `${match[1]}"${label.replace(/[()]/g, " ")}"${match[3]}`;
+        label = `"${label.replace(/[()]/g, " ")}"`;
       }
+
+      // Fix labels with special characters that break Mermaid — wrap in quotes
+      if (/[&#%@!;]/.test(label) && !label.startsWith('"')) {
+        label = `"${label.replace(/[&#%@!;]/g, " ")}"`;
+      }
+
+      // Truncate labels that are too long (max 25 chars)
+      if (label.length > 25) {
+        if (label.startsWith('"') && label.endsWith('"')) {
+          const inner = label.slice(1, -1);
+          if (inner.length > 25) {
+            label = `"${inner.slice(0, 22)}..."`;
+          }
+        } else {
+          label = label.length > 25 ? `${label.slice(0, 22)}...` : label;
+        }
+      }
+
+      lines[i] = `${match[1]}${label}${match[3]}`;
     }
+  }
+
+  // 6. Fix common AI-generated gibberish patterns
+  for (let i = 0; i < lines.length; i++) {
+    // Remove random numbers appended to words like "Strategy23" or "Plan47"
+    lines[i] = lines[i].replace(/([a-zA-Z])(\d{2,})/g, "$1");
+    // Clean up double spaces
+    lines[i] = lines[i].replace(/  +/g, " ");
   }
 
   return lines.join("\n");
@@ -233,55 +303,49 @@ When your response involves ANY of the following, you MUST include a Mermaid dia
 DIAGRAM FORMAT:
 Wrap your Mermaid diagram code in [DIAGRAM] and [/DIAGRAM] tags. Use valid Mermaid syntax ONLY.
 
-Example for a workflow with subgraphs:
+Example for a workflow (MINIMAL, CLEAN):
 [DIAGRAM]
 flowchart TD
-    A[Current State] --> B[Module 1: Site Intelligence]
-    B --> C[Module 2: Entity Architecture]
-    C --> D[Module 3: Content Engineering]
-    D --> E[Module 4: Technical Blueprint]
-    E --> F[Module 5: Behavioral Engineering]
-    F --> G[Module 6: Authority Acquisition]
-    G --> H[Module 7: SERP Feature Capture]
-    H --> I[Target State]
-
-    subgraph S1[Days 1-3: Intelligence]
-        B1[Topical Landscape] --> B2[Query Intent]
-        B2 --> B3[Competitor Profile]
-    end
-
-    subgraph S2[Days 4-5: Entity Build]
-        C1[Brand Entity] --> C2[Author Entity]
-        C2 --> C3[Content Schema]
-    end
+    A[Analyze] --> B[Plan]
+    B --> C[Build]
+    C --> D[Optimize]
+    D --> E[Monitor]
 [/DIAGRAM]
 
 Example for a strategy timeline:
 [DIAGRAM]
 flowchart LR
-    M1[Month 1: Foundation] --> M2[Month 2: Content Engine]
-    M2 --> M3[Month 3: Authority Building]
-    M3 --> M4[Month 4: Scale]
+    A[Foundation] --> B[Content]
+    B --> C[Authority]
+    C --> D[Scale]
 [/DIAGRAM]
 
-DIAGRAM RULES (CRITICAL — VIOLATION CAUSES SYNTAX ERRORS):
+DIAGRAM RULES (CRITICAL — FOLLOW THESE OR DIAGRAMS WILL BE UGLY AND BROKEN):
 - ALWAYS include a diagram when explaining a process, workflow, or strategy
+- Keep diagrams MINIMAL — 4-8 nodes maximum. Less is more. A clean 5-node diagram is better than a messy 15-node one.
+- Use SHORT labels — 1-3 words per node only. Examples: "Research", "Analyze", "Plan", "Execute", "Monitor"
+- NEVER use long phrases or sentences as node labels. "Optimize Title Tags" is okay, but "Optimize All Title Tags For Better CTR" is NOT.
+- SPELL CHECK every label. If a word looks misspelled or awkward, use a simpler word. "Analyze" not "Analsye", "Strategy" not "Stratgy".
+- Use professional, clean labels. Examples: "Research" -> "Analyze" -> "Plan" -> "Execute" -> "Monitor"
+- NEVER use special characters in labels: no &, %, @, #, !, ;, or emojis
 - Use flowchart TD (top-down) for workflows and processes
 - Use flowchart LR (left-right) for timelines and sequences
-- Use short, clear labels in nodes
-- Keep diagrams focused — 5-15 nodes for clarity
+- Do NOT use subgraphs unless absolutely necessary — flat diagrams are cleaner and less error-prone
+- If you use subgraphs, max 2 subgraphs with 2-3 nodes each
 - Every arrow should have a clear relationship
 - You can include text explanation BEFORE the diagram, then the diagram visualizes it
 - Do NOT use markdown inside [DIAGRAM] blocks — only valid Mermaid syntax
 
 CRITICAL SYNTAX RULES (FAILURE TO FOLLOW = BROKEN DIAGRAM — THIS IS THE #1 BUG):
-1. NEVER use the same ID for both a node and a subgraph. This is the most common error that breaks diagrams. If you have "A[Module 1] --> B[Module 2]", then a subgraph MUST NOT use A, B, C, D, E, F, G, H, or I as its ID. Instead, ALWAYS prefix subgraph IDs with "sg_" like: "subgraph sg1[Phase 1]", "subgraph sg2[Phase 2]", "subgraph sg_intel[Intelligence Phase]", etc.
-2. Subgraph IDs must be COMPLETELY DIFFERENT from any node IDs. Use sg1, sg2, sg3, sg4 etc. as subgraph IDs.
-3. Node labels with special characters like quotes, colons, or parentheses MUST use double quotes: A["Module 1: Site Intelligence"]
+1. NEVER use the same ID for both a node and a subgraph. If you have "A[Module 1] --> B[Module 2]", then a subgraph MUST NOT use A, B, C, D, E, F, G, H, or I as its ID. Instead, ALWAYS prefix subgraph IDs with "sg_" like: "subgraph sg1[Phase 1]", "subgraph sg2[Phase 2]", etc.
+2. Subgraph IDs must be COMPLETELY DIFFERENT from any node IDs. Use sg1, sg2, sg3, sg4 etc.
+3. Node labels with colons or special characters MUST use double quotes: A["Step 1: Research"]
 4. Do NOT nest subgraphs — keep them flat at the same level
 5. Each subgraph must end with "end" on its own line
 6. Do NOT use parentheses () in node labels — use brackets [] instead
 7. Avoid special characters in labels: no &, %, @, #, etc.
+8. Keep node IDs simple and unique: A, B, C, D, E, F — single letters are best
+9. Truncate any label longer than 25 characters to keep diagrams clean
 
 AUTONOMOUS BEHAVIOR:
 - When the user asks about SEO, DON'T just give advice — give a complete execution plan with specific steps
@@ -521,82 +585,181 @@ async function executeWebSearch(query: string): Promise<string> {
   }
 }
 
-/* ─── Server-side Credit Verification ──────────────────────── */
-async function verifyCredits(userId: string): Promise<{ allowed: boolean; creditsRemaining: number; tier: string; maxCredits: number; error?: string }> {
+/* ─── Direct Credit Helpers (no HTTP self-call) ─────────────── */
+
+interface CreditRecord {
+  user_id: string;
+  credits_remaining: number;
+  total_used: number;
+  total_refunded: number;
+  tier: Tier;
+  last_reset_at: string;
+  created_at: string;
+}
+
+async function ensureCreditRecord(userId: string): Promise<{ record: CreditRecord | null; error: string | null }> {
+  const { data, error } = await supabaseAdmin
+    .from("user_credits")
+    .select("*")
+    .eq("user_id", userId)
+    .single();
+
+  if (error && error.code === "PGRST116") {
+    const now = new Date().toISOString();
+    const tier: Tier = "free";
+    const startingCredits = FREE_CREDITS_PER_RESET + (BETA_MODE ? BETA_BONUS_CREDITS : 0);
+    const { data: newData, error: insertError } = await supabaseAdmin
+      .from("user_credits")
+      .insert({
+        user_id: userId,
+        credits_remaining: startingCredits,
+        total_used: 0,
+        total_refunded: 0,
+        tier,
+        last_reset_at: now,
+        created_at: now,
+      })
+      .select()
+      .single();
+
+    if (insertError) {
+      console.error("Credits insert error:", insertError);
+      return { record: null, error: "Failed to create credit record" };
+    }
+    return { record: newData as CreditRecord, error: null };
+  }
+
+  if (error) {
+    console.error("Credits fetch error:", error);
+    return { record: null, error: "Failed to fetch credit record" };
+  }
+
+  return { record: data as CreditRecord, error: null };
+}
+
+async function checkAndResetCredits(record: CreditRecord): Promise<CreditRecord> {
+  const lastReset = new Date(record.last_reset_at).getTime();
+  const now = Date.now();
+  const maxCredits = getCreditsForTier(record.tier);
+
+  if (now - lastReset >= RESET_INTERVAL_MS && record.credits_remaining < maxCredits) {
+    const { data: updatedData, error: updateError } = await supabaseAdmin
+      .from("user_credits")
+      .update({
+        credits_remaining: maxCredits,
+        last_reset_at: new Date(now).toISOString(),
+      })
+      .eq("user_id", record.user_id)
+      .select()
+      .single();
+
+    if (updatedData && !updateError) {
+      return updatedData as CreditRecord;
+    }
+  }
+
+  return record;
+}
+
+async function verifyCreditsDirect(userId: string): Promise<{ allowed: boolean; creditsRemaining: number; tier: string; maxCredits: number; error?: string }> {
   try {
     if (!userId) {
-      // No user ID — deny by default (fail-closed)
-      return { allowed: false, creditsRemaining: 0, tier: "free", maxCredits: 25, error: "User ID required" };
+      return { allowed: false, creditsRemaining: 0, tier: "free", maxCredits: FREE_CREDITS_PER_RESET, error: "User ID required" };
     }
 
-    const creditsUrl = process.env.NEXT_PUBLIC_APP_URL
-      ? `${process.env.NEXT_PUBLIC_APP_URL}/api/credits`
-      : `http://localhost:3000/api/credits`;
+    const { record, error } = await ensureCreditRecord(userId);
 
-    const checkRes = await fetch(creditsUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, action: "check" }),
-    });
+    if (error || !record) {
+      if (BETA_MODE) {
+        return {
+          allowed: true,
+          creditsRemaining: FREE_CREDITS_PER_RESET,
+          tier: "free" as Tier,
+          maxCredits: FREE_CREDITS_PER_RESET,
+        };
+      }
+      return { allowed: false, creditsRemaining: 0, tier: "free", maxCredits: FREE_CREDITS_PER_RESET, error: error || "Unable to verify credits" };
+    }
 
-    const checkData = await checkRes.json();
+    const currentRecord = await checkAndResetCredits(record);
+    const maxCredits = getCreditsForTier(currentRecord.tier);
 
-    if (!checkRes.ok || !checkData.allowed) {
+    if (currentRecord.credits_remaining <= 0) {
       return {
         allowed: false,
-        creditsRemaining: checkData.credits_remaining ?? 0,
-        tier: checkData.tier ?? "free",
-        maxCredits: checkData.max_credits ?? 25,
-        error: checkData.message || checkData.error || "No credits remaining",
+        creditsRemaining: 0,
+        tier: currentRecord.tier,
+        maxCredits,
+        error: "No credits remaining. Credits reset every hour.",
       };
     }
 
     return {
       allowed: true,
-      creditsRemaining: checkData.credits_remaining,
-      tier: checkData.tier ?? "free",
-      maxCredits: checkData.max_credits ?? 25,
+      creditsRemaining: currentRecord.credits_remaining,
+      tier: currentRecord.tier,
+      maxCredits,
     };
   } catch (err) {
-    console.error("Credit verification error:", err);
-    // Fail-closed: deny on error
-    return { allowed: false, creditsRemaining: 0, tier: "free", maxCredits: 25, error: "Credit verification failed" };
+    console.error("Credit verification direct error:", err);
+    if (BETA_MODE) {
+      return { allowed: true, creditsRemaining: FREE_CREDITS_PER_RESET, tier: "free", maxCredits: FREE_CREDITS_PER_RESET };
+    }
+    return { allowed: false, creditsRemaining: 0, tier: "free", maxCredits: FREE_CREDITS_PER_RESET, error: "Credit verification failed" };
   }
 }
 
-async function deductCredits(userId: string): Promise<{ success: boolean; creditsRemaining: number }> {
+async function deductCreditsDirect(userId: string): Promise<{ success: boolean; creditsRemaining: number }> {
   try {
-    const creditsUrl = process.env.NEXT_PUBLIC_APP_URL
-      ? `${process.env.NEXT_PUBLIC_APP_URL}/api/credits`
-      : `http://localhost:3000/api/credits`;
+    const { record, error } = await ensureCreditRecord(userId);
 
-    const res = await fetch(creditsUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, action: "deduct" }),
-    });
+    if (error || !record) {
+      return { success: false, creditsRemaining: 0 };
+    }
 
-    const data = await res.json();
-    return { success: data.success ?? false, creditsRemaining: data.credits_remaining ?? 0 };
+    const currentRecord = await checkAndResetCredits(record);
+
+    if (currentRecord.credits_remaining <= 0) {
+      return { success: false, creditsRemaining: 0 };
+    }
+
+    const { error: updateError } = await supabaseAdmin
+      .from("user_credits")
+      .update({
+        credits_remaining: currentRecord.credits_remaining - 1,
+        total_used: currentRecord.total_used + 1,
+      })
+      .eq("user_id", userId);
+
+    if (updateError) {
+      console.error("Credits deduct direct error:", updateError);
+      return { success: false, creditsRemaining: currentRecord.credits_remaining };
+    }
+
+    return { success: true, creditsRemaining: currentRecord.credits_remaining - 1 };
   } catch (err) {
-    console.error("Credit deduction error:", err);
+    console.error("Credit deduction direct error:", err);
     return { success: false, creditsRemaining: 0 };
   }
 }
 
-async function refundCredits(userId: string, amount: number = 1): Promise<void> {
+async function refundCreditsDirect(userId: string, amount: number = 1): Promise<void> {
   try {
-    const creditsUrl = process.env.NEXT_PUBLIC_APP_URL
-      ? `${process.env.NEXT_PUBLIC_APP_URL}/api/credits`
-      : `http://localhost:3000/api/credits`;
+    const { record } = await ensureCreditRecord(userId);
+    if (!record) return;
 
-    await fetch(creditsUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, action: "refund", amount }),
-    });
+    const maxCredits = getCreditsForTier(record.tier);
+    const newCredits = Math.min(record.credits_remaining + amount, maxCredits);
+
+    await supabaseAdmin
+      .from("user_credits")
+      .update({
+        credits_remaining: newCredits,
+        total_refunded: record.total_refunded + amount,
+      })
+      .eq("user_id", userId);
   } catch (err) {
-    console.error("Credit refund error:", err);
+    console.error("Credit refund direct error:", err);
   }
 }
 
@@ -607,8 +770,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Messages array is required" }, { status: 400 });
   }
 
-  // ─── Server-side credit verification (fail-closed) ──────────
-  const creditStatus = await verifyCredits(userId);
+  // ─── Server-side credit verification (fail-closed, direct DB) ─
+  const creditStatus = await verifyCreditsDirect(userId);
   if (!creditStatus.allowed) {
     return NextResponse.json(
       {
@@ -741,7 +904,7 @@ export async function POST(request: NextRequest) {
     // ─── Deduct credits AFTER successful AI response ────────────
     // Credits were only CHECKED before, not deducted. Now we deduct.
     if (userId) {
-      const deduction = await deductCredits(userId);
+      const deduction = await deductCreditsDirect(userId);
       if (!deduction.success) {
         console.warn("Credit deduction failed after successful AI call for user:", userId);
         // Still return the response — user got the value, we just failed to track it

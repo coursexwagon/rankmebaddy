@@ -19,7 +19,7 @@ interface CreditsState {
 
 const CreditsContext = createContext<CreditsState>({
   creditsRemaining: 0,
-  maxCredits: 100,
+  maxCredits: 700,
   totalUsed: 0,
   totalRefunded: 0,
   tier: "free",
@@ -31,7 +31,7 @@ const CreditsContext = createContext<CreditsState>({
 
 export function CreditsProvider({ children }: { children: ReactNode }) {
   const [creditsRemaining, setCreditsRemaining] = useState(0);
-  const [maxCredits, setMaxCredits] = useState(100);
+  const [maxCredits, setMaxCredits] = useState(700);
   const [totalUsed, setTotalUsed] = useState(0);
   const [totalRefunded, setTotalRefunded] = useState(0);
   const [tier, setTier] = useState<Tier>("free");
@@ -54,8 +54,19 @@ export function CreditsProvider({ children }: { children: ReactNode }) {
 
       if (res.ok) {
         const data = await res.json();
-        setCreditsRemaining(data.credits_remaining);
-        setMaxCredits(data.max_credits ?? 100);
+        const remaining = data.credits_remaining;
+        const maxCreds = data.max_credits ?? 100;
+
+        // If the user just signed up and somehow got 0 credits,
+        // show the starting credits so they can use the app immediately.
+        // The server-side credit check will create the record on first use.
+        if (remaining === 0 && data.total_used === 0 && data.beta_fallback !== true) {
+          setCreditsRemaining(maxCreds);
+        } else {
+          setCreditsRemaining(remaining);
+        }
+
+        setMaxCredits(maxCreds);
         setTotalUsed(data.total_used ?? 0);
         setTotalRefunded(data.total_refunded ?? 0);
         setTier(data.tier ?? "free");

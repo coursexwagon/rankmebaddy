@@ -14,13 +14,14 @@ export function MermaidRenderer({ chart, className, autoOpen = false }: MermaidR
   const containerRef = useRef<HTMLDivElement>(null);
   const [svg, setSvg] = useState<string>("");
   const [error, setError] = useState<string>("");
-  const [isCanvasOpen, setIsCanvasOpen] = useState(autoOpen);
+  const [isCanvasOpen, setIsCanvasOpen] = useState(false);
   const [scale, setScale] = useState(1.2);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const dragStart = useRef({ x: 0, y: 0, posx: 0, posy: 0 });
   const renderAttempted = useRef(false);
   const chartRef = useRef(chart);
+  const hasAutoOpened = useRef(false);
 
   // Track chart changes for re-render
   useEffect(() => {
@@ -30,12 +31,19 @@ export function MermaidRenderer({ chart, className, autoOpen = false }: MermaidR
     setError("");
   }, [chart]);
 
-  // Auto-open canvas when SVG is first rendered (if autoOpen)
+  // Auto-open canvas ONLY ONCE when SVG is first rendered (if autoOpen)
+  // Uses hasAutoOpened ref to prevent re-opening after user closes
   useEffect(() => {
-    if (autoOpen && svg && !isCanvasOpen) {
+    if (autoOpen && svg && !isCanvasOpen && !hasAutoOpened.current) {
+      hasAutoOpened.current = true;
       setIsCanvasOpen(true);
     }
   }, [autoOpen, svg, isCanvasOpen]);
+
+  // Reset auto-open tracking when chart changes (new diagram)
+  useEffect(() => {
+    hasAutoOpened.current = false;
+  }, [chart]);
 
   const renderChart = useCallback(async () => {
     if (!chart || renderAttempted.current) return;
@@ -48,14 +56,15 @@ export function MermaidRenderer({ chart, className, autoOpen = false }: MermaidR
         startOnLoad: false,
         theme: "dark",
         securityLevel: "loose",
-        fontFamily: "Space Grotesk, sans-serif",
+        fontFamily: "Inter, system-ui, sans-serif",
+        fontSize: 14,
         flowchart: {
           useMaxWidth: false,
           htmlLabels: true,
           curve: "basis",
-          padding: 30,
-          nodeSpacing: 80,
-          rankSpacing: 100,
+          padding: 25,
+          nodeSpacing: 70,
+          rankSpacing: 90,
         },
         sequence: {
           useMaxWidth: false,
@@ -64,31 +73,32 @@ export function MermaidRenderer({ chart, className, autoOpen = false }: MermaidR
         },
         themeVariables: {
           darkMode: true,
-          background: "#0A0A0F",
-          primaryColor: "#1E3A5F",
-          primaryTextColor: "#E8E8E8",
-          primaryBorderColor: "#2563EB",
-          lineColor: "#4A90D9",
-          secondaryColor: "#1A1A2E",
+          background: "#0B0B12",
+          primaryColor: "#0D3D35",
+          primaryTextColor: "#F0F0F0",
+          primaryBorderColor: "#00D4AA",
+          lineColor: "#00D4AA80",
+          secondaryColor: "#12121E",
           tertiaryColor: "#0F0F1A",
-          noteBkgColor: "#1E3A5F",
-          noteTextColor: "#E8E8E8",
-          actorBkg: "#1E3A5F",
-          actorBorder: "#2563EB",
-          actorTextColor: "#E8E8E8",
-          labelBoxBkgColor: "#1A1A2E",
-          labelBoxBorderColor: "#2563EB",
-          labelTextColor: "#E8E8E8",
-          loopTextColor: "#9B9B9B",
-          activationBorderColor: "#2563EB",
-          activationBkgColor: "#1E3A5F",
+          noteBkgColor: "#0D3D35",
+          noteTextColor: "#F0F0F0",
+          actorBkg: "#0D3D35",
+          actorBorder: "#00D4AA",
+          actorTextColor: "#F0F0F0",
+          labelBoxBkgColor: "#12121E",
+          labelBoxBorderColor: "#00D4AA",
+          labelTextColor: "#F0F0F0",
+          loopTextColor: "#A0A0B8",
+          activationBorderColor: "#00D4AA",
+          activationBkgColor: "#0D3D35",
           sequenceNumberColor: "#FFFFFF",
-          nodeBorder: "#2563EB",
-          mainBkg: "#1E3A5F",
-          clusterBkg: "#111122",
-          clusterBorder: "#2563EB",
-          titleColor: "#E8E8E8",
-          edgeLabelBackground: "#0A0A0F",
+          nodeBorder: "#00D4AA",
+          mainBkg: "#0D3D35",
+          clusterBkg: "#0A0A14",
+          clusterBorder: "#00D4AA60",
+          titleColor: "#F0F0F0",
+          edgeLabelBackground: "#0B0B12",
+          nodeTextColor: "#F0F0F0",
         },
       });
 
@@ -144,15 +154,43 @@ export function MermaidRenderer({ chart, className, autoOpen = false }: MermaidR
     setPosition({ x: 0, y: 0 });
   }, []);
 
-  // ESC to close canvas
+  // Close handler
+  const closeCanvas = useCallback(() => {
+    setIsCanvasOpen(false);
+  }, []);
+
+  // Click backdrop to close
+  const handleBackdropClick = useCallback((e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      closeCanvas();
+    }
+  }, [closeCanvas]);
+
+  // ESC to close canvas — robust with proper cleanup
   useEffect(() => {
+    if (!isCanvasOpen) return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isCanvasOpen) {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        e.stopPropagation();
         setIsCanvasOpen(false);
       }
     };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+
+    // Use capture phase to ensure we get the event before anything else
+    window.addEventListener("keydown", handleKeyDown, true);
+    return () => window.removeEventListener("keydown", handleKeyDown, true);
+  }, [isCanvasOpen]);
+
+  // Lock body scroll when canvas is open
+  useEffect(() => {
+    if (isCanvasOpen) {
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = "";
+      };
+    }
   }, [isCanvasOpen]);
 
   if (error) {
@@ -176,20 +214,20 @@ export function MermaidRenderer({ chart, className, autoOpen = false }: MermaidR
       >
         <button
           onClick={() => setIsCanvasOpen(true)}
-          className="w-full rounded-xl border border-[#1E3A5F]/50 bg-gradient-to-br from-[#0A0A14] to-[#0F0F1A] p-4 text-left transition-all hover:border-[#2563EB]/70 hover:shadow-lg hover:shadow-blue-900/20"
+          className="w-full rounded-xl border border-[#0D3D35]/60 bg-gradient-to-br from-[#0A0A14] to-[#0F0F1A] p-4 text-left transition-all hover:border-[#00D4AA]/50 hover:shadow-lg hover:shadow-[#00D4AA]/10"
         >
           {/* Header */}
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <div className="flex h-6 w-6 items-center justify-center rounded-md bg-[#2563EB]/20">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <div className="flex h-6 w-6 items-center justify-center rounded-md bg-[#00D4AA]/15">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00D4AA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="3" y="3" width="7" height="7" rx="1" />
                   <rect x="14" y="3" width="7" height="7" rx="1" />
                   <rect x="3" y="14" width="7" height="7" rx="1" />
                   <rect x="14" y="14" width="7" height="7" rx="1" />
                 </svg>
               </div>
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-[#4A90D9]">Interactive Workflow</span>
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-[#00D4AA]">Interactive Workflow</span>
             </div>
             <div className="flex items-center gap-1.5 text-[10px] text-[#6B6B9B]">
               <span>Click to expand</span>
@@ -200,7 +238,7 @@ export function MermaidRenderer({ chart, className, autoOpen = false }: MermaidR
           </div>
 
           {/* Mini preview */}
-          <div className="rounded-lg bg-[#0A0A0F] p-4 overflow-hidden max-h-72 relative">
+          <div className="rounded-lg bg-[#0B0B12] p-4 overflow-hidden max-h-72 relative">
             {svg ? (
               <div
                 className="mermaid-svg-wrapper [&_svg]:max-w-full [&_svg]:h-auto opacity-80"
@@ -210,7 +248,7 @@ export function MermaidRenderer({ chart, className, autoOpen = false }: MermaidR
               <div className="flex items-center justify-center py-8">
                 <div className="flex items-center gap-2 text-xs text-[#6B6B9B]">
                   <motion.div
-                    className="h-2 w-2 rounded-full bg-[#2563EB]"
+                    className="h-2 w-2 rounded-full bg-[#00D4AA]"
                     animate={{ scale: [1, 1.3, 1], opacity: [0.5, 1, 0.5] }}
                     transition={{ duration: 0.8, repeat: Infinity }}
                   />
@@ -233,103 +271,113 @@ export function MermaidRenderer({ chart, className, autoOpen = false }: MermaidR
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
+            onClick={handleBackdropClick}
           >
-            {/* Canvas toolbar */}
-            <div className="flex items-center justify-between px-5 py-3 bg-[#06060A] border-b border-[#1A1A2E]">
-              <div className="flex items-center gap-3">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#2563EB]/20">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="3" y="3" width="7" height="7" rx="1" />
-                    <rect x="14" y="3" width="7" height="7" rx="1" />
-                    <rect x="3" y="14" width="7" height="7" rx="1" />
-                    <rect x="14" y="14" width="7" height="7" rx="1" />
-                  </svg>
+            {/* Semi-transparent overlay backdrop — click to close */}
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+
+            {/* Canvas content (above overlay) */}
+            <div className="relative z-10 flex flex-col h-full">
+              {/* Canvas toolbar */}
+              <div className="flex items-center justify-between px-5 py-3 bg-[#06060A]/95 border-b border-[#1A1A2E] backdrop-blur-md">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#00D4AA]/15">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00D4AA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="3" width="7" height="7" rx="1" />
+                      <rect x="14" y="3" width="7" height="7" rx="1" />
+                      <rect x="3" y="14" width="7" height="7" rx="1" />
+                      <rect x="14" y="14" width="7" height="7" rx="1" />
+                    </svg>
+                  </div>
+                  <span className="text-sm font-semibold text-[#F0F0F0]">Workflow Canvas</span>
+                  <span className="text-[10px] text-[#00D4AA] bg-[#00D4AA]/10 px-2 py-0.5 rounded-full border border-[#00D4AA]/20">Interactive</span>
                 </div>
-                <span className="text-sm font-semibold text-[#E8E8E8]">Workflow Canvas</span>
-                <span className="text-[10px] text-[#6B6B9B] bg-[#1A1A2E] px-2 py-0.5 rounded-full">Interactive</span>
+
+                <div className="flex items-center gap-2">
+                  {/* Zoom controls */}
+                  <button
+                    onClick={() => setScale((s) => Math.max(0.3, s - 0.2))}
+                    className="h-7 w-7 flex items-center justify-center rounded-lg bg-[#1A1A2E] text-[#A0A0B8] hover:text-white hover:bg-[#252538] transition-colors text-sm"
+                  >
+                    −
+                  </button>
+                  <span className="text-[11px] text-[#A0A0B8] min-w-[40px] text-center">{Math.round(scale * 100)}%</span>
+                  <button
+                    onClick={() => setScale((s) => Math.min(3, s + 0.2))}
+                    className="h-7 w-7 flex items-center justify-center rounded-lg bg-[#1A1A2E] text-[#A0A0B8] hover:text-white hover:bg-[#252538] transition-colors text-sm"
+                  >
+                    +
+                  </button>
+                  <button
+                    onClick={resetView}
+                    className="h-7 px-2.5 flex items-center justify-center rounded-lg bg-[#1A1A2E] text-[#A0A0B8] hover:text-white hover:bg-[#252538] transition-colors text-[11px]"
+                  >
+                    Reset
+                  </button>
+
+                  <div className="w-px h-5 bg-[#1A1A2E] mx-1" />
+
+                  {/* Close button — prominent and clear */}
+                  <button
+                    onClick={closeCanvas}
+                    className="h-8 px-3 flex items-center justify-center gap-1.5 rounded-lg bg-red-900/30 text-red-400 hover:bg-red-900/50 hover:text-red-300 transition-colors text-xs font-medium border border-red-800/30"
+                    title="Close canvas (ESC)"
+                  >
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M18 6 6 18" /><path d="m6 6 12 12" />
+                    </svg>
+                    Close
+                  </button>
+                </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                {/* Zoom controls */}
-                <button
-                  onClick={() => setScale((s) => Math.max(0.3, s - 0.2))}
-                  className="h-7 w-7 flex items-center justify-center rounded-lg bg-[#1A1A2E] text-[#9B9B9B] hover:text-white hover:bg-[#252538] transition-colors text-sm"
-                >
-                  −
-                </button>
-                <span className="text-[11px] text-[#6B6B9B] min-w-[40px] text-center">{Math.round(scale * 100)}%</span>
-                <button
-                  onClick={() => setScale((s) => Math.min(3, s + 0.2))}
-                  className="h-7 w-7 flex items-center justify-center rounded-lg bg-[#1A1A2E] text-[#9B9B9B] hover:text-white hover:bg-[#252538] transition-colors text-sm"
-                >
-                  +
-                </button>
-                <button
-                  onClick={resetView}
-                  className="h-7 px-2.5 flex items-center justify-center rounded-lg bg-[#1A1A2E] text-[#9B9B9B] hover:text-white hover:bg-[#252538] transition-colors text-[11px]"
-                >
-                  Reset
-                </button>
-
-                <div className="w-px h-5 bg-[#1A1A2E] mx-1" />
-
-                <button
-                  onClick={() => setIsCanvasOpen(false)}
-                  className="h-7 w-7 flex items-center justify-center rounded-lg bg-[#1A1A2E] text-[#9B9B9B] hover:text-red-400 hover:bg-red-900/20 transition-colors"
-                >
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M18 6 6 18" /><path d="m6 6 12 12" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            {/* Canvas area — dark with dot grid pattern */}
-            <div
-              className="flex-1 overflow-hidden bg-[#08080E] relative"
-              onWheel={handleWheel}
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
-              style={{ cursor: isDragging ? "grabbing" : "grab" }}
-            >
-              {/* Dot grid background */}
+              {/* Canvas area — dark with dot grid pattern */}
               <div
-                className="absolute inset-0 opacity-[0.15]"
-                style={{
-                  backgroundImage: "radial-gradient(circle, #2563EB 1px, transparent 1px)",
-                  backgroundSize: `${30 * scale}px ${30 * scale}px`,
-                  backgroundPosition: `${position.x % (30 * scale)}px ${position.y % (30 * scale)}px`,
-                }}
-              />
-
-              {/* Ambient glow effects */}
-              <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-900/10 rounded-full blur-[120px] pointer-events-none" />
-              <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-purple-900/8 rounded-full blur-[100px] pointer-events-none" />
-
-              {/* The diagram */}
-              <div
-                className="absolute inset-0 flex items-center justify-center"
-                style={{
-                  transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
-                  transformOrigin: "center center",
-                  transition: isDragging ? "none" : "transform 0.1s ease-out",
-                }}
+                className="flex-1 overflow-hidden bg-[#08080E] relative"
+                onWheel={handleWheel}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+                style={{ cursor: isDragging ? "grabbing" : "grab" }}
               >
+                {/* Dot grid background */}
                 <div
-                  className="mermaid-canvas-wrapper [&_svg]:max-w-none [&_svg]:h-auto"
-                  dangerouslySetInnerHTML={{ __html: svg }}
+                  className="absolute inset-0 opacity-[0.12]"
+                  style={{
+                    backgroundImage: "radial-gradient(circle, #00D4AA 1px, transparent 1px)",
+                    backgroundSize: `${30 * scale}px ${30 * scale}px`,
+                    backgroundPosition: `${position.x % (30 * scale)}px ${position.y % (30 * scale)}px`,
+                  }}
                 />
-              </div>
 
-              {/* Bottom hint */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-3 text-[10px] text-[#4A4A6A] bg-[#0A0A14]/80 px-3 py-1.5 rounded-full backdrop-blur-sm border border-[#1A1A2E]/50">
-                <span>Scroll to zoom</span>
-                <span className="w-px h-3 bg-[#1A1A2E]" />
-                <span>Drag to pan</span>
-                <span className="w-px h-3 bg-[#1A1A2E]" />
-                <span>ESC to close</span>
+                {/* Ambient glow effects */}
+                <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#00D4AA]/5 rounded-full blur-[120px] pointer-events-none" />
+                <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-[#00D4AA]/3 rounded-full blur-[100px] pointer-events-none" />
+
+                {/* The diagram */}
+                <div
+                  className="absolute inset-0 flex items-center justify-center"
+                  style={{
+                    transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
+                    transformOrigin: "center center",
+                    transition: isDragging ? "none" : "transform 0.1s ease-out",
+                  }}
+                >
+                  <div
+                    className="mermaid-canvas-wrapper [&_svg]:max-w-none [&_svg]:h-auto"
+                    dangerouslySetInnerHTML={{ __html: svg }}
+                  />
+                </div>
+
+                {/* Bottom hint */}
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-3 text-[10px] text-[#4A4A6A] bg-[#0A0A14]/80 px-3 py-1.5 rounded-full backdrop-blur-sm border border-[#1A1A2E]/50">
+                  <span>Scroll to zoom</span>
+                  <span className="w-px h-3 bg-[#1A1A2E]" />
+                  <span>Drag to pan</span>
+                  <span className="w-px h-3 bg-[#1A1A2E]" />
+                  <span>ESC to close</span>
+                </div>
               </div>
             </div>
           </motion.div>
