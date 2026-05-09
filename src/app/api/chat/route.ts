@@ -380,7 +380,14 @@ async function callLongCatAPI(systemPrompt: string, messages: { role: string; co
   if (!response.ok) {
     const errorText = await response.text();
     console.error("LongCat API error:", response.status, errorText);
-    throw new Error(`AI service error: ${response.status}`);
+    // If LongCat fails, try NVIDIA as fallback
+    console.log("Trying NVIDIA fallback...");
+    try {
+      return await callNvidiaAPI(systemPrompt, messages);
+    } catch (nvidiaErr) {
+      console.error("NVIDIA fallback also failed:", nvidiaErr);
+      throw new Error(`AI service error: ${response.status}`);
+    }
   }
 
   const data = await response.json();
@@ -453,7 +460,7 @@ async function callNvidiaAPI(systemPrompt: string, messages: { role: string; con
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 60000);
 
-    const nvidiaSystemPrompt = `You are a second AI agent analyzing SEO data independently. You are part of the RankMeBaddy multi-agent system. Your role is to provide an independent, second opinion on SEO analysis. You have deep expertise in search engine optimization, content strategy, and technical SEO. Provide your own analysis that complements or challenges the primary agent's findings. Be specific, actionable, and data-driven. Keep your response concise — focus on key insights the primary analysis may have missed. Use natural language, not markdown formatting (no ##, **, or backticks for emphasis).`;
+    const nvidiaSystemPrompt = `You are RankMeBaddy's AI SEO Agent — an autonomous, strategic SEO assistant. You have full execution capability across every layer Google uses to rank content. Think like a senior SEO consultant who takes initiative. Provide specific, actionable SEO advice. Use natural language, not markdown formatting (no ##, **, or backticks for emphasis). If your response involves steps, processes, or strategies, include a Mermaid diagram in [DIAGRAM]...[/DIAGRAM] tags. Also include 2-3 [ACTION:type] suggestions at the end. When you need current data, include [WEB_SEARCH:query] in your response. For deep page analysis, include [SCRAPE:url].`;
 
     const response = await fetch(`${NVIDIA_BASE_URL}/chat/completions`, {
       method: "POST",
@@ -471,7 +478,7 @@ async function callNvidiaAPI(systemPrompt: string, messages: { role: string; con
           })),
         ],
         temperature: 0.7,
-        max_tokens: 1500,
+        max_tokens: 3000,
       }),
       signal: controller.signal,
     });
