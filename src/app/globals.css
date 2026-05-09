@@ -249,7 +249,7 @@
 .markdown-content h3 {
   font-family: var(--font-syne), var(--font-space-grotesk), sans-serif;
   font-weight: 700;
-  color: #1A1A1A;
+  color: #E8E8E8;
   margin-top: 1em;
   margin-bottom: 0.5em;
   line-height: 1.3;
@@ -268,7 +268,7 @@
 .markdown-content p {
   font-size: 0.875rem;
   line-height: 1.7;
-  color: #1A1A1A;
+  color: #C8C8C8;
   margin-bottom: 0.5em;
 }
 
@@ -278,7 +278,7 @@
 
 .markdown-content strong {
   font-weight: 700;
-  color: #1A1A1A;
+  color: #E8E8E8;
 }
 
 .markdown-content em {
@@ -302,25 +302,26 @@
 .markdown-content li {
   font-size: 0.875rem;
   line-height: 1.7;
-  color: #1A1A1A;
+  color: #C8C8C8;
   margin-bottom: 0.25em;
 }
 
 .markdown-content code {
   font-family: var(--font-geist-mono), monospace;
   font-size: 0.8rem;
-  background: #F5F0EB;
+  background: #1A1A1E;
   padding: 0.15em 0.4em;
   border-radius: 4px;
-  color: #6A3093;
+  color: #A78BFA;
 }
 
 .markdown-content pre {
-  background: #1A1A2E;
+  background: #1A1A1E;
   border-radius: 8px;
   padding: 1em;
   overflow-x: auto;
   margin-bottom: 0.75em;
+  border: 1px solid #2A2A2E;
 }
 
 .markdown-content pre code {
@@ -331,86 +332,50 @@
 }
 
 .markdown-content blockquote {
-  border-left: 3px solid #6A3093;
+  border-left: 3px solid #A78BFA;
   padding-left: 1em;
   margin-left: 0;
   margin-bottom: 0.75em;
-  color: #6B6B6B;
+  color: #9B9B9B;
   font-style: italic;
 }
 
 .markdown-content a {
-  color: #2563EB;
+  color: #60A5FA;
   text-decoration: underline;
   text-underline-offset: 2px;
 }
 
 .markdown-content a:hover {
-  color: #1d4ed8;
+  color: #93C5FD;
 }
 
 .markdown-content hr {
   border: none;
-  border-top: 1px solid #E8E5E0;
+  border-top: 1px solid #2A2A2E;
   margin: 1em 0;
 }
 
-.dark .markdown-content h1,
-.dark .markdown-content h2,
-.dark .markdown-content h3 {
-  color: #E8E8E8;
-}
-
-.dark .markdown-content p {
-  color: #C8C8C8;
-}
-
-.dark .markdown-content strong {
-  color: #E8E8E8;
-}
-
-.dark .markdown-content li {
-  color: #C8C8C8;
-}
-
-.dark .markdown-content code {
-  background: #2A2A2A;
-  color: #A78BFA;
-}
-
-.dark .markdown-content blockquote {
-  color: #9B9B9B;
-  border-left-color: #A78BFA;
-}
-
-.dark .markdown-content a {
-  color: #60A5FA;
-}
-
-.dark .markdown-content a:hover {
-  color: #93C5FD;
-}
-
-.dark .markdown-content hr {
-  border-top-color: #333333;
-}
-
-/* Custom scrollbar for chat areas */
-.custom-scrollbar::-webkit-scrollbar {
+/* Custom scrollbar for chat areas (dark theme) */
+.custom-scrollbar::-webkit-scrollbar,
+.custom-scrollbar-dark::-webkit-scrollbar {
   width: 5px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-track {
+.custom-scrollbar::-webkit-scrollbar-track,
+.custom-scrollbar-dark::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #d4d0ca;
+.custom-scrollbar::-webkit-scrollbar-thumb,
+.custom-scrollbar-dark::-webkit-scrollbar-thumb {
+  background: #2A2A2E;
   border-radius: 10px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #b0aca5;
+.custom-scrollbar::-webkit-scrollbar-thumb:hover,
+.custom-scrollbar-dark::-webkit-scrollbar-thumb:hover {
+  background: #3A3A3E;
 }
 
 .lab-bg::before {

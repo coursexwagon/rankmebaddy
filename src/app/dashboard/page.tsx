@@ -75,106 +75,21 @@ interface ContentItem {
   url?: string;
 }
 
-/* ─── Sidebar Nav Items ─────────────────────────────────────── */
-const navItems = [
-  {
-    id: "chat",
-    label: "Chat",
-    icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-      </svg>
-    ),
-  },
-  {
-    id: "overview",
-    label: "Overview",
-    icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="3" width="7" height="7" rx="1" />
-        <rect x="14" y="3" width="7" height="7" rx="1" />
-        <rect x="3" y="14" width="7" height="7" rx="1" />
-        <rect x="14" y="14" width="7" height="7" rx="1" />
-      </svg>
-    ),
-  },
-  {
-    id: "keywords",
-    label: "Keywords",
-    icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="m21 21-4.35-4.35" />
-        <circle cx="11" cy="11" r="8" />
-      </svg>
-    ),
-  },
-  {
-    id: "rankings",
-    label: "Rankings",
-    icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 20V10" />
-        <path d="M18 20V4" />
-        <path d="M6 20v-4" />
-      </svg>
-    ),
-  },
-  {
-    id: "content",
-    label: "Content",
-    icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-        <polyline points="14 2 14 8 20 8" />
-      </svg>
-    ),
-  },
-  {
-    id: "pro",
-    label: "Pro",
-    icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-      </svg>
-    ),
-  },
-  {
-    id: "settings",
-    label: "Settings",
-    icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
-        <circle cx="12" cy="12" r="3" />
-      </svg>
-    ),
-  },
+/* ─── Top Bar Tab Items ─────────────────────────────────────── */
+const topBarTabs = [
+  { id: "chat", label: "Chat" },
+  { id: "overview", label: "Overview" },
+  { id: "keywords", label: "Keywords" },
+  { id: "rankings", label: "Rankings" },
+  { id: "content", label: "Content" },
 ];
 
-/* ─── Quick Action Chips ────────────────────────────────────── */
-const quickActions = [
-  { label: "Keyword gaps", icon: "🔍", prompt: "What keyword gaps should I target for my site?" },
-  { label: "SEO workflow", icon: "📊", prompt: "Show me the complete SEO workflow for my site as a visual diagram" },
-  { label: "Competitor analysis", icon: "📊", prompt: "Who are my top SEO competitors and what are they ranking for?" },
-  { label: "Strategy timeline", icon: "🗓️", prompt: "Create a visual SEO strategy timeline showing month-by-month milestones" },
-];
-
-/* ─── Agent Tools Indicator ─────────────────────────────────── */
-const agentTools = [
-  { label: "Web Search", icon: "🌐" },
-  { label: "Diagrams", icon: "📊" },
-  { label: "Keyword Analysis", icon: "🔑" },
-  { label: "Content Score", icon: "📝" },
-  { label: "SERP Check", icon: "📈" },
-  { label: "Site Audit", icon: "🏥" },
-];
-
-/* ─── Agent Thinking Steps ──────────────────────────────────── */
-const agentThinkingSteps = [
-  "Analyzing your site...",
-  "Researching keywords...",
-  "Checking competitors...",
-  "Evaluating content...",
-  "Building recommendations...",
+/* ─── Suggested Prompt Cards ────────────────────────────────── */
+const suggestedPrompts = [
+  { title: "Keyword gaps", subtitle: "Find keyword opportunities", prompt: "What keyword gaps should I target for my site?" },
+  { title: "SEO audit", subtitle: "Run a full site audit", prompt: "Run a comprehensive SEO audit on my site covering technical SEO, content, and authority factors." },
+  { title: "Competitor analysis", subtitle: "Analyze your competition", prompt: "Who are my top SEO competitors and what are they ranking for?" },
+  { title: "Strategy timeline", subtitle: "Plan your SEO roadmap", prompt: "Create a visual SEO strategy timeline showing month-by-month milestones" },
 ];
 
 /* ─── Platform Icons ────────────────────────────────────────── */
@@ -205,7 +120,7 @@ function PlatformIcon({ platform, size = 14 }: { platform: string; size?: number
     case "tiktok":
       return (
         <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-          <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" fill="#1A1A1A" />
+          <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" fill="#6B6B6B" />
         </svg>
       );
     case "aisearch":
@@ -220,22 +135,7 @@ function PlatformIcon({ platform, size = 14 }: { platform: string; size?: number
   }
 }
 
-/* ─── Agent Step Indicator ────────────────────────────────────── */
-function AgentStepIndicator({ steps, currentStep }: { steps: string[]; currentStep: number }) {
-  const displayStep = currentStep % steps.length;
-  return (
-    <div className="flex items-center gap-2.5 text-[12px] text-[#6B6B6B]">
-      <motion.div
-        className="h-2 w-2 rounded-full bg-[#2563EB]"
-        animate={{ scale: [1, 1.4, 1], opacity: [0.5, 1, 0.5] }}
-        transition={{ duration: 0.8, repeat: Infinity }}
-      />
-      <span>{steps[displayStep]}</span>
-    </div>
-  );
-}
-
-/* ─── Action Buttons — pill-shaped ──────────────────────────── */
+/* ─── Action Buttons — pill-shaped, dark ────────────────────── */
 function ActionButtons({ actions, onAction }: { actions: AgentAction[]; onAction: (prompt: string) => void }) {
   if (!actions || actions.length === 0) return null;
   return (
@@ -244,11 +144,11 @@ function ActionButtons({ actions, onAction }: { actions: AgentAction[]; onAction
         <motion.button
           key={action.type}
           onClick={() => onAction(action.prompt)}
-          className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#F5F0EB] to-[#EDE8E2] px-4 py-1.5 text-[11px] font-medium text-[#1A1A1A] transition-all hover:from-[#EDE8E2] hover:to-[#E5DFD8] shadow-sm"
+          className="inline-flex items-center gap-2 rounded-full border border-[#2A2A2E] bg-[#1A1A1E] px-3.5 py-1.5 text-[11px] font-medium text-[#C8C8C8] transition-all hover:border-[#3A3A3E] hover:text-white"
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
         >
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="m5 12h14" /><path d="m12 5 7 7-7 7" />
           </svg>
           {action.label}
@@ -286,25 +186,25 @@ function SetupScreen({ onComplete }: { onComplete: () => void }) {
 
   return (
     <motion.div
-      className="flex min-h-screen items-center justify-center px-4 bg-[#FAFAF7] dark:bg-[#0F0F11]"
+      className="flex min-h-screen items-center justify-center px-4 bg-[#0A0A0B]"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
       <div className="w-full max-w-sm text-center">
         <motion.div
-          className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-full border border-blue-200 bg-blue-50"
+          className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-full border border-[#2A2A2E] bg-[#1A1A1E]"
           animate={{ scale: [1, 1.04, 1] }}
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
         >
           <motion.div
-            className="h-8 w-8 rounded-full border-2 border-blue-200 border-t-blue-600"
+            className="h-8 w-8 rounded-full border-2 border-[#2A2A2E] border-t-white"
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
           />
         </motion.div>
 
-        <h2 className="font-heading text-xl font-bold text-[#1A1A1A]">
+        <h2 className="font-heading text-xl font-bold text-white">
           Setting up your workspace
         </h2>
         <p className="mt-2 text-sm text-[#6B6B6B]">
@@ -315,7 +215,7 @@ function SetupScreen({ onComplete }: { onComplete: () => void }) {
           {steps.map((text, i) => (
             <motion.div
               key={text}
-              className="flex items-center gap-3 rounded-xl border border-[#E8E5E0] bg-white px-4 py-3 shadow-sm"
+              className="flex items-center gap-3 rounded-xl border border-[#2A2A2E] bg-[#1A1A1E] px-4 py-3"
               initial={{ opacity: 0, x: -12 }}
               animate={{
                 opacity: step >= i ? 1 : 0,
@@ -324,21 +224,21 @@ function SetupScreen({ onComplete }: { onComplete: () => void }) {
               transition={{ duration: 0.3 }}
             >
               {step > i ? (
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
               ) : step === i ? (
                 <motion.div
-                  className="h-1.5 w-1.5 rounded-full bg-blue-600"
+                  className="h-1.5 w-1.5 rounded-full bg-white"
                   animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
                   transition={{ duration: 0.6, repeat: Infinity }}
                 />
               ) : (
-                <div className="h-1.5 w-1.5 rounded-full bg-[#E8E5E0]" />
+                <div className="h-1.5 w-1.5 rounded-full bg-[#2A2A2E]" />
               )}
               <span
                 className={`text-[12px] ${
-                  step > i ? "text-[#16A34A]" : step === i ? "text-[#6B6B6B]" : "text-[#9B9B9B]"
+                  step > i ? "text-[#4ADE80]" : step === i ? "text-[#9B9B9B]" : "text-[#6B6B6B]"
                 }`}
               >
                 {text}
@@ -348,150 +248,6 @@ function SetupScreen({ onComplete }: { onComplete: () => void }) {
         </div>
       </div>
     </motion.div>
-  );
-}
-
-/* ─── Sidebar ───────────────────────────────────────────────── */
-function Sidebar({
-  siteData,
-  activeSection,
-  onSectionChange,
-  userName,
-  platforms,
-  mobileOpen,
-  onMobileClose,
-  isPro,
-  onSignOut,
-}: {
-  siteData: SiteData | null;
-  activeSection: string;
-  onSectionChange: (id: string) => void;
-  userName: string;
-  platforms: string[];
-  mobileOpen: boolean;
-  onMobileClose: () => void;
-  isPro?: boolean;
-  onSignOut: () => void;
-}) {
-  const sidebarContent = (
-    <div className="flex h-full flex-col">
-      <div className="flex items-center gap-2.5 px-4 py-4 sm:py-5">
-        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-900/30">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-        </div>
-        <span className="font-heading text-sm font-bold text-[#1A1A1A] dark:text-white">
-          RankMeBaddy
-        </span>
-      </div>
-
-      {siteData && (
-        <div className="mx-3 mb-3 overflow-hidden rounded-xl border border-[#E8E5E0] dark:border-[#2A2A2E] bg-white dark:bg-[#1A1A1E] shadow-sm">
-          <div className="flex items-center gap-2.5 px-3 py-2.5">
-            {siteData.favicon ? (
-              <img src={siteData.favicon} alt="" className="h-5 w-5 rounded" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
-            ) : (
-              <div className="flex h-5 w-5 items-center justify-center rounded bg-[#F5F5F0] dark:bg-[#252528]">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10" /><path d="M2 12h20" />
-                </svg>
-              </div>
-            )}
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-[12px] font-medium text-[#1A1A1A] dark:text-white">{siteData.domain}</p>
-              <p className="truncate text-[10px] text-[#9B9B9B] dark:text-[#9B9B9B]">
-                {siteData.title ? siteData.title.slice(0, 28) + (siteData.title.length > 28 ? "..." : "") : "No title detected"}
-              </p>
-            </div>
-            <div className="h-1.5 w-1.5 rounded-full bg-[#16A34A]" title="Connected" />
-          </div>
-          {platforms.length > 0 && (
-            <div className="flex items-center gap-1.5 border-t border-[#E8E5E0] dark:border-[#2A2A2E] px-3 py-2">
-              {platforms.map((p) => (
-                <PlatformIcon key={p} platform={p} />
-              ))}
-              <span className="ml-1 text-[9px] text-[#9B9B9B] dark:text-[#9B9B9B]">
-                {platforms.length} platform{platforms.length !== 1 ? "s" : ""}
-              </span>
-            </div>
-          )}
-        </div>
-      )}
-
-      <nav className="flex-1 space-y-0.5 px-2">
-        {navItems.map((item) => {
-          const isActive = activeSection === item.id;
-          return (
-            <button
-              key={item.id}
-              onClick={() => { onSectionChange(item.id); onMobileClose(); }}
-              className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] transition-all ${
-                isActive
-                  ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-medium"
-                  : "text-[#6B6B6B] dark:text-[#9B9B9B] hover:bg-[#F5F5F0] dark:hover:bg-[#252528] hover:text-[#1A1A1A] dark:hover:text-white"
-              }`}
-            >
-              <span className={isActive ? "text-blue-600 dark:text-blue-400" : "text-[#9B9B9B] dark:text-[#6B6B6B]"}>{item.icon}</span>
-              {item.label}
-            </button>
-          );
-        })}
-      </nav>
-
-      <div className="border-t border-[#E8E5E0] dark:border-[#2A2A2E] px-4 py-3">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600 text-[11px] font-bold text-white">
-            {userName ? userName[0].toUpperCase() : "U"}
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-[12px] font-medium text-[#1A1A1A] dark:text-white">{userName || "User"}</p>
-            <p className="text-[10px] text-[#9B9B9B] dark:text-[#9B9B9B]">{isPro ? "Pro plan" : BETA_MODE ? "Beta - Free" : "Free plan"}</p>
-          </div>
-          <button
-            onClick={onSignOut}
-            className="flex h-6 w-6 items-center justify-center rounded-md text-[#9B9B9B] hover:bg-[#F5F5F0] dark:hover:bg-[#252528] hover:text-[#6B6B6B] dark:hover:text-white transition-colors"
-            title="Sign out"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-              <polyline points="16 17 21 12 16 7" />
-              <line x1="21" y1="12" x2="9" y2="12" />
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
-  return (
-    <>
-      <aside className="hidden w-[220px] shrink-0 border-r border-[#E8E5E0] dark:border-[#2A2A2E] bg-white dark:bg-[#1A1A1E] sm:flex sm:flex-col">
-        {sidebarContent}
-      </aside>
-      <AnimatePresence>
-        {mobileOpen && (
-          <>
-            <motion.div
-              className="fixed inset-0 z-40 bg-black/30 sm:hidden"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={onMobileClose}
-            />
-            <motion.aside
-              className="fixed inset-y-0 left-0 z-50 w-[260px] bg-white dark:bg-[#1A1A1E] shadow-xl sm:hidden"
-              initial={{ x: -260 }}
-              animate={{ x: 0 }}
-              exit={{ x: -260 }}
-              transition={{ duration: 0.2, ease: [0.21, 0.47, 0.32, 0.98] }}
-            >
-              {sidebarContent}
-            </motion.aside>
-          </>
-        )}
-      </AnimatePresence>
-    </>
   );
 }
 
@@ -515,18 +271,10 @@ function ChatBubble({ message, onAction }: { message: ChatMessage; onAction: (pr
       <div
         className={`max-w-[85%] ${
           isUser
-            ? "rounded-2xl bg-[#F5F0EB] dark:bg-[#252528] text-[#1A1A1A] dark:text-[#E8E8E8] px-5 py-3.5"
-            : "rounded-2xl bg-white dark:bg-[#1A1A1E] text-[#1A1A1A] dark:text-[#E8E8E8] px-5 py-3.5 shadow-sm border border-[#E8E5E0]/50 dark:border-[#2A2A2E]/50"
+            ? "rounded-2xl bg-[#1E1E22] text-[#E8E8E8] px-5 py-3.5"
+            : "text-[#E8E8E8] px-1 py-1"
         }`}
       >
-        {/* Assistant indicator — small blue dot + label */}
-        {!isUser && (
-          <div className="mb-2 flex items-center gap-1.5">
-            <div className="h-1.5 w-1.5 rounded-full bg-[#2563EB]" />
-            <span className="text-[10px] font-medium text-[#2563EB]">RankMeBaddy</span>
-          </div>
-        )}
-
         {isUser ? (
           <div className="text-[14px] leading-relaxed whitespace-pre-wrap">
             {message.content}
@@ -549,17 +297,45 @@ function ChatBubble({ message, onAction }: { message: ChatMessage; onAction: (pr
           </div>
         )}
 
-        <div className="flex items-center justify-between mt-2">
-          <p className="text-[10px] text-[#9B9B9B]">
-            {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-          </p>
-        </div>
-
         {!isUser && message.actions && message.actions.length > 0 && (
           <ActionButtons actions={message.actions} onAction={onAction} />
         )}
       </div>
     </motion.div>
+  );
+}
+
+/* ─── Thinking Indicator — minimal ──────────────────────────── */
+function ThinkingIndicator() {
+  return (
+    <div className="flex items-center gap-2 text-[12px] text-[#6B6B6B]">
+      <div className="flex items-center gap-1">
+        {[1, 2, 3].map((dot) => (
+          <motion.div
+            key={dot}
+            className="w-1.5 h-1.5 bg-white/30 rounded-full"
+            animate={{ opacity: [0.3, 1, 0.3], scale: [0.85, 1.1, 0.85] }}
+            transition={{ duration: 1.2, repeat: Infinity, delay: dot * 0.15, ease: "easeInOut" }}
+          />
+        ))}
+      </div>
+      <span>Thinking...</span>
+    </div>
+  );
+}
+
+/* ─── Suggested Prompt Card — clean, text-only ─────────────── */
+function SuggestedPromptCard({ title, subtitle, onClick }: { title: string; subtitle: string; onClick: () => void }) {
+  return (
+    <motion.button
+      onClick={onClick}
+      className="flex-shrink-0 rounded-xl border border-[#2A2A2E] bg-[#1A1A1E] px-4 py-3 text-left transition-all hover:border-[#3A3A3E] hover:bg-[#1E1E22] min-w-[160px]"
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+    >
+      <p className="text-[12px] font-medium text-white">{title}</p>
+      <p className="text-[10px] text-[#6B6B6B] mt-0.5">{subtitle}</p>
+    </motion.button>
   );
 }
 
@@ -597,23 +373,23 @@ function OverviewSection({ siteData, keyword, platforms, onNavigate }: {
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-4 sm:p-6">
       <div>
-        <h2 className="font-heading text-lg font-bold text-[#1A1A1A]">SEO Overview</h2>
+        <h2 className="font-heading text-lg font-bold text-white">SEO Overview</h2>
         <p className="text-[12px] text-[#6B6B6B]">Real-time analysis of {siteData.domain}</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-4">
         <motion.div
-          className="flex flex-col items-center justify-center rounded-2xl border border-[#E8E5E0] bg-white p-5 shadow-sm"
+          className="flex flex-col items-center justify-center rounded-2xl border border-[#2A2A2E] bg-[#1A1A1E] p-5"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
           <div className="relative flex h-20 w-20 items-center justify-center">
             <svg className="h-20 w-20 -rotate-90" viewBox="0 0 80 80">
-              <circle cx="40" cy="40" r="34" fill="none" stroke="#E8E5E0" strokeWidth="5" />
+              <circle cx="40" cy="40" r="34" fill="none" stroke="#2A2A2E" strokeWidth="5" />
               <motion.circle
                 cx="40" cy="40" r="34" fill="none"
-                stroke={seoScore >= 70 ? "#2563EB" : seoScore >= 40 ? "#D97706" : "#DC2626"}
+                stroke={seoScore >= 70 ? "#4ADE80" : seoScore >= 40 ? "#FBBF24" : "#F87171"}
                 strokeWidth="5"
                 strokeLinecap="round"
                 strokeDasharray={`${(seoScore / 100) * 213.6} 213.6`}
@@ -622,9 +398,9 @@ function OverviewSection({ siteData, keyword, platforms, onNavigate }: {
                 transition={{ duration: 1, delay: 0.3 }}
               />
             </svg>
-            <span className="absolute font-heading text-xl font-bold text-[#1A1A1A]">{seoScore}</span>
+            <span className="absolute font-heading text-xl font-bold text-white">{seoScore}</span>
           </div>
-          <p className="mt-2 text-[10px] font-semibold uppercase tracking-wider text-[#9B9B9B]">SEO Score</p>
+          <p className="mt-2 text-[10px] font-semibold uppercase tracking-wider text-[#6B6B6B]">SEO Score</p>
         </motion.div>
 
         {[
@@ -635,49 +411,49 @@ function OverviewSection({ siteData, keyword, platforms, onNavigate }: {
           <motion.button
             key={stat.label}
             onClick={stat.onClick}
-            className="rounded-2xl border border-[#E8E5E0] bg-white p-4 text-left shadow-sm transition-colors hover:border-[#9B9B9B]"
+            className="rounded-2xl border border-[#2A2A2E] bg-[#1A1A1E] p-4 text-left transition-colors hover:border-[#3A3A3E]"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 + i * 0.05 }}
           >
-            <p className={`font-heading text-2xl font-bold ${stat.accent ? "text-blue-600" : "text-[#1A1A1A]"}`}>{stat.value}</p>
-            <p className="text-[10px] text-[#9B9B9B]">{stat.label}</p>
-            <p className="mt-0.5 text-[9px] text-[#9B9B9B]">{stat.sub}</p>
+            <p className={`font-heading text-2xl font-bold ${stat.accent ? "text-white" : "text-white"}`}>{stat.value}</p>
+            <p className="text-[10px] text-[#6B6B6B]">{stat.label}</p>
+            <p className="mt-0.5 text-[9px] text-[#6B6B6B]">{stat.sub}</p>
           </motion.button>
         ))}
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <motion.div
-          className="rounded-2xl border border-[#E8E5E0] bg-white p-4 shadow-sm"
+          className="rounded-2xl border border-[#2A2A2E] bg-[#1A1A1E] p-4"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-[#9B9B9B]">Site Issues</h3>
+          <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-[#6B6B6B]">Site Issues</h3>
           <div className="space-y-2.5">
             {issues.map((issue) => (
               <div key={issue.text} className="flex items-start gap-2">
                 <div className={`mt-0.5 h-2 w-2 shrink-0 rounded-full ${issue.type === "error" ? "bg-red-500" : issue.type === "warning" ? "bg-amber-500" : "bg-green-500"}`} />
-                <span className={`text-[12px] ${issue.type === "error" ? "text-red-600" : issue.type === "warning" ? "text-amber-600" : "text-[#6B6B6B]"}`}>{issue.text}</span>
+                <span className={`text-[12px] ${issue.type === "error" ? "text-red-400" : issue.type === "warning" ? "text-amber-400" : "text-[#9B9B9B]"}`}>{issue.text}</span>
               </div>
             ))}
           </div>
         </motion.div>
 
         <motion.div
-          className="rounded-2xl border border-[#E8E5E0] bg-white p-4 shadow-sm"
+          className="rounded-2xl border border-[#2A2A2E] bg-[#1A1A1E] p-4"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.35 }}
         >
-          <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-[#9B9B9B]">Active Campaign</h3>
-          <div className="rounded-xl border border-blue-200 bg-blue-50 p-3">
-            <p className="text-[13px] font-medium text-[#1A1A1A]">&ldquo;{keyword}&rdquo;</p>
+          <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-[#6B6B6B]">Active Campaign</h3>
+          <div className="rounded-xl border border-[#2A2A2E] bg-[#0A0A0B] p-3">
+            <p className="text-[13px] font-medium text-white">&ldquo;{keyword}&rdquo;</p>
             <div className="mt-3 flex items-center gap-2">
-              <div className="h-1.5 flex-1 rounded-full bg-blue-100">
+              <div className="h-1.5 flex-1 rounded-full bg-[#2A2A2E]">
                 <motion.div
-                  className="h-1.5 rounded-full bg-blue-600"
+                  className="h-1.5 rounded-full bg-white"
                   initial={{ width: 0 }}
                   animate={{ width: "35%" }}
                   transition={{ duration: 1, delay: 0.5 }}
@@ -693,22 +469,22 @@ function OverviewSection({ siteData, keyword, platforms, onNavigate }: {
       </div>
 
       <motion.div
-        className="overflow-hidden rounded-2xl border border-[#E8E5E0] bg-white shadow-sm"
+        className="overflow-hidden rounded-2xl border border-[#2A2A2E] bg-[#1A1A1E]"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
       >
-        <h3 className="px-4 pt-4 pb-2 text-[11px] font-semibold uppercase tracking-wider text-[#9B9B9B]">Site Preview</h3>
-        <div className="relative h-48 w-full overflow-hidden bg-[#F5F5F0]">
+        <h3 className="px-4 pt-4 pb-2 text-[11px] font-semibold uppercase tracking-wider text-[#6B6B6B]">Site Preview</h3>
+        <div className="relative h-48 w-full overflow-hidden bg-[#0A0A0B]">
           <img src={siteData.screenshot} alt={`Screenshot of ${siteData.domain}`} className="h-full w-full object-cover object-top" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
-          <div className="absolute bottom-3 left-3 flex items-center gap-2 rounded-lg bg-white/90 px-3 py-1.5 shadow-sm backdrop-blur-sm">
+          <div className="absolute bottom-3 left-3 flex items-center gap-2 rounded-lg bg-[#0A0A0B]/90 px-3 py-1.5 backdrop-blur-sm border border-[#2A2A2E]">
             {siteData.favicon && <img src={siteData.favicon} alt="" className="h-3.5 w-3.5 rounded" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />}
-            <span className="text-[11px] font-medium text-[#1A1A1A]">{siteData.domain}</span>
+            <span className="text-[11px] font-medium text-white">{siteData.domain}</span>
           </div>
         </div>
         {siteData.title && (
-          <div className="border-t border-[#E8E5E0] px-4 py-3">
-            <p className="text-[12px] font-medium text-[#1A1A1A]">{siteData.title}</p>
+          <div className="border-t border-[#2A2A2E] px-4 py-3">
+            <p className="text-[12px] font-medium text-white">{siteData.title}</p>
             {siteData.description && <p className="mt-1 text-[11px] text-[#6B6B6B] line-clamp-2">{siteData.description}</p>}
           </div>
         )}
@@ -737,40 +513,40 @@ function KeywordsSection({ siteData, keyword, onAskAI }: { siteData: SiteData; k
 
   const filtered = filter === "all" ? keywords : keywords.filter((k) => k.status === filter);
   const statusColors: Record<string, string> = {
-    opportunity: "text-blue-600 border-blue-200 bg-blue-50",
-    ranking: "text-green-600 border-green-200 bg-green-50",
-    gap: "text-amber-600 border-amber-200 bg-amber-50",
-    tracked: "text-[#6B6B6B] border-[#E8E5E0] bg-[#F5F5F0]",
+    opportunity: "text-[#4ADE80] border-[#2A2A2E] bg-[#1A1A1E]",
+    ranking: "text-[#60A5FA] border-[#2A2A2E] bg-[#1A1A1E]",
+    gap: "text-[#FBBF24] border-[#2A2A2E] bg-[#1A1A1E]",
+    tracked: "text-[#6B6B6B] border-[#2A2A2E] bg-[#1A1A1E]",
   };
 
   return (
     <div className="mx-auto max-w-4xl space-y-5 p-4 sm:p-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="font-heading text-lg font-bold text-[#1A1A1A]">Keywords</h2>
+          <h2 className="font-heading text-lg font-bold text-white">Keywords</h2>
           <p className="text-[12px] text-[#6B6B6B]">{keywords.length} keywords tracked for {siteData.domain}</p>
         </div>
-        <button onClick={() => onAskAI("Find more keyword opportunities for my site beyond what's listed")} className="shrink-0 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-[11px] font-medium text-blue-600 transition-colors hover:bg-blue-100">+ Find more</button>
+        <button onClick={() => onAskAI("Find more keyword opportunities for my site beyond what's listed")} className="shrink-0 rounded-full border border-[#2A2A2E] bg-[#1A1A1E] px-3 py-1.5 text-[11px] font-medium text-white transition-colors hover:bg-[#1E1E22]">+ Find more</button>
       </div>
 
       <div className="flex gap-2">
         {["all", "opportunity", "ranking", "gap", "tracked"].map((f) => (
-          <button key={f} onClick={() => setFilter(f)} className={`rounded-full border px-3 py-1 text-[11px] capitalize transition-all ${filter === f ? "border-blue-300 bg-blue-50 text-blue-600 font-medium" : "border-[#E8E5E0] text-[#6B6B6B] hover:text-[#1A1A1A] hover:border-[#9B9B9B]"}`}>{f}</button>
+          <button key={f} onClick={() => setFilter(f)} className={`rounded-full border px-3 py-1 text-[11px] capitalize transition-all ${filter === f ? "border-[#3A3A3E] bg-[#1E1E22] text-white font-medium" : "border-[#2A2A2E] text-[#6B6B6B] hover:text-white hover:border-[#3A3A3E]"}`}>{f}</button>
         ))}
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-[#E8E5E0] bg-white shadow-sm">
+      <div className="overflow-x-auto rounded-2xl border border-[#2A2A2E] bg-[#1A1A1E]">
         <div className="min-w-[540px]">
-          <div className="grid grid-cols-[1fr_80px_80px_90px_90px] gap-2 border-b border-[#E8E5E0] px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-[#9B9B9B]">
+          <div className="grid grid-cols-[1fr_80px_80px_90px_90px] gap-2 border-b border-[#2A2A2E] px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-[#6B6B6B]">
             <span>Keyword</span><span>Volume</span><span>Difficulty</span><span>Intent</span><span>Status</span>
           </div>
-          <div className="divide-y divide-[#E8E5E0]">
+          <div className="divide-y divide-[#2A2A2E]">
             {filtered.map((kw, i) => (
-              <motion.div key={kw.keyword} className="grid grid-cols-[1fr_80px_80px_90px_90px] gap-2 px-4 py-3 text-[12px] transition-colors hover:bg-[#F5F5F0]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.03 }}>
-                <span className="font-medium text-[#1A1A1A] truncate">{kw.keyword}</span>
-                <span className="text-[#6B6B6B]">{kw.volume}</span>
-                <span className={parseInt(kw.difficulty) > 60 ? "text-red-600" : parseInt(kw.difficulty) > 40 ? "text-amber-600" : "text-green-600"}>{kw.difficulty}</span>
-                <span className="text-[#6B6B6B]">{kw.intent}</span>
+              <motion.div key={kw.keyword} className="grid grid-cols-[1fr_80px_80px_90px_90px] gap-2 px-4 py-3 text-[12px] transition-colors hover:bg-[#1E1E22]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.03 }}>
+                <span className="font-medium text-white truncate">{kw.keyword}</span>
+                <span className="text-[#9B9B9B]">{kw.volume}</span>
+                <span className={parseInt(kw.difficulty) > 60 ? "text-red-400" : parseInt(kw.difficulty) > 40 ? "text-amber-400" : "text-green-400"}>{kw.difficulty}</span>
+                <span className="text-[#9B9B9B]">{kw.intent}</span>
                 <span className={`rounded-full border px-2 py-0.5 text-[10px] capitalize ${statusColors[kw.status]}`}>{kw.status}</span>
               </motion.div>
             ))}
@@ -796,7 +572,7 @@ function RankingsSection({ siteData, keyword, platforms }: { siteData: SiteData;
   return (
     <div className="mx-auto max-w-4xl space-y-5 p-4 sm:p-6">
       <div>
-        <h2 className="font-heading text-lg font-bold text-[#1A1A1A]">Rankings</h2>
+        <h2 className="font-heading text-lg font-bold text-white">Rankings</h2>
         <p className="text-[12px] text-[#6B6B6B]">Tracking {rankings.length} positions across {platforms.length} platform{platforms.length !== 1 ? "s" : ""}</p>
       </div>
 
@@ -806,29 +582,29 @@ function RankingsSection({ siteData, keyword, platforms }: { siteData: SiteData;
           { label: "Page 1 Rankings", value: "2", trend: "+1", positive: true },
           { label: "Improving", value: "4", trend: "of 6", positive: true },
         ].map((stat, i) => (
-          <motion.div key={stat.label} className="rounded-2xl border border-[#E8E5E0] bg-white p-3.5 shadow-sm" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + i * 0.05 }}>
-            <p className="font-heading text-xl font-bold text-[#1A1A1A]">{stat.value}</p>
-            <p className="text-[10px] text-[#9B9B9B]">{stat.label}</p>
-            <p className={`mt-0.5 text-[10px] ${stat.positive ? "text-green-600" : "text-red-600"}`}>{stat.trend}</p>
+          <motion.div key={stat.label} className="rounded-2xl border border-[#2A2A2E] bg-[#1A1A1E] p-3.5" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + i * 0.05 }}>
+            <p className="font-heading text-xl font-bold text-white">{stat.value}</p>
+            <p className="text-[10px] text-[#6B6B6B]">{stat.label}</p>
+            <p className={`mt-0.5 text-[10px] ${stat.positive ? "text-green-400" : "text-red-400"}`}>{stat.trend}</p>
           </motion.div>
         ))}
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-[#E8E5E0] bg-white shadow-sm">
+      <div className="overflow-x-auto rounded-2xl border border-[#2A2A2E] bg-[#1A1A1E]">
         <div className="min-w-[480px]">
-          <div className="grid grid-cols-[1fr_70px_80px_70px_60px] gap-2 border-b border-[#E8E5E0] px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-[#9B9B9B]">
+          <div className="grid grid-cols-[1fr_70px_80px_70px_60px] gap-2 border-b border-[#2A2A2E] px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-[#6B6B6B]">
             <span>Keyword</span><span>Platform</span><span>Position</span><span>Change</span><span>URL</span>
           </div>
-          <div className="divide-y divide-[#E8E5E0]">
+          <div className="divide-y divide-[#2A2A2E]">
             {rankings.map((r, i) => {
               const change = r.previousPosition - r.position;
               return (
-                <motion.div key={`${r.keyword}-${r.platform}`} className="grid grid-cols-[1fr_70px_80px_70px_60px] gap-2 px-4 py-3 text-[12px] items-center transition-colors hover:bg-[#F5F5F0]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.04 }}>
-                  <span className="font-medium text-[#1A1A1A] truncate">{r.keyword}</span>
+                <motion.div key={`${r.keyword}-${r.platform}`} className="grid grid-cols-[1fr_70px_80px_70px_60px] gap-2 px-4 py-3 text-[12px] items-center transition-colors hover:bg-[#1E1E22]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.04 }}>
+                  <span className="font-medium text-white truncate">{r.keyword}</span>
                   <span><PlatformIcon platform={r.platform} size={16} /></span>
-                  <span className="text-[#1A1A1A]">#{r.position}</span>
-                  <span className={change > 0 ? "text-green-600" : change < 0 ? "text-red-600" : "text-[#6B6B6B]"}>{change > 0 ? "+" : ""}{change}</span>
-                  <span className="truncate text-[#9B9B9B]">{r.url}</span>
+                  <span className="text-white">#{r.position}</span>
+                  <span className={change > 0 ? "text-green-400" : change < 0 ? "text-red-400" : "text-[#9B9B9B]"}>{change > 0 ? "+" : ""}{change}</span>
+                  <span className="truncate text-[#6B6B6B]">{r.url}</span>
                 </motion.div>
               );
             })}
@@ -851,10 +627,10 @@ function ContentSection({ siteData, keyword, onAskAI }: { siteData: SiteData; ke
   ];
 
   const statusStyles: Record<string, string> = {
-    optimize: "text-blue-600 border-blue-200 bg-blue-50",
-    publish: "text-green-600 border-green-200 bg-green-50",
-    update: "text-amber-600 border-amber-200 bg-amber-50",
-    draft: "text-[#6B6B6B] border-[#E8E5E0] bg-[#F5F5F0]",
+    optimize: "text-[#60A5FA] border-[#2A2A2E] bg-[#1A1A1E]",
+    publish: "text-[#4ADE80] border-[#2A2A2E] bg-[#1A1A1E]",
+    update: "text-[#FBBF24] border-[#2A2A2E] bg-[#1A1A1E]",
+    draft: "text-[#6B6B6B] border-[#2A2A2E] bg-[#1A1A1E]",
   };
 
   const typeIcons: Record<string, string> = { blog: "Blog", page: "Page", product: "Product", video: "Video" };
@@ -863,26 +639,26 @@ function ContentSection({ siteData, keyword, onAskAI }: { siteData: SiteData; ke
     <div className="mx-auto max-w-4xl space-y-5 p-4 sm:p-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="font-heading text-lg font-bold text-[#1A1A1A]">Content</h2>
+          <h2 className="font-heading text-lg font-bold text-white">Content</h2>
           <p className="text-[12px] text-[#6B6B6B]">Content strategy and optimization tasks</p>
         </div>
-        <button onClick={() => onAskAI("Generate a complete content calendar for my SEO campaign")} className="shrink-0 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-[11px] font-medium text-blue-600 transition-colors hover:bg-blue-100">+ Generate plan</button>
+        <button onClick={() => onAskAI("Generate a complete content calendar for my SEO campaign")} className="shrink-0 rounded-full border border-[#2A2A2E] bg-[#1A1A1E] px-3 py-1.5 text-[11px] font-medium text-white transition-colors hover:bg-[#1E1E22]">+ Generate plan</button>
       </div>
 
       <div className="space-y-2.5">
         {contentItems.map((item, i) => (
-          <motion.div key={item.title} className="flex items-center gap-4 rounded-2xl border border-[#E8E5E0] bg-white px-4 py-3.5 shadow-sm transition-colors hover:border-[#9B9B9B]" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-            <span className="shrink-0 rounded-md border border-[#E8E5E0] bg-[#F5F5F0] px-2 py-1 text-[9px] font-semibold uppercase text-[#6B6B6B]">{typeIcons[item.type]}</span>
+          <motion.div key={item.title} className="flex items-center gap-4 rounded-2xl border border-[#2A2A2E] bg-[#1A1A1E] px-4 py-3.5 transition-colors hover:border-[#3A3A3E]" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
+            <span className="shrink-0 rounded-md border border-[#2A2A2E] bg-[#0A0A0B] px-2 py-1 text-[9px] font-semibold uppercase text-[#9B9B9B]">{typeIcons[item.type]}</span>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[13px] font-medium text-[#1A1A1A]">{item.title}</p>
-              {item.url && <p className="text-[10px] text-[#9B9B9B]">{siteData.domain}{item.url}</p>}
+              <p className="truncate text-[13px] font-medium text-white">{item.title}</p>
+              {item.url && <p className="text-[10px] text-[#6B6B6B]">{siteData.domain}{item.url}</p>}
             </div>
             {item.score > 0 && (
               <div className="flex items-center gap-2">
-                <div className="h-1.5 w-16 rounded-full bg-[#E8E5E0]">
-                  <div className={`h-1.5 rounded-full ${item.score >= 70 ? "bg-blue-600" : item.score >= 40 ? "bg-amber-500" : "bg-red-500"}`} style={{ width: `${item.score}%` }} />
+                <div className="h-1.5 w-16 rounded-full bg-[#2A2A2E]">
+                  <div className={`h-1.5 rounded-full ${item.score >= 70 ? "bg-white" : item.score >= 40 ? "bg-[#FBBF24]" : "bg-[#F87171]"}`} style={{ width: `${item.score}%` }} />
                 </div>
-                <span className="text-[10px] text-[#6B6B6B]">{item.score}</span>
+                <span className="text-[10px] text-[#9B9B9B]">{item.score}</span>
               </div>
             )}
             <span className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[10px] capitalize ${statusStyles[item.status]}`}>{item.status}</span>
@@ -910,36 +686,35 @@ function SettingsSection({ onboardingData, onUpdateData, onUpgrade, onSignOut }:
   return (
     <div className="mx-auto max-w-2xl space-y-6 p-4 sm:p-6">
       <div>
-        <h2 className="font-heading text-lg font-bold text-[#1A1A1A] dark:text-white">Settings</h2>
-        <p className="text-[12px] text-[#6B6B6B] dark:text-[#9B9B9B]">Manage your campaign and profile</p>
+        <h2 className="font-heading text-lg font-bold text-white">Settings</h2>
+        <p className="text-[12px] text-[#6B6B6B]">Manage your campaign and profile</p>
       </div>
 
-      {/* Subscription */}
       <CustomerCenter onUpgrade={onUpgrade} />
 
-      <div className="space-y-4 rounded-2xl border border-[#E8E5E0] dark:border-[#2A2A2E] bg-white dark:bg-[#1A1A1E] p-4 shadow-sm">
-        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[#9B9B9B] dark:text-[#9B9B9B]">Profile</h3>
+      <div className="space-y-4 rounded-2xl border border-[#2A2A2E] bg-[#1A1A1E] p-4">
+        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[#6B6B6B]">Profile</h3>
         <div className="space-y-2">
-          <label className="text-[10px] font-semibold uppercase tracking-wider text-[#6B6B6B] dark:text-[#9B9B9B]">Name</label>
-          <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full rounded-xl border border-[#E8E5E0] dark:border-[#2A2A2E] bg-white dark:bg-[#252528] px-3 py-2.5 text-[13px] text-[#1A1A1A] dark:text-white outline-none transition-colors focus:border-blue-300 dark:focus:border-blue-600 focus:ring-1 focus:ring-blue-100 dark:focus:ring-blue-900" />
+          <label className="text-[10px] font-semibold uppercase tracking-wider text-[#9B9B9B]">Name</label>
+          <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full rounded-xl border border-[#2A2A2E] bg-[#0A0A0B] px-3 py-2.5 text-[13px] text-white outline-none transition-colors focus:border-[#3A3A3E] focus:ring-1 focus:ring-white/5" />
         </div>
       </div>
 
-      <div className="space-y-4 rounded-2xl border border-[#E8E5E0] dark:border-[#2A2A2E] bg-white dark:bg-[#1A1A1E] p-4 shadow-sm">
-        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[#9B9B9B] dark:text-[#9B9B9B]">Campaign</h3>
+      <div className="space-y-4 rounded-2xl border border-[#2A2A2E] bg-[#1A1A1E] p-4">
+        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[#6B6B6B]">Campaign</h3>
         <div className="space-y-2">
-          <label className="text-[10px] font-semibold uppercase tracking-wider text-[#6B6B6B] dark:text-[#9B9B9B]">Primary Keyword</label>
-          <input type="text" value={keyword} onChange={(e) => setKeyword(e.target.value)} className="w-full rounded-xl border border-[#E8E5E0] dark:border-[#2A2A2E] bg-white dark:bg-[#252528] px-3 py-2.5 text-[13px] text-[#1A1A1A] dark:text-white outline-none transition-colors focus:border-blue-300 dark:focus:border-blue-600 focus:ring-1 focus:ring-blue-100 dark:focus:ring-blue-900" />
+          <label className="text-[10px] font-semibold uppercase tracking-wider text-[#9B9B9B]">Primary Keyword</label>
+          <input type="text" value={keyword} onChange={(e) => setKeyword(e.target.value)} className="w-full rounded-xl border border-[#2A2A2E] bg-[#0A0A0B] px-3 py-2.5 text-[13px] text-white outline-none transition-colors focus:border-[#3A3A3E] focus:ring-1 focus:ring-white/5" />
         </div>
         <div className="space-y-2">
-          <label className="text-[10px] font-semibold uppercase tracking-wider text-[#6B6B6B] dark:text-[#9B9B9B]">Website</label>
-          <input type="text" value={onboardingData.website} readOnly className="w-full rounded-xl border border-[#E8E5E0] dark:border-[#2A2A2E] bg-[#F5F5F0] dark:bg-[#252528] px-3 py-2.5 text-[13px] text-[#9B9B9B] outline-none" />
+          <label className="text-[10px] font-semibold uppercase tracking-wider text-[#9B9B9B]">Website</label>
+          <input type="text" value={onboardingData.website} readOnly className="w-full rounded-xl border border-[#2A2A2E] bg-[#0A0A0B] px-3 py-2.5 text-[13px] text-[#6B6B6B] outline-none" />
         </div>
         <div className="space-y-2">
-          <label className="text-[10px] font-semibold uppercase tracking-wider text-[#6B6B6B] dark:text-[#9B9B9B]">Platforms</label>
+          <label className="text-[10px] font-semibold uppercase tracking-wider text-[#9B9B9B]">Platforms</label>
           <div className="flex flex-wrap gap-2">
             {onboardingData.platforms.map((p) => (
-              <span key={p} className="flex items-center gap-1.5 rounded-full border border-[#E8E5E0] dark:border-[#2A2A2E] bg-[#F5F5F0] dark:bg-[#252528] px-3 py-1 text-[11px] text-[#6B6B6B] dark:text-[#9B9B9B]">
+              <span key={p} className="flex items-center gap-1.5 rounded-full border border-[#2A2A2E] bg-[#0A0A0B] px-3 py-1 text-[11px] text-[#9B9B9B]">
                 <PlatformIcon platform={p} size={12} />
                 {p === "aisearch" ? "AI Search" : p.charAt(0).toUpperCase() + p.slice(1)}
               </span>
@@ -948,14 +723,14 @@ function SettingsSection({ onboardingData, onUpdateData, onUpgrade, onSignOut }:
         </div>
       </div>
 
-      <button onClick={handleSave} className="w-full rounded-full bg-blue-600 py-3 text-sm font-semibold text-white transition-all hover:bg-blue-700">
+      <button onClick={handleSave} className="w-full rounded-full bg-white py-3 text-sm font-semibold text-[#0A0A0B] transition-all hover:bg-[#E8E8E8]">
         {saved ? "Saved ✓" : "Save changes"}
       </button>
 
-      <div className="space-y-3 rounded-2xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 p-4">
-        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-red-600 dark:text-red-400">Danger zone</h3>
-        <p className="text-[11px] text-[#6B6B6B] dark:text-[#9B9B9B]">Reset all onboarding data and start over.</p>
-        <button onClick={() => { localStorage.removeItem("rankmebaddy_onboarding"); onSignOut(); }} className="rounded-full border border-red-300 dark:border-red-800 px-3 py-1.5 text-[11px] text-red-600 dark:text-red-400 transition-colors hover:bg-red-100 dark:hover:bg-red-900/30">Reset everything</button>
+      <div className="space-y-3 rounded-2xl border border-red-900/50 bg-red-900/10 p-4">
+        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-red-400">Danger zone</h3>
+        <p className="text-[11px] text-[#6B6B6B]">Reset all onboarding data and start over.</p>
+        <button onClick={() => { localStorage.removeItem("rankmebaddy_onboarding"); onSignOut(); }} className="rounded-full border border-red-900/50 px-3 py-1.5 text-[11px] text-red-400 transition-colors hover:bg-red-900/20">Reset everything</button>
       </div>
     </div>
   );
@@ -967,14 +742,10 @@ export default function DashboardPage() {
   const [setup, setSetup] = useState(true);
   const [activeSection, setActiveSection] = useState("chat");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [inputValue, setInputValue] = useState("");
   const [isSending, setIsSending] = useState(false);
-  const [mobileSidebar, setMobileSidebar] = useState(false);
-  const [agentStep, setAgentStep] = useState(0);
   const [paywallOpen, setPaywallOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
-  const agentStepIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const { isPro } = useSubscription();
   const { user, signOut, loading } = useAuth();
 
@@ -988,67 +759,16 @@ export default function DashboardPage() {
     } catch { /* ignore */ }
   }, []);
 
-  useEffect(() => {
-    if (!setup && onboardingData && messages.length === 0) {
-      const name = onboardingData.name?.split(" ")[0] || "there";
-      const domain = onboardingData.siteData?.domain || "your site";
-      const keyword = onboardingData.keyword || "your target keyword";
-
-      const welcomeActions: AgentAction[] = [
-        { type: "keyword-gap", label: "Run keyword gap analysis", prompt: "Run a detailed keyword gap analysis for my site. Show me keywords my competitors rank for that I don't." },
-        { type: "optimize-titles", label: "Optimize title tags", prompt: "Review all my page titles and suggest optimized versions with exact before/after comparisons." },
-        { type: "competitor-analysis", label: "Analyze competitors", prompt: "Analyze my top SEO competitors. What are they ranking for that I'm not?" },
-      ];
-
-      const welcomeMsg: ChatMessage = {
-        id: "welcome",
-        role: "assistant",
-        content: `Hey ${name}! I've finished analyzing **${domain}**.\n\nHere's what I found:\n\n1. ${
-          onboardingData.siteData?.title
-            ? `Your page title is "${onboardingData.siteData.title.slice(0, 60)}" — ${onboardingData.siteData.title.length > 60 ? "it's a bit long, we should trim it" : "good length"}`
-            : "No page title detected — this is **critical** for SEO"
-        }\n2. ${
-          onboardingData.siteData?.description ? "Meta description is set" : "No meta description — we need to add one"
-        }\n3. ${
-          onboardingData.siteData?.ogImage ? "OG image is configured for social sharing" : "Missing OG image — social shares will look bare"
-        }\n4. ${
-          onboardingData.siteData?.h1 ? `H1 tag found: "${onboardingData.siteData.h1.slice(0, 40)}"` : "No H1 tag found — search engines use this"
-        }\n\nI'm ready to help you rank for "${keyword}" across ${
-          onboardingData.platforms?.length || 1
-        } platform${onboardingData.platforms?.length !== 1 ? "s" : ""}. What would you like to tackle first?`,
-        timestamp: new Date(),
-        actions: welcomeActions,
-      };
-      setMessages([welcomeMsg]);
-    }
-  }, [setup, onboardingData, messages.length]);
+  // No auto-welcome message — show centered greeting in empty state instead
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, isSending]);
-
-  useEffect(() => {
-    if (isSending) {
-      setAgentStep(0);
-      agentStepIntervalRef.current = setInterval(() => { setAgentStep((prev) => prev + 1); }, 1500);
-    } else {
-      if (agentStepIntervalRef.current) { clearInterval(agentStepIntervalRef.current); agentStepIntervalRef.current = null; }
-    }
-    return () => { if (agentStepIntervalRef.current) { clearInterval(agentStepIntervalRef.current); } };
-  }, [isSending]);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInputValue(e.target.value);
-    e.target.style.height = "auto";
-    e.target.style.height = Math.min(e.target.scrollHeight, 120) + "px";
-  };
 
   const sendMessage = useCallback(
     async (content: string) => {
       if (!content.trim() || isSending) return;
       const userMsg: ChatMessage = { id: `user-${Date.now()}`, role: "user", content: content.trim(), timestamp: new Date() };
       setMessages((prev) => [...prev, userMsg]);
-      setInputValue("");
       setIsSending(true);
-      if (inputRef.current) inputRef.current.style.height = "auto";
 
       try {
         const chatMessages = [...messages, userMsg].map((m) => ({ role: m.role, content: m.content }));
@@ -1070,21 +790,17 @@ export default function DashboardPage() {
     [messages, isSending, onboardingData]
   );
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(inputValue); }
-  };
-
   const askInChat = useCallback((prompt: string) => { setActiveSection("chat"); setTimeout(() => sendMessage(prompt), 100); }, [sendMessage]);
   const updateOnboardingData = useCallback((data: OnboardingData) => { setOnboardingData(data); }, []);
 
-  // Auth check — redirect to /auth if not logged in
+  // Auth check
   useEffect(() => {
     if (!user && !loading) {
       window.location.href = "/auth";
     }
   }, [user, loading]);
 
-  // Onboarding data check — redirect if no onboarding data
+  // Onboarding data check
   useEffect(() => {
     const timer = setTimeout(() => {
       const stored = localStorage.getItem("rankmebaddy_onboarding");
@@ -1098,190 +814,351 @@ export default function DashboardPage() {
   }
 
   if (!onboardingData) {
-    // Show loading while auth is being checked
     if (loading) {
       return (
-        <div className="flex min-h-screen items-center justify-center bg-[#FAFAF7] dark:bg-[#0F0F11]">
-          <motion.div className="h-6 w-6 rounded-full border-2 border-[#E8E5E0] dark:border-[#2A2A2E] border-t-blue-600" animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }} />
+        <div className="flex min-h-screen items-center justify-center bg-[#0A0A0B]">
+          <motion.div className="h-6 w-6 rounded-full border-2 border-[#2A2A2E] border-t-white" animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }} />
         </div>
       );
     }
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#FAFAF7] dark:bg-[#0F0F11]">
-        <motion.div className="h-6 w-6 rounded-full border-2 border-[#E8E5E0] dark:border-[#2A2A2E] border-t-blue-600" animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }} />
+      <div className="flex min-h-screen items-center justify-center bg-[#0A0A0B]">
+        <motion.div className="h-6 w-6 rounded-full border-2 border-[#2A2A2E] border-t-white" animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }} />
       </div>
     );
   }
 
   const siteData = onboardingData.siteData;
+  const userName = user?.email?.split("@")[0] || onboardingData.name;
+  const greetingName = onboardingData.name?.split(" ")[0] || userName || "there";
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good Morning";
+    if (hour < 18) return "Good Afternoon";
+    return "Good Evening";
+  };
 
   return (
     <SubscriptionProvider>
-    <div className="flex h-screen overflow-hidden bg-[#FAFAF7] dark:bg-[#0F0F11]">
-      <Sidebar siteData={siteData} activeSection={activeSection} onSectionChange={setActiveSection} userName={user?.email?.split("@")[0] || onboardingData.name} platforms={onboardingData.platforms || []} mobileOpen={mobileSidebar} onMobileClose={() => setMobileSidebar(false)} isPro={effectiveIsPro} onSignOut={async () => { await signOut(); window.location.href = "/auth"; }} />
-
+    <div className="flex h-screen flex-col overflow-hidden bg-[#0A0A0B]">
       {/* Paywall Modal */}
       <Paywall open={paywallOpen} onClose={() => setPaywallOpen(false)} />
 
-      <main className="flex min-w-0 flex-1 flex-col">
-        {/* Top Bar */}
-        <header className="flex items-center justify-between border-b border-[#E8E5E0] dark:border-[#2A2A2E] bg-white dark:bg-[#1A1A1E] px-4 py-3 sm:px-6">
-          <div className="flex items-center gap-3">
-            <button className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#E8E5E0] dark:border-[#2A2A2E] bg-white dark:bg-[#1E1E22] sm:hidden" onClick={() => setMobileSidebar(true)}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B6B6B" className="dark:stroke-[#9B9B9B]" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
-            </button>
-            <div>
-              <h1 className="font-heading text-sm font-bold text-[#1A1A1A] dark:text-white capitalize">{activeSection === "chat" ? "Chat" : activeSection === "pro" ? "rankmebaddy Pro" : activeSection}</h1>
-              <p className="text-[10px] text-[#9B9B9B]">{siteData?.domain || "No site connected"}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            {activeSection === "chat" && (
-              <button onClick={() => setMessages([])} className="flex items-center gap-1.5 rounded-full border border-[#E8E5E0] dark:border-[#2A2A2E] bg-white dark:bg-[#1E1E22] px-2.5 py-1.5 text-[11px] text-[#6B6B6B] dark:text-[#9B9B9B] transition-colors hover:text-[#1A1A1A] dark:hover:text-white hover:border-[#9B9B9B] dark:hover:border-[#444]">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14" /><path d="M5 12h14" /></svg>
-                New chat
-              </button>
-            )}
-          </div>
-        </header>
+      {/* ─── Top Bar ──────────────────────────────────────────── */}
+      <header className="flex items-center justify-between border-b border-[#1A1A1E] bg-[#0A0A0B] px-4 py-3 sm:px-6 shrink-0">
+        {/* Left: Brand */}
+        <div className="flex items-center gap-3">
+          <button className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#2A2A2E] bg-[#1A1A1E] sm:hidden" onClick={() => setMobileMenuOpen(true)}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
+          </button>
+          <span className="font-heading text-sm font-bold text-white">RankMeBaddy</span>
+        </div>
 
-        {/* Content area */}
-        <div className="min-h-0 flex-1 overflow-y-auto">
-          <AnimatePresence mode="wait">
-            {activeSection === "chat" && (
-              <motion.div key="chat" className="flex h-full flex-col" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
-                {/* Messages */}
-                <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6 custom-scrollbar">
-                  <div className="mx-auto max-w-2xl space-y-5">
-                    {/* Agent tools indicator */}
-                    <motion.div
-                      className="flex flex-wrap items-center gap-2"
+        {/* Center: Tabs (desktop only) */}
+        <nav className="hidden sm:flex items-center gap-1">
+          {topBarTabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveSection(tab.id)}
+              className={`rounded-lg px-3 py-1.5 text-[12px] font-medium transition-colors ${
+                activeSection === tab.id
+                  ? "bg-[#1A1A1E] text-white"
+                  : "text-[#6B6B6B] hover:text-[#9B9B9B] hover:bg-[#1A1A1E]/50"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </nav>
+
+        {/* Right: User avatar + settings */}
+        <div className="flex items-center gap-2">
+          {activeSection === "chat" && (
+            <button onClick={() => setMessages([])} className="flex items-center gap-1.5 rounded-full border border-[#2A2A2E] bg-[#1A1A1E] px-3 py-1.5 text-[11px] font-medium text-[#9B9B9B] transition-colors hover:text-white hover:border-[#3A3A3E] hover:bg-[#1E1E22]">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14" /><path d="M5 12h14" /></svg>
+              New chat
+            </button>
+          )}
+          <button
+            onClick={() => setActiveSection("settings")}
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-[#2A2A2E] bg-[#1A1A1E] text-[11px] font-bold text-white transition-colors hover:border-[#3A3A3E]"
+            title="Settings"
+          >
+            {userName ? userName[0].toUpperCase() : "U"}
+          </button>
+        </div>
+      </header>
+
+      {/* ─── Mobile Menu Overlay ──────────────────────────────── */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <>
+            <motion.div
+              className="fixed inset-0 z-40 bg-black/60 sm:hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMobileMenuOpen(false)}
+            />
+            <motion.div
+              className="fixed inset-y-0 left-0 z-50 w-[260px] bg-[#0A0A0B] border-r border-[#1A1A1E] shadow-xl sm:hidden flex flex-col"
+              initial={{ x: -260 }}
+              animate={{ x: 0 }}
+              exit={{ x: -260 }}
+              transition={{ duration: 0.2, ease: [0.21, 0.47, 0.32, 0.98] }}
+            >
+              <div className="flex items-center gap-2.5 px-4 py-4 border-b border-[#1A1A1E]">
+                <span className="font-heading text-sm font-bold text-white">RankMeBaddy</span>
+              </div>
+              <nav className="flex-1 space-y-0.5 px-2 py-2">
+                {topBarTabs.map((tab) => {
+                  const isActive = activeSection === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => { setActiveSection(tab.id); setMobileMenuOpen(false); }}
+                      className={`flex w-full items-center rounded-lg px-3 py-2 text-[13px] transition-all ${
+                        isActive
+                          ? "bg-[#1A1A1E] text-white font-medium"
+                          : "text-[#6B6B6B] hover:bg-[#1A1A1E] hover:text-white"
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  );
+                })}
+                <button
+                  onClick={() => { setActiveSection("settings"); setMobileMenuOpen(false); }}
+                  className={`flex w-full items-center rounded-lg px-3 py-2 text-[13px] transition-all ${
+                    activeSection === "settings"
+                      ? "bg-[#1A1A1E] text-white font-medium"
+                      : "text-[#6B6B6B] hover:bg-[#1A1A1E] hover:text-white"
+                  }`}
+                >
+                  Settings
+                </button>
+                <button
+                  onClick={() => { setActiveSection("pro"); setMobileMenuOpen(false); }}
+                  className={`flex w-full items-center rounded-lg px-3 py-2 text-[13px] transition-all ${
+                    activeSection === "pro"
+                      ? "bg-[#1A1A1E] text-white font-medium"
+                      : "text-[#6B6B6B] hover:bg-[#1A1A1E] hover:text-white"
+                  }`}
+                >
+                  Pro
+                </button>
+              </nav>
+              <div className="border-t border-[#1A1A1E] px-4 py-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#1A1A1E] text-[11px] font-bold text-white">
+                    {userName ? userName[0].toUpperCase() : "U"}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[12px] font-medium text-white">{userName || "User"}</p>
+                    <p className="text-[10px] text-[#6B6B6B]">{effectiveIsPro ? "Pro plan" : BETA_MODE ? "Beta - Free" : "Free plan"}</p>
+                  </div>
+                  <button
+                    onClick={async () => { await signOut(); window.location.href = "/auth"; }}
+                    className="flex h-6 w-6 items-center justify-center rounded-md text-[#6B6B6B] hover:bg-[#1A1A1E] hover:text-white transition-colors"
+                    title="Sign out"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                      <polyline points="16 17 21 12 16 7" />
+                      <line x1="21" y1="12" x2="9" y2="12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* ─── Content area ─────────────────────────────────────── */}
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        <AnimatePresence mode="wait">
+          {activeSection === "chat" && (
+            <motion.div key="chat" className="flex h-full flex-col" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
+              {messages.length === 0 ? (
+                /* Centered welcome state */
+                <div className="flex-1 flex flex-col justify-center items-center px-4 sm:px-6">
+                  <motion.div
+                    className="w-full max-w-2xl flex flex-col items-center"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    {/* Small label */}
+                    <motion.p
+                      className="text-[10px] font-medium uppercase tracking-[0.25em] text-[#6B6B6B] mb-4"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.1 }}
+                    >
+                      RankMeBaddy AI
+                    </motion.p>
+
+                    {/* Greeting with gradient glow */}
+                    <div className="relative">
+                      <div className="absolute inset-0 blur-3xl bg-white/[0.03] rounded-full scale-150" />
+                      <motion.h1
+                        className="relative font-heading text-3xl sm:text-4xl font-bold text-white text-center mb-2"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                      >
+                        {getGreeting()}, {greetingName}!
+                      </motion.h1>
+                    </div>
+
+                    <motion.p
+                      className="text-[15px] text-[#9B9B9B] text-center mb-8"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.3 }}
                     >
-                      <span className="text-[10px] font-medium uppercase tracking-wider text-[#9B9B9B]">Tools:</span>
-                      {agentTools.map((tool) => (
-                        <span key={tool.label} className="inline-flex items-center gap-1 rounded-full bg-[#F5F0EB] dark:bg-[#252528] px-2.5 py-1 text-[10px] text-[#6B6B6B] dark:text-[#9B9B9B]">
-                          <span>{tool.icon}</span>
-                          {tool.label}
-                        </span>
-                      ))}
+                      I am ready to help you rank
+                    </motion.p>
+
+                    {/* Input area */}
+                    <motion.div
+                      className="w-full max-w-2xl mb-6"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.4 }}
+                    >
+                      <AnimatedAIChat onSendMessage={sendMessage} isTyping={isSending} />
                     </motion.div>
 
-                    {messages.map((msg) => (
-                      <ChatBubble key={msg.id} message={msg} onAction={sendMessage} />
-                    ))}
+                    {/* Quick action cards — horizontal scrollable row */}
+                    <motion.div
+                      className="w-full max-w-2xl flex gap-2.5 overflow-x-auto pb-2 scrollbar-none"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.5 }}
+                    >
+                      {suggestedPrompts.map((prompt, i) => (
+                        <motion.div
+                          key={prompt.title}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.5 + i * 0.08 }}
+                        >
+                          <SuggestedPromptCard
+                            title={prompt.title}
+                            subtitle={prompt.subtitle}
+                            onClick={() => sendMessage(prompt.prompt)}
+                          />
+                        </motion.div>
+                      ))}
+                    </motion.div>
+                  </motion.div>
 
-                    {isSending && (
-                      <motion.div className="flex justify-start" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-                        <div className="max-w-[85%] rounded-2xl bg-white dark:bg-[#1A1A1E] px-5 py-3.5 shadow-sm border border-[#E8E5E0]/50 dark:border-[#2A2A2E]/50">
-                          <div className="mb-2 flex items-center gap-1.5">
-                            <div className="h-1.5 w-1.5 rounded-full bg-[#2563EB]" />
-                            <span className="text-[10px] font-medium text-[#2563EB] dark:text-blue-400">RankMeBaddy</span>
-                          </div>
-                          <AgentStepIndicator steps={agentThinkingSteps} currentStep={agentStep} />
-                        </div>
-                      </motion.div>
-                    )}
-                    <div ref={chatEndRef} />
+                  {/* Footer links */}
+                  <div className="mt-auto pt-6 pb-4 flex items-center gap-4 text-[10px] text-[#4A4A4E]">
+                    <span>24/7 Help Chat</span>
+                    <span>·</span>
+                    <button className="hover:text-[#6B6B6B] transition-colors">Terms of Service</button>
+                    <span>·</span>
+                    <button className="hover:text-[#6B6B6B] transition-colors">Privacy Policy</button>
                   </div>
                 </div>
-
-                {/* Quick actions */}
-                {messages.length <= 1 && (
-                  <div className="border-t border-[#E8E5E0] dark:border-[#2A2A2E] px-4 py-3 sm:px-6 bg-white dark:bg-[#1A1A1E]">
-                    <div className="mx-auto flex max-w-2xl flex-wrap gap-2">
-                      {quickActions.map((action) => (
-                        <button
-                          key={action.label}
-                          onClick={() => sendMessage(action.prompt)}
-                          disabled={isSending}
-                          className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#F5F0EB] to-[#EDE8E2] dark:from-[#252528] dark:to-[#2A2A2E] px-4 py-1.5 text-[11px] text-[#1A1A1A] dark:text-[#C8C8C8] transition-all hover:from-[#EDE8E2] hover:to-[#E5DFD8] dark:hover:from-[#2A2A2E] dark:hover:to-[#333] disabled:opacity-40 shadow-sm"
-                        >
-                          <span>{action.icon}</span>
-                          {action.label}
-                        </button>
+              ) : (
+                <>
+                  {/* Messages area */}
+                  <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6 custom-scrollbar-dark">
+                    <div className="mx-auto max-w-2xl space-y-5">
+                      {messages.map((msg) => (
+                        <ChatBubble key={msg.id} message={msg} onAction={sendMessage} />
                       ))}
+
+                      {isSending && (
+                        <motion.div className="flex justify-start" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+                          <ThinkingIndicator />
+                        </motion.div>
+                      )}
+                      <div ref={chatEndRef} />
                     </div>
                   </div>
+
+                  {/* Input bar pinned to bottom */}
+                  <div className="border-t border-[#1A1A1E] bg-[#0A0A0B] px-4 py-3 sm:px-6 shrink-0">
+                    <div className="mx-auto max-w-2xl">
+                      <AnimatedAIChat onSendMessage={sendMessage} isTyping={isSending} />
+                    </div>
+                  </div>
+                </>
+              )}
+            </motion.div>
+          )}
+
+          {activeSection === "overview" && siteData && (
+            <motion.div key="overview" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <OverviewSection siteData={siteData} keyword={onboardingData.keyword} platforms={onboardingData.platforms || []} onNavigate={setActiveSection} />
+            </motion.div>
+          )}
+
+          {activeSection === "keywords" && siteData && (
+            <motion.div key="keywords" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <KeywordsSection siteData={siteData} keyword={onboardingData.keyword} onAskAI={askInChat} />
+            </motion.div>
+          )}
+
+          {activeSection === "rankings" && siteData && (
+            <motion.div key="rankings" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <RankingsSection siteData={siteData} keyword={onboardingData.keyword} platforms={onboardingData.platforms || []} />
+            </motion.div>
+          )}
+
+          {activeSection === "content" && siteData && (
+            <motion.div key="content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <ContentSection siteData={siteData} keyword={onboardingData.keyword} onAskAI={askInChat} />
+            </motion.div>
+          )}
+
+          {activeSection === "pro" && (
+            <motion.div key="pro" className="flex items-center justify-center min-h-[50vh]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <div className="text-center space-y-4 p-8">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-lg">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0A0A0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                  </svg>
+                </div>
+                <h2 className="font-heading text-2xl font-bold text-white">RankMeBaddy Pro</h2>
+                {BETA_MODE ? (
+                  <>
+                    <div className="inline-flex items-center gap-2 rounded-full bg-[#1A1A1E] border border-[#2A2A2E] px-4 py-2 text-sm font-medium text-[#4ADE80]">
+                      <div className="h-2 w-2 rounded-full bg-[#4ADE80] animate-pulse" />
+                      Beta — All features unlocked for free
+                    </div>
+                    <p className="text-sm text-[#6B6B6B] max-w-sm mx-auto">You have full access to all Pro features during the beta. Enjoy unlimited SEO campaigns, all platforms, AI optimization, and more.</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm text-[#6B6B6B] max-w-sm mx-auto">Unlock unlimited SEO campaigns, all platforms, AI optimization, and priority support.</p>
+                    <motion.button
+                      onClick={() => setPaywallOpen(true)}
+                      className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-[#0A0A0B] shadow-lg transition-all hover:bg-[#E8E8E8]"
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.97 }}
+                    >
+                      {effectiveIsPro ? "Manage Subscription" : "Upgrade to Pro"}
+                    </motion.button>
+                  </>
                 )}
+              </div>
+            </motion.div>
+          )}
 
-                {/* Input — Animated AI Chat */}
-                <div className="border-t border-[#E8E5E0] dark:border-[#2A2A2E] bg-white dark:bg-[#1A1A1E] px-4 py-3 sm:px-6">
-                  <div className="mx-auto max-w-2xl">
-                    <AnimatedAIChat onSendMessage={sendMessage} isTyping={isSending} />
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {activeSection === "overview" && siteData && (
-              <motion.div key="overview" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <OverviewSection siteData={siteData} keyword={onboardingData.keyword} platforms={onboardingData.platforms || []} onNavigate={setActiveSection} />
-              </motion.div>
-            )}
-
-            {activeSection === "keywords" && siteData && (
-              <motion.div key="keywords" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <KeywordsSection siteData={siteData} keyword={onboardingData.keyword} onAskAI={askInChat} />
-              </motion.div>
-            )}
-
-            {activeSection === "rankings" && siteData && (
-              <motion.div key="rankings" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <RankingsSection siteData={siteData} keyword={onboardingData.keyword} platforms={onboardingData.platforms || []} />
-              </motion.div>
-            )}
-
-            {activeSection === "content" && siteData && (
-              <motion.div key="content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <ContentSection siteData={siteData} keyword={onboardingData.keyword} onAskAI={askInChat} />
-              </motion.div>
-            )}
-
-            {activeSection === "pro" && (
-              <motion.div key="pro" className="flex items-center justify-center min-h-[50vh]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <div className="text-center space-y-4 p-8">
-                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#2563EB] to-[#6A3093] shadow-lg">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                    </svg>
-                  </div>
-                  <h2 className="font-heading text-2xl font-bold text-[#1A1A1A] dark:text-white">rankmebaddy Pro</h2>
-                  {BETA_MODE ? (
-                    <>
-                      <div className="inline-flex items-center gap-2 rounded-full bg-green-50 dark:bg-green-900/20 px-4 py-2 text-sm font-medium text-green-600 dark:text-green-400">
-                        <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                        Beta — All features unlocked for free
-                      </div>
-                      <p className="text-sm text-[#6B6B6B] dark:text-[#9B9B9B] max-w-sm mx-auto">You have full access to all Pro features during the beta. Enjoy unlimited SEO campaigns, all platforms, AI optimization, and more.</p>
-                    </>
-                  ) : (
-                    <>
-                      <p className="text-sm text-[#6B6B6B] dark:text-[#9B9B9B] max-w-sm mx-auto">Unlock unlimited SEO campaigns, all platforms, AI optimization, and priority support.</p>
-                      <motion.button
-                        onClick={() => setPaywallOpen(true)}
-                        className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#2563EB] to-[#6A3093] px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:shadow-xl"
-                        whileHover={{ scale: 1.03 }}
-                        whileTap={{ scale: 0.97 }}
-                      >
-                        {effectiveIsPro ? "Manage Subscription" : "Upgrade to Pro"}
-                      </motion.button>
-                    </>
-                  )}
-                </div>
-              </motion.div>
-            )}
-
-            {activeSection === "settings" && (
-              <motion.div key="settings" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <SettingsSection onboardingData={onboardingData} onUpdateData={updateOnboardingData} onUpgrade={() => setPaywallOpen(true)} onSignOut={async () => { await signOut(); window.location.href = "/auth"; }} />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </main>
+          {activeSection === "settings" && (
+            <motion.div key="settings" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <SettingsSection onboardingData={onboardingData} onUpdateData={updateOnboardingData} onUpgrade={() => setPaywallOpen(true)} onSignOut={async () => { await signOut(); window.location.href = "/auth"; }} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
     </SubscriptionProvider>
   );

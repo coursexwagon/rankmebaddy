@@ -5,6 +5,13 @@ const LONGCAT_API_KEY = process.env.LONGCAT_API_KEY || "";
 const LONGCAT_BASE_URL = process.env.LONGCAT_BASE_URL || "https://api.longcat.chat/openai";
 const LONGCAT_MODEL = process.env.LONGCAT_MODEL || "LongCat-Flash-Thinking-2601";
 
+const OLOSTEP_API_KEY = process.env.OLOSTEP_API_KEY || "";
+const OLOSTEP_BASE_URL = "https://api.olostep.com/v1/scrapes";
+
+const NVIDIA_API_KEY = process.env.NVIDIA_API_KEY || "";
+const NVIDIA_BASE_URL = process.env.NVIDIA_BASE_URL || "https://integrate.api.nvidia.com/v1";
+const NVIDIA_MODEL = process.env.NVIDIA_MODEL || "nvidia/nemotron-3-super-120b-a12b";
+
 interface AgentAction {
   type: string;
   label: string;
@@ -134,8 +141,6 @@ function fixMermaidSyntax(diagram: string): string {
     if (match) {
       lines[fix.index] = `${match[1]}${fix.newId} ${match[3]}`;
     }
-    // Also need to update any references to the old subgraph ID in subsequent lines
-    // (though subgraph IDs are rarely referenced, this is for safety)
   }
 
   // Fix node labels with unquoted colons (e.g., A[Module 1: Site] -> A["Module 1: Site"])
@@ -296,6 +301,20 @@ You have a WEB SEARCH tool. When you need current data, competitor info, or real
 - Current search volume data
 - Industry news affecting SEO
 
+WEB SCRAPING TOOL:
+You have a WEB SCRAPING tool powered by Olostep. When you need to deeply analyze a specific webpage, competitor page, or any URL for SEO data, include [SCRAPE:url] in your response. The system will scrape the full content of that URL and provide it to you. Use this when:
+- You need to analyze a competitor's page content and structure
+- You want to check a specific page's SEO elements (title, headings, meta tags)
+- You need the actual content of a search result for deeper analysis
+- You want to extract data from a specific webpage
+
+MULTI-AGENT VERIFICATION:
+When you want a second expert opinion or verification of your analysis, include [AGENT:analyze] in your response. The system will consult another AI model (NVIDIA Nemotron) independently, and both analyses will be combined. Use this when:
+- You want to verify your SEO recommendations with a second opinion
+- The analysis is complex and would benefit from multiple perspectives
+- You want to provide the user with confidence that your advice is sound
+- You're making significant strategic recommendations
+
 ACTION TAG FORMAT:
 At the end of your response, always include 2-3 suggested next actions using this format:
 [ACTION:type]Label text for the button
@@ -368,6 +387,112 @@ async function callLongCatAPI(systemPrompt: string, messages: { role: string; co
   return data.choices?.[0]?.message?.content || "Sorry, I couldn't process that. Try again?";
 }
 
+/* ─── Olostep Web Scraping ─────────────────────────────────── */
+async function executeOlostepScrape(url: string): Promise<string> {
+  try {
+    if (!OLOSTEP_API_KEY) {
+      return `Olostep scraping not configured (missing API key). Could not scrape: ${url}`;
+    }
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
+
+    const response = await fetch(OLOSTEP_BASE_URL, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${OLOSTEP_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        url_to_scrape: url,
+      }),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeout);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Olostep API error:", response.status, errorText);
+      return `Failed to scrape ${url}: HTTP ${response.status}`;
+    }
+
+    const data = await response.json();
+
+    // Extract content from Olostep response
+    const content = data?.data?.content || data?.content || data?.text || data?.raw_content || "";
+    const title = data?.data?.title || data?.title || "";
+    const metaDescription = data?.data?.meta_description || data?.meta_description || "";
+    const h1 = data?.data?.h1 || data?.h1 || "";
+
+    if (!content && !title) {
+      return `No content extracted from ${url}`;
+    }
+
+    let result = `Scraped content from: ${url}\n`;
+    if (title) result += `Title: ${title}\n`;
+    if (metaDescription) result += `Meta Description: ${metaDescription}\n`;
+    if (h1) result += `H1: ${h1}\n`;
+    if (content) result += `\nContent:\n${content.slice(0, 8000)}\n`;
+    if (content.length > 8000) result += `\n[Content truncated — ${content.length} total characters]`;
+
+    return result;
+  } catch (err) {
+    console.error("Olostep scrape error:", err);
+    return `Web scraping failed for ${url}. Proceeding without scraped content.`;
+  }
+}
+
+/* ─── NVIDIA Nemotron Multi-Agent ──────────────────────────── */
+async function callNvidiaAPI(systemPrompt: string, messages: { role: string; content: string }[]): Promise<string> {
+  try {
+    if (!NVIDIA_API_KEY) {
+      return "NVIDIA agent not configured (missing API key). Skipping second opinion.";
+    }
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 60000);
+
+    const nvidiaSystemPrompt = `You are a second AI agent analyzing SEO data independently. You are part of the RankMeBaddy multi-agent system. Your role is to provide an independent, second opinion on SEO analysis. You have deep expertise in search engine optimization, content strategy, and technical SEO. Provide your own analysis that complements or challenges the primary agent's findings. Be specific, actionable, and data-driven. Keep your response concise — focus on key insights the primary analysis may have missed. Use natural language, not markdown formatting (no ##, **, or backticks for emphasis).`;
+
+    const response = await fetch(`${NVIDIA_BASE_URL}/chat/completions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${NVIDIA_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: NVIDIA_MODEL,
+        messages: [
+          { role: "system", content: nvidiaSystemPrompt },
+          ...messages.map((m) => ({
+            role: m.role as "user" | "assistant",
+            content: m.content,
+          })),
+        ],
+        temperature: 0.7,
+        max_tokens: 1500,
+      }),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeout);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("NVIDIA API error:", response.status, errorText);
+      return "Second opinion unavailable — NVIDIA agent encountered an error.";
+    }
+
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content || "No response from NVIDIA agent.";
+  } catch (err) {
+    console.error("NVIDIA agent error:", err);
+    return "Second opinion unavailable — NVIDIA agent timed out or encountered an error.";
+  }
+}
+
+/* ─── Web Search via z-ai ──────────────────────────────────── */
 async function executeWebSearch(query: string): Promise<string> {
   try {
     const zai = await ZAI.create();
@@ -411,7 +536,7 @@ export async function POST(request: NextRequest) {
       const searchPromises = searchMatches.map(async (match) => {
         const query = match[1].trim();
         const results = await executeWebSearch(query);
-        return `Search results for "${query}":\n${results}`;
+        return { query, results };
       });
       const searchResults = await Promise.all(searchPromises);
 
@@ -419,17 +544,92 @@ export async function POST(request: NextRequest) {
       rawReply = rawReply.replace(webSearchRegex, "").trim();
       rawReply = rawReply.replace(/\n{3,}/g, "\n\n");
 
+      // Check if we should deep-scrape the top search result for more content
+      let scrapedContent = "";
+      for (const sr of searchResults) {
+        const urlMatch = sr.results.match(/URL:\s*(https?:\/\/[^\s]+)/);
+        if (urlMatch) {
+          // Scrape the top result for deeper analysis
+          scrapedContent = await executeOlostepScrape(urlMatch[1]);
+          break; // Only scrape the top result
+        }
+      }
+
       // Make a second API call with the search results
+      const searchResultsText = searchResults.map((sr) => `Search results for "${sr.query}":\n${sr.results}`).join("\n\n---\n\n");
+      let augmentedContext = `Here are the web search results I requested:\n\n${searchResultsText}`;
+      if (scrapedContent) {
+        augmentedContext += `\n\n---\n\nDeep scraped content from top result:\n${scrapedContent}`;
+      }
+      augmentedContext += `\n\nNow provide a comprehensive answer based on this current data. Remember to follow the OUTPUT FORMATTING RULES — no markdown symbols, use ALL CAPS for emphasis, natural language only. If your response involves steps, processes, workflows, or strategies, include a Mermaid diagram in [DIAGRAM]...[/DIAGRAM] tags. Also include 2-3 [ACTION:type] suggestions at the end.`;
+
       const augmentedMessages = [
         ...messages,
         { role: "assistant" as const, content: rawReply },
         {
           role: "user" as const,
-          content: `Here are the web search results I requested:\n\n${searchResults.join("\n\n---\n\n")}\n\nNow provide a comprehensive answer based on this current data. Remember to follow the OUTPUT FORMATTING RULES — no markdown symbols, use ALL CAPS for emphasis, natural language only. If your response involves steps, processes, workflows, or strategies, include a Mermaid diagram in [DIAGRAM]...[/DIAGRAM] tags. Also include 2-3 [ACTION:type] suggestions at the end.`,
+          content: augmentedContext,
         },
       ];
 
       rawReply = await callLongCatAPI(systemPrompt, augmentedMessages);
+    }
+
+    // Check for [SCRAPE:url] patterns
+    const scrapeRegex = /\[SCRAPE:(https?:\/\/[^\]]+)\]/g;
+    const scrapeMatches = [...rawReply.matchAll(scrapeRegex)];
+
+    if (scrapeMatches.length > 0) {
+      // Execute all scrapes in parallel
+      const scrapePromises = scrapeMatches.map(async (match) => {
+        const url = match[1].trim();
+        const content = await executeOlostepScrape(url);
+        return `Scraped content from ${url}:\n${content}`;
+      });
+      const scrapeResults = await Promise.all(scrapePromises);
+
+      // Remove [SCRAPE:url] tags from the reply
+      rawReply = rawReply.replace(scrapeRegex, "").trim();
+      rawReply = rawReply.replace(/\n{3,}/g, "\n\n");
+
+      // Make another API call with the scraped content
+      const augmentedMessages = [
+        ...messages,
+        { role: "assistant" as const, content: rawReply },
+        {
+          role: "user" as const,
+          content: `Here is the scraped content I requested:\n\n${scrapeResults.join("\n\n---\n\n")}\n\nNow provide a comprehensive answer based on this scraped data. Remember to follow the OUTPUT FORMATTING RULES — no markdown symbols, use ALL CAPS for emphasis, natural language only. If your response involves steps, processes, workflows, or strategies, include a Mermaid diagram in [DIAGRAM]...[/DIAGRAM] tags. Also include 2-3 [ACTION:type] suggestions at the end.`,
+        },
+      ];
+
+      rawReply = await callLongCatAPI(systemPrompt, augmentedMessages);
+    }
+
+    // Check for [AGENT:analyze] or [AGENT:verify] patterns — multi-agent verification
+    const agentRegex = /\[AGENT:(analyze|verify)\]/g;
+    const agentMatches = [...rawReply.matchAll(agentRegex)];
+
+    if (agentMatches.length > 0) {
+      // Remove [AGENT:...] tags from the reply
+      rawReply = rawReply.replace(agentRegex, "").trim();
+      rawReply = rawReply.replace(/\n{3,}/g, "\n\n");
+
+      // Call NVIDIA for a second opinion
+      const agentMessages = [
+        ...messages,
+        { role: "assistant" as const, content: rawReply },
+        {
+          role: "user" as const,
+          content: "Please provide your independent analysis and second opinion on this SEO topic. Focus on any insights, additional recommendations, or alternative strategies that may have been missed.",
+        },
+      ];
+
+      const nvidiaReply = await callNvidiaAPI(systemPrompt, agentMessages);
+
+      // Combine both responses
+      if (nvidiaReply && !nvidiaReply.startsWith("Second opinion unavailable") && !nvidiaReply.startsWith("NVIDIA agent not configured")) {
+        rawReply += `\n\n--- SECOND OPINION (NVIDIA Nemotron) ---\n\n${nvidiaReply}`;
+      }
     }
 
     // Clean markdown from the final response (but preserve diagram blocks)
