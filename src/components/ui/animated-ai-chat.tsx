@@ -3,7 +3,7 @@
 import { useEffect, useRef, useCallback } from "react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { SendIcon } from "lucide-react";
+import { Send, Paperclip, ArrowUp } from "lucide-react";
 import { motion } from "framer-motion";
 import * as React from "react";
 
@@ -47,11 +47,11 @@ interface AnimatedAIChatProps {
   disabled?: boolean;
 }
 
-/* ─── Glass Chat Input Component — larger, premium ───────────── */
+/* ─── Glass Chat Input — iOS26 liquid glass, spacious, turquoise accent ─ */
 export function AnimatedAIChat({ onSendMessage, isTyping, className, disabled }: AnimatedAIChatProps) {
   const [value, setValue] = useState("");
   const [isFocused, setIsFocused] = useState(false);
-  const { textareaRef, adjustHeight } = useAutoResizeTextarea({ minHeight: 64, maxHeight: 200 });
+  const { textareaRef, adjustHeight } = useAutoResizeTextarea({ minHeight: 80, maxHeight: 240 });
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -70,27 +70,52 @@ export function AnimatedAIChat({ onSendMessage, isTyping, className, disabled }:
     }
   };
 
+  const canSend = value.trim() && !disabled && !isTyping;
+
   return (
     <div className={cn("relative w-full", className)}>
-      {/* Gradient glow border effect on focus */}
+      {/* Outer glow ring on focus */}
       <div
         className={cn(
-          "absolute -inset-[1px] rounded-2xl transition-all duration-500",
+          "absolute -inset-[1.5px] rounded-[22px] transition-all duration-500 pointer-events-none",
           isFocused && !disabled
-            ? "bg-gradient-to-r from-white/20 via-white/10 to-white/20 opacity-100"
+            ? "opacity-100"
             : "opacity-0"
         )}
+        style={{
+          background: isFocused && !disabled
+            ? "linear-gradient(135deg, rgba(0,212,170,0.2), rgba(255,255,255,0.08), rgba(0,212,170,0.15))"
+            : "transparent",
+        }}
       />
 
       <div
         className={cn(
-          "relative flex items-end gap-3 rounded-2xl bg-white/[0.06] backdrop-blur-xl border px-5 py-4 transition-all duration-300",
+          "glass-input relative flex items-end gap-3 bg-white/[0.06] px-5 py-5 transition-all duration-400",
           isFocused && !disabled
-            ? "bg-white/[0.09] border-white/[0.15] shadow-[0_0_40px_rgba(255,255,255,0.06)]"
+            ? "bg-white/[0.09] border-white/[0.15]"
             : "border-white/[0.08]",
           disabled && "opacity-50 cursor-not-allowed"
         )}
       >
+        {/* Paperclip / file attachment button */}
+        <motion.button
+          type="button"
+          disabled={disabled}
+          className={cn(
+            "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-all mb-0.5",
+            "bg-white/[0.06] border border-white/[0.08] text-white/30",
+            "hover:bg-white/[0.1] hover:text-white/60 hover:border-white/[0.12]",
+            disabled && "opacity-40 cursor-not-allowed"
+          )}
+          whileHover={!disabled ? { scale: 1.05 } : {}}
+          whileTap={!disabled ? { scale: 0.95 } : {}}
+          title="Attach file"
+        >
+          <Paperclip className="w-[18px] h-[18px]" />
+        </motion.button>
+
+        {/* Textarea — spacious, auto-growing */}
         <textarea
           ref={textareaRef}
           value={value}
@@ -101,47 +126,49 @@ export function AnimatedAIChat({ onSendMessage, isTyping, className, disabled }:
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           onKeyDown={handleKeyDown}
-          placeholder={disabled ? "No credits remaining..." : "What do you want to rank for?"}
+          placeholder={disabled ? "No credits remaining..." : "Ask me anything......"}
           rows={1}
           disabled={disabled}
-          className="max-h-[160px] min-h-[28px] flex-1 resize-none bg-transparent text-[16px] text-white outline-none placeholder:text-white/25 leading-relaxed"
+          className="max-h-[200px] min-h-[36px] flex-1 resize-none bg-transparent text-[16px] text-white outline-none placeholder:text-white/20 leading-relaxed py-1"
         />
+
+        {/* Send button — turquoise/cyan, prominent */}
         <motion.button
           onClick={handleSend}
-          disabled={!value.trim() || isTyping || disabled}
+          disabled={!canSend}
           className={cn(
-            "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-all mb-0",
-            value.trim() && !disabled
-              ? "bg-white text-[#0A0A0B] hover:bg-white/90 shadow-[0_0_24px_rgba(255,255,255,0.12)]"
-              : "bg-white/[0.06] text-white/20"
+            "flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl transition-all mb-0.5",
+            canSend
+              ? "bg-[#00D4AA] text-white shadow-[0_0_24px_rgba(0,212,170,0.25)] hover:bg-[#00E4BA] hover:shadow-[0_0_32px_rgba(0,212,170,0.35)]"
+              : "bg-white/[0.06] text-white/20 border border-white/[0.08]"
           )}
-          whileHover={value.trim() && !disabled ? { scale: 1.05 } : {}}
-          whileTap={value.trim() && !disabled ? { scale: 0.95 } : {}}
+          whileHover={canSend ? { scale: 1.06 } : {}}
+          whileTap={canSend ? { scale: 0.94 } : {}}
         >
-          <SendIcon className="w-5 h-5" />
+          <ArrowUp className="w-5 h-5" strokeWidth={2.5} />
         </motion.button>
       </div>
 
-      {/* Press Enter to send hint */}
-      <div className="mt-2 flex items-center justify-between px-1">
-        <p className="text-[10px] text-white/20">
-          Press <kbd className="px-1 py-0.5 rounded bg-white/[0.04] border border-white/[0.06] text-white/30 font-mono text-[9px]">Enter</kbd> to send · <kbd className="px-1 py-0.5 rounded bg-white/[0.04] border border-white/[0.06] text-white/30 font-mono text-[9px]">Shift+Enter</kbd> for new line
+      {/* Hint text */}
+      <div className="mt-2.5 flex items-center justify-between px-2">
+        <p className="text-[11px] text-white/20">
+          Press <kbd className="px-1.5 py-0.5 rounded-md bg-white/[0.04] border border-white/[0.06] text-white/25 font-mono text-[10px]">Enter</kbd> to send · <kbd className="px-1.5 py-0.5 rounded-md bg-white/[0.04] border border-white/[0.06] text-white/25 font-mono text-[10px]">Shift+Enter</kbd> for new line
         </p>
       </div>
     </div>
   );
 }
 
-/* ─── Typing Dots ───────────────────────────────────────────── */
+/* ─── Typing Dots — turquoise accent ──────────────────────── */
 export function TypingDots() {
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-1.5">
       {[1, 2, 3].map((dot) => (
         <motion.div
           key={dot}
-          className="w-1.5 h-1.5 bg-white/40 rounded-full"
+          className="w-1.5 h-1.5 rounded-full bg-[#00D4AA]/60"
           initial={{ opacity: 0.3 }}
-          animate={{ opacity: [0.3, 1, 0.3], scale: [0.85, 1.1, 0.85] }}
+          animate={{ opacity: [0.3, 1, 0.3], scale: [0.85, 1.15, 0.85] }}
           transition={{ duration: 1.2, repeat: Infinity, delay: dot * 0.15, ease: "easeInOut" }}
         />
       ))}

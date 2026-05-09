@@ -2,46 +2,74 @@
 
 import { useState, useEffect, useCallback, createContext, useContext, type ReactNode } from "react";
 
+type Tier = "free" | "pro" | "enterprise";
+
 interface CreditsState {
   creditsRemaining: number;
+  maxCredits: number;
   totalUsed: number;
+  totalRefunded: number;
+  tier: Tier;
   nextReset: string | null;
   loading: boolean;
-  deductCredit: () => Promise<boolean>;
+  error: string | null;
+  /** Refresh credits from the server (does NOT deduct) */
   refreshCredits: () => Promise<void>;
 }
 
 const CreditsContext = createContext<CreditsState>({
-  creditsRemaining: 10,
+  creditsRemaining: 0,
+  maxCredits: 25,
   totalUsed: 0,
+  totalRefunded: 0,
+  tier: "free",
   nextReset: null,
   loading: true,
-  deductCredit: async () => true,
+  error: null,
   refreshCredits: async () => {},
 });
 
 export function CreditsProvider({ children }: { children: ReactNode }) {
-  const [creditsRemaining, setCreditsRemaining] = useState(10);
+  const [creditsRemaining, setCreditsRemaining] = useState(0);
+  const [maxCredits, setMaxCredits] = useState(25);
   const [totalUsed, setTotalUsed] = useState(0);
+  const [totalRefunded, setTotalRefunded] = useState(0);
+  const [tier, setTier] = useState<Tier>("free");
   const [nextReset, setNextReset] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const refreshCredits = useCallback(async () => {
     try {
+      setError(null);
       const userId = localStorage.getItem("rankmebaddy_user_id");
-      if (!userId) { setLoading(false); return; }
+      if (!userId) {
+        setLoading(false);
+        return;
+      }
 
       const res = await fetch(`/api/credits`, {
         headers: { "x-user-id": userId },
       });
+
       if (res.ok) {
         const data = await res.json();
         setCreditsRemaining(data.credits_remaining);
-        setTotalUsed(data.total_used);
+        setMaxCredits(data.max_credits ?? 25);
+        setTotalUsed(data.total_used ?? 0);
+        setTotalRefunded(data.total_refunded ?? 0);
+        setTier(data.tier ?? "free");
         setNextReset(data.next_reset);
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || "Failed to fetch credits");
+        // On error, set credits to 0 (fail-closed)
+        setCreditsRemaining(0);
       }
-    } catch {
-      // Credits fetch failed, use defaults
+    } catch (err) {
+      setError("Network error fetching credits");
+      // Fail-closed: assume no credits on error
+      setCreditsRemaining(0);
     } finally {
       setLoading(false);
     }
@@ -50,39 +78,25 @@ export function CreditsProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     refreshCredits();
 
-    // Refresh credits every 60 seconds to keep countdown accurate
-    const interval = setInterval(refreshCredits, 60000);
+    // Refresh credits every 30 seconds to keep countdown accurate
+    const interval = setInterval(refreshCredits, 30000);
     return () => clearInterval(interval);
   }, [refreshCredits]);
 
-  const deductCredit = useCallback(async (): Promise<boolean> => {
-    try {
-      const userId = localStorage.getItem("rankmebaddy_user_id");
-      if (!userId) return true; // Allow if no user ID stored
-
-      const res = await fetch("/api/credits", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId }),
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setCreditsRemaining(data.credits_remaining);
-        setNextReset(data.next_reset || null);
-        if (!data.allowed) {
-          return false;
-        }
-        return true;
-      }
-      return false; // Block on API error to be safe
-    } catch {
-      return false; // Block on network error
-    }
-  }, []);
-
   return (
-    <CreditsContext.Provider value={{ creditsRemaining, totalUsed, nextReset, loading, deductCredit, refreshCredits }}>
+    <CreditsContext.Provider
+      value={{
+        creditsRemaining,
+        maxCredits,
+        totalUsed,
+        totalRefunded,
+        tier,
+        nextReset,
+        loading,
+        error,
+        refreshCredits,
+      }}
+    >
       {children}
     </CreditsContext.Provider>
   );

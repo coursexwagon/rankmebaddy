@@ -229,3 +229,162 @@ Stage Summary:
 - Zero mock data — clean start for every user
 - Premium glassmorphism UI throughout
 - Larger, more creative chat box with gradient glow and Enter hint
+
+---
+Task ID: 3
+Agent: main
+Task: Rebuild Credits System to be More Powerful and Robust
+
+Work Log:
+1. REWRITE /api/credits/route.ts — Complete overhaul
+   - Increased FREE_CREDITS_PER_RESET from 10 → 25
+   - Added tier system: free (25), pro (100), enterprise (999)
+   - Added `tier` and `max_credits` fields to all responses
+   - Added `total_refunded` field for tracking refunds
+   - Fail-closed error handling: ALL errors return credits_remaining: 0 with HTTP error status — NEVER allows through
+   - New `action` parameter in POST: "check" (verify only), "deduct" (after success), "refund" (on failure)
+   - Legacy mode (no action param) still supported for backward compat
+   - Helper functions: ensureCreditRecord(), checkAndResetCredits()
+   - handleRefundCredits() restores credits and increments total_refunded
+
+2. UPDATE /api/chat/route.ts — Server-side credit enforcement
+   - Added verifyCredits(userId): calls /api/credits with action: "check" before AI processing
+   - Fail-closed: denies on missing userId, network errors, or API errors
+   - Returns 429 with error details when credits exhausted
+   - Added deductCredits(userId): calls /api/credits with action: "deduct" AFTER successful AI response
+   - Added refundCredits(userId, amount): for future use if deduct-then-call pattern is needed
+   - Flow: CHECK credits → process AI → DEDUCT on success → if AI fails, NO deduction
+   - Returns credits_remaining in successful response for client state sync
+
+3. REFACTOR use-credits.tsx — Remove client-side deduction
+   - Removed deductCredit() function entirely — credits deducted server-side now
+   - Added maxCredits (default 25), tier, totalRefunded, error fields
+   - Fail-closed: on fetch error, sets creditsRemaining to 0
+   - More frequent refresh: every 30 seconds (was 60)
+   - refreshCredits() is the only way to update client state
+
+4. UPDATE CreditsDisplay — Progress bar + Tier badge
+   - Shows "X/25" format instead of "X credits"
+   - Visual progress bar (12px wide): green > 50%, white 20-50%, amber ≤ 20%, red = 0
+   - Tier badge: "Free" (white/50), "Pro" (emerald-400), "Enterprise" (violet-400)
+   - Tabular-nums for aligned number display
+
+5. UPDATE CreditsExhaustedBanner — Better design
+   - Shows "Your Free plan gives you 25 credits/hour" with tier-aware messaging
+   - Added progress bar showing "0/25"
+   - Glass effect styling maintained
+
+6. UPDATE sendMessage flow — Server-side credit verification
+   - Removed deductCredit() call before sending messages
+   - Client-side UX check: if creditsRemaining ≤ 0, shows error immediately
+   - Handles 429 response from chat API (server-side enforcement)
+   - refreshCredits() called after success and after error
+
+Build verification:
+- ESLint on all 4 modified files: 0 errors, 0 warnings
+- Dev server compiles successfully
+
+Stage Summary:
+- Credits increased from 10 → 25 per hour (free tier)
+- Server-side credit enforcement prevents bypass
+- Credits deducted AFTER successful AI response — no wasted credits on failures
+- Fail-closed: errors never allow users through
+- Tier system (free/pro/enterprise) ready for future scaling
+- Credit refund mechanism available for edge cases
+- Visual progress bar and tier badge in UI
+- All existing functionality preserved
+
+---
+Task ID: 4
+Agent: main
+Task: Implement iOS26 Liquid Glass Buttons + Redesign Chat Interface
+
+Work Log:
+- Added iOS26 liquid glass CSS utilities to globals.css: .glass-button, .glass-card, .glass-input, .glow-turquoise, .gradient-border, .glass-button-shine, .sidebar-active-indicator, .sidebar-scrollbar
+- Rewrote animated-ai-chat.tsx: much bigger input (80px min), paperclip button on left, turquoise ArrowUp send button on right, placeholder "Ask me anything......", gradient focus ring, turquoise typing dots
+- Completely redesigned dashboard/page.tsx:
+  - Added 68px left sidebar with icon-only navigation (Chat, Overview, Keywords, Rankings, Content, Settings, Pro)
+  - Sidebar has animated turquoise active indicator with spring animation (layoutId)
+  - Mobile drawer menu with turquoise active states and X close button
+  - Removed top-center tabs, moved navigation to sidebar
+  - Simplified top bar: Brand + Credits + New chat + Avatar
+  - All buttons transformed to iOS26 liquid glass style with colored gradients
+  - SuggestedPromptCard: glass-button with gradient backgrounds, Sparkles icon
+  - ActionButtons: glass-button with blue/pink/green gradients, ArrowUp icon
+  - GlassActionCard: new component for empty state CTAs
+  - CreditsDisplay: glass-card with turquoise progress bar
+  - Settings save button: glass with turquoise gradient
+  - User chat bubbles: turquoise-tinted glass gradient
+  - AI chat bubbles: glass-card with inner gradient
+  - ThinkingIndicator: turquoise accent dots
+  - SetupScreen: turquoise spinner and checkmarks
+- Applied #00D4AA turquoise accent consistently: send button, sidebar indicator, progress bars, focus rings, score rings, loading spinners
+- Cleaned up unused imports (Bell, Target)
+- ESLint: 0 errors in modified files
+- Dev server compiles and runs successfully
+
+Stage Summary:
+- iOS26 liquid glass design language applied across entire dashboard
+- Left sidebar navigation replaces top tabs
+- Chat input is much more spacious with paperclip + turquoise send button
+- All interactive elements use frosted glass with colored gradients
+- Turquoise (#00D4AA) accent color used consistently throughout
+- All existing functionality (chat, credits, auth, settings, sections) preserved
+---
+Task ID: 3
+Agent: Main Agent
+Task: Rebuild credits system to be more powerful and robust
+
+Work Log:
+- Rewrote /src/app/api/credits/route.ts with new tier system (free: 25, pro: 100, enterprise: 999)
+- Added server-side credit verification in /src/app/api/chat/route.ts
+- Credits now deducted AFTER successful AI response (not before)
+- Added refund mechanism for failed AI calls
+- Fail-closed error handling (denies access on any error)
+- Updated /src/hooks/use-credits.tsx to remove client-side deduction
+- Added tier, maxCredits, totalRefunded fields to credits context
+
+Stage Summary:
+- Credits increased from 10/hr to 25/hr (free tier)
+- Server-side enforcement prevents bypass
+- No more wasted credits on AI failures
+- Scalable tier system for future Pro/Enterprise plans
+
+---
+Task ID: 4
+Agent: Main Agent
+Task: Implement iOS26 liquid glass buttons + redesign chat interface
+
+Work Log:
+- Added glass CSS utilities to globals.css (glass-button, glass-card, glass-input, glow-turquoise)
+- Rewrote animated-ai-chat.tsx with bigger input, paperclip button, turquoise send button
+- Added left sidebar navigation with animated turquoise active indicator
+- Redesigned all buttons as liquid glass with colored gradients
+- Changed SuggestedPromptChip to rounded-2xl glass cards
+- Added GlassActionCard for empty state CTAs
+- User chat bubbles now have turquoise-tinted glass
+- Thinking indicator uses turquoise accent dots
+- Consistent #00D4AA turquoise accent throughout
+
+Stage Summary:
+- iOS26 liquid glass design language implemented across all buttons
+- Chat input redesigned: bigger, glass effect, paperclip + turquoise send button
+- Left sidebar added for desktop navigation
+- All buttons use frosted glass with colored gradient overlays
+- Dark theme with turquoise accent consistent with reference images
+
+---
+Task ID: 7
+Agent: Main Agent
+Task: Add env vars to Vercel and redeploy
+
+Work Log:
+- Verified all env vars already exist in Vercel project
+- Added NEXT_PUBLIC_APP_URL env var for server-side credit verification
+- Deployed to production: https://my-project-brown-iota.vercel.app
+- Build successful, deployment live with HTTP 200
+
+Stage Summary:
+- All 13 environment variables configured in Vercel
+- Production deployment successful
+- URL: https://my-project-brown-iota.vercel.app

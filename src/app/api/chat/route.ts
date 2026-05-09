@@ -521,17 +521,107 @@ async function executeWebSearch(query: string): Promise<string> {
   }
 }
 
-export async function POST(request: NextRequest) {
+/* ─── Server-side Credit Verification ──────────────────────── */
+async function verifyCredits(userId: string): Promise<{ allowed: boolean; creditsRemaining: number; tier: string; maxCredits: number; error?: string }> {
   try {
-    const { messages, siteData, keyword, platforms, userName, userId } = await request.json();
-
-    if (!messages || !Array.isArray(messages)) {
-      return NextResponse.json({ error: "Messages array is required" }, { status: 400 });
+    if (!userId) {
+      // No user ID — deny by default (fail-closed)
+      return { allowed: false, creditsRemaining: 0, tier: "free", maxCredits: 25, error: "User ID required" };
     }
 
-    // Credits are now checked/deducted by the dashboard BEFORE calling this endpoint
-    // This endpoint focuses solely on AI processing
+    const creditsUrl = process.env.NEXT_PUBLIC_APP_URL
+      ? `${process.env.NEXT_PUBLIC_APP_URL}/api/credits`
+      : `http://localhost:3000/api/credits`;
 
+    const checkRes = await fetch(creditsUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, action: "check" }),
+    });
+
+    const checkData = await checkRes.json();
+
+    if (!checkRes.ok || !checkData.allowed) {
+      return {
+        allowed: false,
+        creditsRemaining: checkData.credits_remaining ?? 0,
+        tier: checkData.tier ?? "free",
+        maxCredits: checkData.max_credits ?? 25,
+        error: checkData.message || checkData.error || "No credits remaining",
+      };
+    }
+
+    return {
+      allowed: true,
+      creditsRemaining: checkData.credits_remaining,
+      tier: checkData.tier ?? "free",
+      maxCredits: checkData.max_credits ?? 25,
+    };
+  } catch (err) {
+    console.error("Credit verification error:", err);
+    // Fail-closed: deny on error
+    return { allowed: false, creditsRemaining: 0, tier: "free", maxCredits: 25, error: "Credit verification failed" };
+  }
+}
+
+async function deductCredits(userId: string): Promise<{ success: boolean; creditsRemaining: number }> {
+  try {
+    const creditsUrl = process.env.NEXT_PUBLIC_APP_URL
+      ? `${process.env.NEXT_PUBLIC_APP_URL}/api/credits`
+      : `http://localhost:3000/api/credits`;
+
+    const res = await fetch(creditsUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, action: "deduct" }),
+    });
+
+    const data = await res.json();
+    return { success: data.success ?? false, creditsRemaining: data.credits_remaining ?? 0 };
+  } catch (err) {
+    console.error("Credit deduction error:", err);
+    return { success: false, creditsRemaining: 0 };
+  }
+}
+
+async function refundCredits(userId: string, amount: number = 1): Promise<void> {
+  try {
+    const creditsUrl = process.env.NEXT_PUBLIC_APP_URL
+      ? `${process.env.NEXT_PUBLIC_APP_URL}/api/credits`
+      : `http://localhost:3000/api/credits`;
+
+    await fetch(creditsUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, action: "refund", amount }),
+    });
+  } catch (err) {
+    console.error("Credit refund error:", err);
+  }
+}
+
+export async function POST(request: NextRequest) {
+  const { messages, siteData, keyword, platforms, userName, userId } = await request.json();
+
+  if (!messages || !Array.isArray(messages)) {
+    return NextResponse.json({ error: "Messages array is required" }, { status: 400 });
+  }
+
+  // ─── Server-side credit verification (fail-closed) ──────────
+  const creditStatus = await verifyCredits(userId);
+  if (!creditStatus.allowed) {
+    return NextResponse.json(
+      {
+        error: creditStatus.error || "No credits remaining. Credits reset every hour.",
+        credits_remaining: creditStatus.creditsRemaining,
+        tier: creditStatus.tier,
+        max_credits: creditStatus.maxCredits,
+      },
+      { status: 429 }
+    );
+  }
+
+  try {
     const systemPrompt = buildSystemPrompt(siteData, keyword, platforms, userName);
 
     // First API call
@@ -648,13 +738,29 @@ export async function POST(request: NextRequest) {
     // Parse actions
     const { cleanReply, actions } = parseActions(rawReply);
 
+    // ─── Deduct credits AFTER successful AI response ────────────
+    // Credits were only CHECKED before, not deducted. Now we deduct.
+    if (userId) {
+      const deduction = await deductCredits(userId);
+      if (!deduction.success) {
+        console.warn("Credit deduction failed after successful AI call for user:", userId);
+        // Still return the response — user got the value, we just failed to track it
+      }
+    }
+
     return NextResponse.json({
       reply: cleanReply,
       actions,
+      credits_remaining: creditStatus.creditsRemaining - 1, // Optimistic update for client
     });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Unknown error";
     console.error("Chat API error:", message, err instanceof Error ? err.stack : "");
+
+    // ─── No credits deducted on failure ───────────────────────
+    // Credits were only CHECKED before the AI call, never deducted.
+    // So on failure, no refund is needed.
+
     return NextResponse.json(
       { error: `Failed to generate response: ${message}` },
       { status: 500 }

@@ -384,3 +384,166 @@
   max-height: 100vh;
   box-sizing: border-box;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   iOS26 LIQUID GLASS — Buttons, Cards, Inputs
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Glass Button — iOS26 liquid glass style
+   Rounded rectangular, frosted glass, subtle shadows */
+.glass-button {
+  position: relative;
+  border-radius: 20px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.glass-button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 50%, rgba(255,255,255,0.06) 100%);
+  pointer-events: none;
+}
+
+.glass-button:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transform: translateY(-1px);
+}
+
+.glass-button:active {
+  transform: translateY(0px) scale(0.98);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* Glass Card — frosted glass container with colored overlay */
+.glass-card {
+  position: relative;
+  border-radius: 20px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.glass-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(160deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.01) 100%);
+  pointer-events: none;
+}
+
+/* Glass Input — frosted chat input style */
+.glass-input {
+  position: relative;
+  border-radius: 20px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-input:focus-within {
+  border-color: rgba(0, 212, 170, 0.3);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35), 0 0 30px rgba(0, 212, 170, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* Glow effect — for focus and active states */
+.glow-turquoise {
+  box-shadow: 0 0 20px rgba(0, 212, 170, 0.15), 0 0 40px rgba(0, 212, 170, 0.06);
+}
+
+.glow-turquoise-strong {
+  box-shadow: 0 0 24px rgba(0, 212, 170, 0.25), 0 0 48px rgba(0, 212, 170, 0.1);
+}
+
+/* Gradient border — animated shine */
+.gradient-border {
+  position: relative;
+  background-clip: padding-box;
+}
+
+.gradient-border::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(0, 212, 170, 0.2), rgba(255,255,255,0.1), rgba(0, 212, 170, 0.15));
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.gradient-border:focus-within::after {
+  opacity: 1;
+}
+
+/* Animated shine sweep — for glass buttons */
+@keyframes shine-sweep {
+  0% { transform: translateX(-100%) rotate(25deg); }
+  100% { transform: translateX(200%) rotate(25deg); }
+}
+
+.glass-button-shine::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 40%;
+  height: 200%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+  transform: translateX(-100%) rotate(25deg);
+  transition: none;
+  opacity: 0;
+}
+
+.glass-button-shine:hover::after {
+  opacity: 1;
+  animation: shine-sweep 0.8s ease-out;
+}
+
+/* Sidebar active indicator — turquoise accent bar */
+.sidebar-active-indicator {
+  position: relative;
+}
+
+.sidebar-active-indicator::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 20px;
+  border-radius: 0 3px 3px 0;
+  background: #00D4AA;
+  box-shadow: 0 0 8px rgba(0, 212, 170, 0.4);
+}
+
+/* Custom scrollbar for sidebar */
+.sidebar-scrollbar::-webkit-scrollbar {
+  width: 3px;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
