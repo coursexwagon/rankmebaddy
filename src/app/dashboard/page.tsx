@@ -4,9 +4,11 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 /* ─── Color System ───────────────────────────────────────────── */
-// Background: #0A0A0B  |  Surface: #18181B  |  Border: #27272A
-// Text: #FAFAFA  |  Secondary: #A1A1AA  |  Muted: #71717A
-// Accent: #6EE7B7 (emerald-300)
+// Background: #FAFAF7  |  Surface: #FFFFFF  |  Border: #E8E5E0
+// Text Primary: #1A1A1A  |  Secondary: #6B6B6B  |  Muted: #9B9B9B
+// Accent: #2563EB (blue-600)  |  Accent Light: #EFF6FF (blue-50)
+// Success: #16A34A  |  Error: #DC2626  |  Warning: #D97706
+// Surface Hover: #F5F5F0
 
 /* ─── Types ──────────────────────────────────────────────────── */
 interface SiteData {
@@ -23,11 +25,18 @@ interface SiteData {
   screenshot: string;
 }
 
+interface AgentAction {
+  type: string;
+  label: string;
+  prompt: string;
+}
+
 interface ChatMessage {
   id: string;
   role: "user" | "assistant";
   content: string;
   timestamp: Date;
+  actions?: AgentAction[];
 }
 
 interface OnboardingData {
@@ -137,6 +146,15 @@ const quickActions = [
   { label: "Content ideas", prompt: "Give me content ideas that could rank for my target keyword" },
 ];
 
+/* ─── Agent Thinking Steps ──────────────────────────────────── */
+const agentThinkingSteps = [
+  "Analyzing your site...",
+  "Researching keywords...",
+  "Checking competitors...",
+  "Evaluating content...",
+  "Building recommendations...",
+];
+
 /* ─── Platform Icons ────────────────────────────────────────── */
 function PlatformIcon({ platform, size = 14 }: { platform: string; size?: number }) {
   switch (platform) {
@@ -153,7 +171,7 @@ function PlatformIcon({ platform, size = 14 }: { platform: string; size?: number
       return (
         <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
           <path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.38.55A3.02 3.02 0 0 0 .5 6.19 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.81 3.02 3.02 0 0 0 2.12 2.14c1.88.55 9.38.55 9.38.55s7.5 0 9.38-.55a3.02 3.02 0 0 0 2.12-2.14A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.81z" fill="#FF0000" />
-          <path d="M9.75 15.02 15.75 12 9.75 8.98v6.04z" fill="#FAFAFA" />
+          <path d="M9.75 15.02 15.75 12 9.75 8.98v6.04z" fill="#FFFFFF" />
         </svg>
       );
     case "amazon":
@@ -165,12 +183,12 @@ function PlatformIcon({ platform, size = 14 }: { platform: string; size?: number
     case "tiktok":
       return (
         <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-          <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" fill="#FAFAFA" />
+          <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" fill="#1A1A1A" />
         </svg>
       );
     case "aisearch":
       return (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#A1A1AA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#6B6B6B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="11" cy="11" r="8" />
           <path d="m21 21-4.35-4.35" />
         </svg>
@@ -180,9 +198,101 @@ function PlatformIcon({ platform, size = 14 }: { platform: string; size?: number
   }
 }
 
+/* ─── Agent Step Indicator ───────────────────────────────────── */
+function AgentStepIndicator({ steps, currentStep }: { steps: string[]; currentStep: number }) {
+  const displayStep = currentStep % steps.length;
+  return (
+    <div className="flex items-center gap-2 text-[12px] text-[#6B6B6B]">
+      <motion.div
+        className="h-1.5 w-1.5 rounded-full bg-blue-600"
+        animate={{ scale: [1, 1.4, 1], opacity: [0.5, 1, 0.5] }}
+        transition={{ duration: 0.8, repeat: Infinity }}
+      />
+      <span className="flex items-center gap-1.5">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.35-4.35" />
+        </svg>
+        {steps[displayStep]}
+      </span>
+    </div>
+  );
+}
+
+/* ─── Action Buttons ────────────────────────────────────────── */
+function ActionButtons({ actions, onAction }: { actions: AgentAction[]; onAction: (prompt: string) => void }) {
+  if (!actions || actions.length === 0) return null;
+  return (
+    <div className="mt-3 flex flex-wrap gap-2">
+      {actions.map((action) => (
+        <motion.button
+          key={action.type}
+          onClick={() => onAction(action.prompt)}
+          className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-[11px] font-medium text-blue-700 transition-all hover:bg-blue-100 hover:border-blue-300"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="m5 12h14" /><path d="m12 5 7 7-7 7" />
+          </svg>
+          {action.label}
+        </motion.button>
+      ))}
+    </div>
+  );
+}
+
+/* ─── Step Visualization ────────────────────────────────────── */
+function StepContent({ content }: { content: string }) {
+  // Parse numbered steps and render with step indicators
+  const lines = content.split("\n");
+  const elements: React.ReactNode[] = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const stepMatch = line.match(/^(\d+)\.\s+(.+)/);
+
+    if (stepMatch) {
+      const stepNum = parseInt(stepMatch[1]);
+      elements.push(
+        <div key={`step-${i}`} className="flex items-start gap-2.5 my-1.5">
+          <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-50 text-[10px] font-bold text-blue-600 mt-0.5">
+            {stepNum}
+          </div>
+          <span className="text-[13px] text-[#1A1A1A] leading-relaxed">{stepMatch[2]}</span>
+        </div>
+      );
+    } else if (line.startsWith("• ") || line.startsWith("- ") || line.startsWith("* ")) {
+      elements.push(
+        <div key={`bullet-${i}`} className="flex items-start gap-2 my-0.5 ml-0">
+          <div className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[#9B9B9B]" />
+          <span className="text-[13px] text-[#1A1A1A] leading-relaxed">{line.slice(2)}</span>
+        </div>
+      );
+    } else if (line.startsWith("## ")) {
+      elements.push(
+        <h3 key={`h-${i}`} className="text-[13px] font-bold text-[#1A1A1A] mt-2 mb-1">{line.slice(3)}</h3>
+      );
+    } else if (line.trim() === "") {
+      elements.push(<div key={`br-${i}`} className="h-1" />);
+    } else {
+      elements.push(
+        <span key={`text-${i}`} className="text-[13px] text-[#1A1A1A] leading-relaxed">{line}</span>
+      );
+    }
+  }
+
+  return <div className="space-y-0.5">{elements}</div>;
+}
+
 /* ─── Setup Animation ───────────────────────────────────────── */
 function SetupScreen({ onComplete }: { onComplete: () => void }) {
   const [step, setStep] = useState(0);
+  const onCompleteRef = useRef(onComplete);
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
+
   const steps = [
     "Analyzing your site structure...",
     "Mapping keyword opportunities...",
@@ -194,38 +304,38 @@ function SetupScreen({ onComplete }: { onComplete: () => void }) {
     const timers = steps.map((_, i) =>
       setTimeout(() => setStep(i), i * 600)
     );
-    const done = setTimeout(onComplete, steps.length * 600 + 800);
+    const done = setTimeout(() => onCompleteRef.current(), steps.length * 600 + 800);
     return () => {
       timers.forEach(clearTimeout);
       clearTimeout(done);
     };
-  }, [onComplete]);
+  }, []);
 
   return (
     <motion.div
       className="flex min-h-screen items-center justify-center px-4"
-      style={{ backgroundColor: "#0A0A0B" }}
+      style={{ backgroundColor: "#FAFAF7" }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
       <div className="w-full max-w-sm text-center">
         <motion.div
-          className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-full border border-[#6EE7B7]/20 bg-[#6EE7B7]/5"
+          className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-full border border-blue-200 bg-blue-50"
           animate={{ scale: [1, 1.04, 1] }}
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
         >
           <motion.div
-            className="h-8 w-8 rounded-full border-2 border-[#6EE7B7]/30 border-t-[#6EE7B7]"
+            className="h-8 w-8 rounded-full border-2 border-blue-200 border-t-blue-600"
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
           />
         </motion.div>
 
-        <h2 className="font-heading text-xl font-bold text-[#FAFAFA]">
+        <h2 className="font-heading text-xl font-bold text-[#1A1A1A]">
           Setting up your workspace
         </h2>
-        <p className="mt-2 text-sm text-[#71717A]">
+        <p className="mt-2 text-sm text-[#6B6B6B]">
           Building your SEO command center
         </p>
 
@@ -233,7 +343,7 @@ function SetupScreen({ onComplete }: { onComplete: () => void }) {
           {steps.map((text, i) => (
             <motion.div
               key={text}
-              className="flex items-center gap-3 rounded-lg border border-[#27272A]/40 bg-[#18181B]/30 px-4 py-3"
+              className="flex items-center gap-3 rounded-xl border border-[#E8E5E0] bg-white px-4 py-3 shadow-sm"
               initial={{ opacity: 0, x: -12 }}
               animate={{
                 opacity: step >= i ? 1 : 0,
@@ -242,21 +352,21 @@ function SetupScreen({ onComplete }: { onComplete: () => void }) {
               transition={{ duration: 0.3 }}
             >
               {step > i ? (
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6EE7B7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
               ) : step === i ? (
                 <motion.div
-                  className="h-1.5 w-1.5 rounded-full bg-[#6EE7B7]"
+                  className="h-1.5 w-1.5 rounded-full bg-blue-600"
                   animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
                   transition={{ duration: 0.6, repeat: Infinity }}
                 />
               ) : (
-                <div className="h-1.5 w-1.5 rounded-full bg-[#27272A]" />
+                <div className="h-1.5 w-1.5 rounded-full bg-[#E8E5E0]" />
               )}
               <span
                 className={`text-[12px] ${
-                  step > i ? "text-[#6EE7B7]" : step === i ? "text-[#A1A1AA]" : "text-[#3F3F46]"
+                  step > i ? "text-[#16A34A]" : step === i ? "text-[#6B6B6B]" : "text-[#9B9B9B]"
                 }`}
               >
                 {text}
@@ -291,19 +401,19 @@ function Sidebar({
     <div className="flex h-full flex-col">
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-4 py-4 sm:py-5">
-        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#6EE7B7]/10">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6EE7B7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="20 6 9 17 4 12" />
           </svg>
         </div>
-        <span className="font-heading text-sm font-bold text-[#FAFAFA]">
+        <span className="font-heading text-sm font-bold text-[#1A1A1A]">
           RankMeBaddy
         </span>
       </div>
 
       {/* Site Card */}
       {siteData && (
-        <div className="mx-3 mb-3 overflow-hidden rounded-xl border border-[#27272A]/60 bg-[#18181B]/60">
+        <div className="mx-3 mb-3 overflow-hidden rounded-xl border border-[#E8E5E0] bg-white shadow-sm">
           <div className="flex items-center gap-2.5 px-3 py-2.5">
             {siteData.favicon ? (
               <img
@@ -315,31 +425,31 @@ function Sidebar({
                 }}
               />
             ) : (
-              <div className="flex h-5 w-5 items-center justify-center rounded bg-[#27272A]">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#71717A" strokeWidth="2">
+              <div className="flex h-5 w-5 items-center justify-center rounded bg-[#F5F5F0]">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="2">
                   <circle cx="12" cy="12" r="10" />
                   <path d="M2 12h20" />
                 </svg>
               </div>
             )}
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[12px] font-medium text-[#FAFAFA]">
+              <p className="truncate text-[12px] font-medium text-[#1A1A1A]">
                 {siteData.domain}
               </p>
-              <p className="truncate text-[10px] text-[#52525B]">
+              <p className="truncate text-[10px] text-[#9B9B9B]">
                 {siteData.title
                   ? siteData.title.slice(0, 28) + (siteData.title.length > 28 ? "..." : "")
                   : "No title detected"}
               </p>
             </div>
-            <div className="h-1.5 w-1.5 rounded-full bg-[#6EE7B7]" title="Connected" />
+            <div className="h-1.5 w-1.5 rounded-full bg-[#16A34A]" title="Connected" />
           </div>
           {platforms.length > 0 && (
-            <div className="flex items-center gap-1.5 border-t border-[#27272A]/40 px-3 py-2">
+            <div className="flex items-center gap-1.5 border-t border-[#E8E5E0] px-3 py-2">
               {platforms.map((p) => (
                 <PlatformIcon key={p} platform={p} />
               ))}
-              <span className="ml-1 text-[9px] text-[#52525B]">
+              <span className="ml-1 text-[9px] text-[#9B9B9B]">
                 {platforms.length} platform{platforms.length !== 1 ? "s" : ""}
               </span>
             </div>
@@ -360,11 +470,11 @@ function Sidebar({
               }}
               className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] transition-all ${
                 isActive
-                  ? "bg-[#6EE7B7]/[0.06] text-[#6EE7B7]"
-                  : "text-[#71717A] hover:bg-[#18181B]/60 hover:text-[#A1A1AA]"
+                  ? "bg-blue-50 text-blue-600 font-medium"
+                  : "text-[#6B6B6B] hover:bg-[#F5F5F0] hover:text-[#1A1A1A]"
               }`}
             >
-              <span className={isActive ? "text-[#6EE7B7]" : "text-[#52525B]"}>
+              <span className={isActive ? "text-blue-600" : "text-[#9B9B9B]"}>
                 {item.icon}
               </span>
               {item.label}
@@ -374,16 +484,16 @@ function Sidebar({
       </nav>
 
       {/* User */}
-      <div className="border-t border-[#27272A]/40 px-4 py-3">
+      <div className="border-t border-[#E8E5E0] px-4 py-3">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#6EE7B7]/10 text-[11px] font-bold text-[#6EE7B7]">
+          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600 text-[11px] font-bold text-white">
             {userName ? userName[0].toUpperCase() : "U"}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[12px] font-medium text-[#FAFAFA]">
+            <p className="truncate text-[12px] font-medium text-[#1A1A1A]">
               {userName || "User"}
             </p>
-            <p className="text-[10px] text-[#52525B]">Free plan</p>
+            <p className="text-[10px] text-[#9B9B9B]">Free plan</p>
           </div>
         </div>
       </div>
@@ -392,21 +502,21 @@ function Sidebar({
 
   return (
     <>
-      <aside className="hidden w-[220px] shrink-0 border-r border-[#27272A]/40 bg-[#0A0A0B] sm:flex sm:flex-col">
+      <aside className="hidden w-[220px] shrink-0 border-r border-[#E8E5E0] bg-white sm:flex sm:flex-col">
         {sidebarContent}
       </aside>
       <AnimatePresence>
         {mobileOpen && (
           <>
             <motion.div
-              className="fixed inset-0 z-40 bg-black/60 sm:hidden"
+              className="fixed inset-0 z-40 bg-black/30 sm:hidden"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={onMobileClose}
             />
             <motion.aside
-              className="fixed inset-y-0 left-0 z-50 w-[260px] bg-[#0A0A0B] sm:hidden"
+              className="fixed inset-y-0 left-0 z-50 w-[260px] bg-white shadow-xl sm:hidden"
               initial={{ x: -260 }}
               animate={{ x: 0 }}
               exit={{ x: -260 }}
@@ -422,7 +532,7 @@ function Sidebar({
 }
 
 /* ─── Chat Message ──────────────────────────────────────────── */
-function ChatBubble({ message }: { message: ChatMessage }) {
+function ChatBubble({ message, onAction }: { message: ChatMessage; onAction: (prompt: string) => void }) {
   const isUser = message.role === "user";
 
   return (
@@ -430,11 +540,11 @@ function ChatBubble({ message }: { message: ChatMessage }) {
       className={`flex gap-3 ${isUser ? "flex-row-reverse" : "flex-row"}`}
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25 }}
+      transition={{ duration: 0.2 }}
     >
       <div
         className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
-          isUser ? "bg-[#18181B] text-[#A1A1AA]" : "bg-[#6EE7B7]/10 text-[#6EE7B7]"
+          isUser ? "bg-[#E8E5E0] text-[#6B6B6B]" : "bg-blue-50 text-blue-600"
         }`}
       >
         {isUser ? "You" : "R"}
@@ -442,16 +552,25 @@ function ChatBubble({ message }: { message: ChatMessage }) {
       <div
         className={`max-w-[85%] rounded-2xl px-4 py-3 ${
           isUser
-            ? "rounded-tr-sm bg-[#18181B] text-[#FAFAFA]"
-            : "rounded-tl-sm border border-[#27272A]/40 bg-[#0A0A0B] text-[#A1A1AA]"
+            ? "rounded-tr-sm bg-blue-50 text-[#1A1A1A]"
+            : "rounded-tl-sm border border-[#E8E5E0] bg-white text-[#1A1A1A] shadow-sm"
         }`}
       >
-        <div className="text-[13px] leading-relaxed whitespace-pre-wrap">
-          {message.content}
+        {isUser ? (
+          <div className="text-[13px] leading-relaxed whitespace-pre-wrap">
+            {message.content}
+          </div>
+        ) : (
+          <StepContent content={message.content} />
+        )}
+        <div className="flex items-center justify-between mt-1.5">
+          <p className={`text-[10px] ${isUser ? "text-[#9B9B9B]" : "text-[#9B9B9B]"}`}>
+            {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+          </p>
         </div>
-        <p className={`mt-1.5 text-[10px] ${isUser ? "text-[#52525B]" : "text-[#3F3F46]"}`}>
-          {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-        </p>
+        {!isUser && message.actions && message.actions.length > 0 && (
+          <ActionButtons actions={message.actions} onAction={onAction} />
+        )}
       </div>
     </motion.div>
   );
@@ -496,10 +615,10 @@ function OverviewSection({ siteData, keyword, platforms, onNavigate }: {
     <div className="mx-auto max-w-4xl space-y-6 p-4 sm:p-6">
       {/* Header */}
       <div>
-        <h2 className="font-heading text-lg font-bold text-[#FAFAFA]">
+        <h2 className="font-heading text-lg font-bold text-[#1A1A1A]">
           SEO Overview
         </h2>
-        <p className="text-[12px] text-[#71717A]">
+        <p className="text-[12px] text-[#6B6B6B]">
           Real-time analysis of {siteData.domain}
         </p>
       </div>
@@ -508,17 +627,17 @@ function OverviewSection({ siteData, keyword, platforms, onNavigate }: {
       <div className="grid gap-4 sm:grid-cols-4">
         {/* Score Ring */}
         <motion.div
-          className="flex flex-col items-center justify-center rounded-xl border border-[#27272A]/60 bg-[#18181B]/40 p-5"
+          className="flex flex-col items-center justify-center rounded-xl border border-[#E8E5E0] bg-white p-5 shadow-sm"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
           <div className="relative flex h-20 w-20 items-center justify-center">
             <svg className="h-20 w-20 -rotate-90" viewBox="0 0 80 80">
-              <circle cx="40" cy="40" r="34" fill="none" stroke="#27272A" strokeWidth="5" />
+              <circle cx="40" cy="40" r="34" fill="none" stroke="#E8E5E0" strokeWidth="5" />
               <motion.circle
                 cx="40" cy="40" r="34" fill="none"
-                stroke={seoScore >= 70 ? "#6EE7B7" : seoScore >= 40 ? "#FBBC05" : "#EF4444"}
+                stroke={seoScore >= 70 ? "#2563EB" : seoScore >= 40 ? "#D97706" : "#DC2626"}
                 strokeWidth="5"
                 strokeLinecap="round"
                 strokeDasharray={`${(seoScore / 100) * 213.6} 213.6`}
@@ -527,9 +646,9 @@ function OverviewSection({ siteData, keyword, platforms, onNavigate }: {
                 transition={{ duration: 1, delay: 0.3 }}
               />
             </svg>
-            <span className="absolute font-heading text-xl font-bold text-[#FAFAFA]">{seoScore}</span>
+            <span className="absolute font-heading text-xl font-bold text-[#1A1A1A]">{seoScore}</span>
           </div>
-          <p className="mt-2 text-[10px] font-semibold uppercase tracking-wider text-[#52525B]">SEO Score</p>
+          <p className="mt-2 text-[10px] font-semibold uppercase tracking-wider text-[#9B9B9B]">SEO Score</p>
         </motion.div>
 
         {/* Stats */}
@@ -541,16 +660,16 @@ function OverviewSection({ siteData, keyword, platforms, onNavigate }: {
           <motion.button
             key={stat.label}
             onClick={stat.onClick}
-            className="rounded-xl border border-[#27272A]/60 bg-[#18181B]/40 p-4 text-left transition-colors hover:border-[#3F3F46]"
+            className="rounded-xl border border-[#E8E5E0] bg-white p-4 text-left shadow-sm transition-colors hover:border-[#9B9B9B]"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 + i * 0.05 }}
           >
-            <p className={`font-heading text-2xl font-bold ${stat.accent ? "text-[#6EE7B7]" : "text-[#FAFAFA]"}`}>
+            <p className={`font-heading text-2xl font-bold ${stat.accent ? "text-blue-600" : "text-[#1A1A1A]"}`}>
               {stat.value}
             </p>
-            <p className="text-[10px] text-[#52525B]">{stat.label}</p>
-            <p className="mt-0.5 text-[9px] text-[#3F3F46]">{stat.sub}</p>
+            <p className="text-[10px] text-[#9B9B9B]">{stat.label}</p>
+            <p className="mt-0.5 text-[9px] text-[#9B9B9B]">{stat.sub}</p>
           </motion.button>
         ))}
       </div>
@@ -559,22 +678,22 @@ function OverviewSection({ siteData, keyword, platforms, onNavigate }: {
       <div className="grid gap-4 sm:grid-cols-2">
         {/* SEO Issues */}
         <motion.div
-          className="rounded-xl border border-[#27272A]/60 bg-[#18181B]/40 p-4"
+          className="rounded-xl border border-[#E8E5E0] bg-white p-4 shadow-sm"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-[#52525B]">
+          <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-[#9B9B9B]">
             Site Issues
           </h3>
           <div className="space-y-2.5">
             {issues.map((issue) => (
               <div key={issue.text} className="flex items-start gap-2">
                 <div className={`mt-0.5 h-2 w-2 shrink-0 rounded-full ${
-                  issue.type === "error" ? "bg-red-500" : issue.type === "warning" ? "bg-yellow-500" : "bg-[#6EE7B7]"
+                  issue.type === "error" ? "bg-red-500" : issue.type === "warning" ? "bg-amber-500" : "bg-green-500"
                 }`} />
                 <span className={`text-[12px] ${
-                  issue.type === "error" ? "text-red-400" : issue.type === "warning" ? "text-yellow-400" : "text-[#71717A]"
+                  issue.type === "error" ? "text-red-600" : issue.type === "warning" ? "text-amber-600" : "text-[#6B6B6B]"
                 }`}>
                   {issue.text}
                 </span>
@@ -585,30 +704,30 @@ function OverviewSection({ siteData, keyword, platforms, onNavigate }: {
 
         {/* Active Campaign */}
         <motion.div
-          className="rounded-xl border border-[#27272A]/60 bg-[#18181B]/40 p-4"
+          className="rounded-xl border border-[#E8E5E0] bg-white p-4 shadow-sm"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.35 }}
         >
-          <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-[#52525B]">
+          <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-[#9B9B9B]">
             Active Campaign
           </h3>
-          <div className="rounded-lg border border-[#6EE7B7]/20 bg-[#6EE7B7]/[0.03] p-3">
-            <p className="text-[13px] font-medium text-[#FAFAFA]">
+          <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
+            <p className="text-[13px] font-medium text-[#1A1A1A]">
               &ldquo;{keyword}&rdquo;
             </p>
             <div className="mt-3 flex items-center gap-2">
-              <div className="h-1.5 flex-1 rounded-full bg-[#27272A]">
+              <div className="h-1.5 flex-1 rounded-full bg-blue-100">
                 <motion.div
-                  className="h-1.5 rounded-full bg-[#6EE7B7]"
+                  className="h-1.5 rounded-full bg-blue-600"
                   initial={{ width: 0 }}
                   animate={{ width: "35%" }}
                   transition={{ duration: 1, delay: 0.5 }}
                 />
               </div>
-              <span className="text-[10px] text-[#52525B]">35%</span>
+              <span className="text-[10px] text-[#6B6B6B]">35%</span>
             </div>
-            <p className="mt-2 text-[10px] text-[#52525B]">
+            <p className="mt-2 text-[10px] text-[#6B6B6B]">
               Strategy in progress — {platforms.length} platform{platforms.length !== 1 ? "s" : ""} targeted
             </p>
           </div>
@@ -617,15 +736,15 @@ function OverviewSection({ siteData, keyword, platforms, onNavigate }: {
 
       {/* Site Screenshot */}
       <motion.div
-        className="overflow-hidden rounded-xl border border-[#27272A]/60 bg-[#18181B]/40"
+        className="overflow-hidden rounded-xl border border-[#E8E5E0] bg-white shadow-sm"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
       >
-        <h3 className="px-4 pt-4 pb-2 text-[11px] font-semibold uppercase tracking-wider text-[#52525B]">
+        <h3 className="px-4 pt-4 pb-2 text-[11px] font-semibold uppercase tracking-wider text-[#9B9B9B]">
           Site Preview
         </h3>
-        <div className="relative h-48 w-full overflow-hidden bg-[#0A0A0B]">
+        <div className="relative h-48 w-full overflow-hidden bg-[#F5F5F0]">
           <img
             src={siteData.screenshot}
             alt={`Screenshot of ${siteData.domain}`}
@@ -634,7 +753,7 @@ function OverviewSection({ siteData, keyword, platforms, onNavigate }: {
               (e.target as HTMLImageElement).style.display = "none";
             }}
           />
-          <div className="absolute bottom-3 left-3 flex items-center gap-2 rounded-lg bg-[#0A0A0B]/80 px-3 py-1.5 backdrop-blur-sm">
+          <div className="absolute bottom-3 left-3 flex items-center gap-2 rounded-lg bg-white/90 px-3 py-1.5 shadow-sm backdrop-blur-sm">
             {siteData.favicon && (
               <img
                 src={siteData.favicon}
@@ -645,14 +764,14 @@ function OverviewSection({ siteData, keyword, platforms, onNavigate }: {
                 }}
               />
             )}
-            <span className="text-[11px] font-medium text-[#FAFAFA]">{siteData.domain}</span>
+            <span className="text-[11px] font-medium text-[#1A1A1A]">{siteData.domain}</span>
           </div>
         </div>
         {siteData.title && (
-          <div className="border-t border-[#27272A]/40 px-4 py-3">
-            <p className="text-[12px] font-medium text-[#FAFAFA]">{siteData.title}</p>
+          <div className="border-t border-[#E8E5E0] px-4 py-3">
+            <p className="text-[12px] font-medium text-[#1A1A1A]">{siteData.title}</p>
             {siteData.description && (
-              <p className="mt-1 text-[11px] text-[#71717A] line-clamp-2">{siteData.description}</p>
+              <p className="mt-1 text-[11px] text-[#6B6B6B] line-clamp-2">{siteData.description}</p>
             )}
           </div>
         )}
@@ -685,22 +804,22 @@ function KeywordsSection({ siteData, keyword, onAskAI }: {
 
   const filtered = filter === "all" ? keywords : keywords.filter((k) => k.status === filter);
   const statusColors: Record<string, string> = {
-    opportunity: "text-[#6EE7B7] border-[#6EE7B7]/20 bg-[#6EE7B7]/5",
-    ranking: "text-blue-400 border-blue-400/20 bg-blue-400/5",
-    gap: "text-yellow-400 border-yellow-400/20 bg-yellow-400/5",
-    tracked: "text-[#A1A1AA] border-[#27272A] bg-[#18181B]/40",
+    opportunity: "text-blue-600 border-blue-200 bg-blue-50",
+    ranking: "text-green-600 border-green-200 bg-green-50",
+    gap: "text-amber-600 border-amber-200 bg-amber-50",
+    tracked: "text-[#6B6B6B] border-[#E8E5E0] bg-[#F5F5F0]",
   };
 
   return (
     <div className="mx-auto max-w-4xl space-y-5 p-4 sm:p-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="font-heading text-lg font-bold text-[#FAFAFA]">Keywords</h2>
-          <p className="text-[12px] text-[#71717A]">{keywords.length} keywords tracked for {siteData.domain}</p>
+          <h2 className="font-heading text-lg font-bold text-[#1A1A1A]">Keywords</h2>
+          <p className="text-[12px] text-[#6B6B6B]">{keywords.length} keywords tracked for {siteData.domain}</p>
         </div>
         <button
           onClick={() => onAskAI("Find more keyword opportunities for my site beyond what's listed")}
-          className="shrink-0 rounded-lg border border-[#6EE7B7]/20 bg-[#6EE7B7]/5 px-3 py-1.5 text-[11px] font-medium text-[#6EE7B7] transition-colors hover:bg-[#6EE7B7]/10"
+          className="shrink-0 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-[11px] font-medium text-blue-600 transition-colors hover:bg-blue-100"
         >
           + Find more
         </button>
@@ -714,8 +833,8 @@ function KeywordsSection({ siteData, keyword, onAskAI }: {
             onClick={() => setFilter(f)}
             className={`rounded-full border px-3 py-1 text-[11px] capitalize transition-all ${
               filter === f
-                ? "border-[#6EE7B7]/30 bg-[#6EE7B7]/10 text-[#6EE7B7]"
-                : "border-[#27272A] text-[#71717A] hover:text-[#A1A1AA]"
+                ? "border-blue-300 bg-blue-50 text-blue-600 font-medium"
+                : "border-[#E8E5E0] text-[#6B6B6B] hover:text-[#1A1A1A] hover:border-[#9B9B9B]"
             }`}
           >
             {f}
@@ -724,30 +843,30 @@ function KeywordsSection({ siteData, keyword, onAskAI }: {
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-xl border border-[#27272A]/60 bg-[#18181B]/30">
+      <div className="overflow-x-auto rounded-xl border border-[#E8E5E0] bg-white shadow-sm">
         <div className="min-w-[540px]">
-        <div className="grid grid-cols-[1fr_80px_80px_90px_90px] gap-2 border-b border-[#27272A]/40 px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-[#52525B]">
+        <div className="grid grid-cols-[1fr_80px_80px_90px_90px] gap-2 border-b border-[#E8E5E0] px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-[#9B9B9B]">
           <span>Keyword</span>
           <span>Volume</span>
           <span>Difficulty</span>
           <span>Intent</span>
           <span>Status</span>
         </div>
-        <div className="divide-y divide-[#27272A]/20">
+        <div className="divide-y divide-[#E8E5E0]">
           {filtered.map((kw, i) => (
             <motion.div
               key={kw.keyword}
-              className="grid grid-cols-[1fr_80px_80px_90px_90px] gap-2 px-4 py-3 text-[12px] transition-colors hover:bg-[#18181B]/40"
+              className="grid grid-cols-[1fr_80px_80px_90px_90px] gap-2 px-4 py-3 text-[12px] transition-colors hover:bg-[#F5F5F0]"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: i * 0.03 }}
             >
-              <span className="font-medium text-[#FAFAFA] truncate">{kw.keyword}</span>
-              <span className="text-[#A1A1AA]">{kw.volume}</span>
-              <span className={parseInt(kw.difficulty) > 60 ? "text-red-400" : parseInt(kw.difficulty) > 40 ? "text-yellow-400" : "text-[#6EE7B7]"}>
+              <span className="font-medium text-[#1A1A1A] truncate">{kw.keyword}</span>
+              <span className="text-[#6B6B6B]">{kw.volume}</span>
+              <span className={parseInt(kw.difficulty) > 60 ? "text-red-600" : parseInt(kw.difficulty) > 40 ? "text-amber-600" : "text-green-600"}>
                 {kw.difficulty}
               </span>
-              <span className="text-[#71717A]">{kw.intent}</span>
+              <span className="text-[#6B6B6B]">{kw.intent}</span>
               <span className={`rounded-full border px-2 py-0.5 text-[10px] capitalize ${statusColors[kw.status]}`}>
                 {kw.status}
               </span>
@@ -779,8 +898,8 @@ function RankingsSection({ siteData, keyword, platforms }: {
   return (
     <div className="mx-auto max-w-4xl space-y-5 p-4 sm:p-6">
       <div>
-        <h2 className="font-heading text-lg font-bold text-[#FAFAFA]">Rankings</h2>
-        <p className="text-[12px] text-[#71717A]">Tracking {rankings.length} positions across {platforms.length} platform{platforms.length !== 1 ? "s" : ""}</p>
+        <h2 className="font-heading text-lg font-bold text-[#1A1A1A]">Rankings</h2>
+        <p className="text-[12px] text-[#6B6B6B]">Tracking {rankings.length} positions across {platforms.length} platform{platforms.length !== 1 ? "s" : ""}</p>
       </div>
 
       {/* Summary cards */}
@@ -792,14 +911,14 @@ function RankingsSection({ siteData, keyword, platforms }: {
         ].map((stat, i) => (
           <motion.div
             key={stat.label}
-            className="rounded-xl border border-[#27272A]/60 bg-[#18181B]/40 p-3.5"
+            className="rounded-xl border border-[#E8E5E0] bg-white p-3.5 shadow-sm"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 + i * 0.05 }}
           >
-            <p className="font-heading text-xl font-bold text-[#FAFAFA]">{stat.value}</p>
-            <p className="text-[10px] text-[#52525B]">{stat.label}</p>
-            <p className={`mt-0.5 text-[10px] ${stat.positive ? "text-[#6EE7B7]" : "text-red-400"}`}>
+            <p className="font-heading text-xl font-bold text-[#1A1A1A]">{stat.value}</p>
+            <p className="text-[10px] text-[#9B9B9B]">{stat.label}</p>
+            <p className={`mt-0.5 text-[10px] ${stat.positive ? "text-green-600" : "text-red-600"}`}>
               {stat.trend}
             </p>
           </motion.div>
@@ -807,33 +926,33 @@ function RankingsSection({ siteData, keyword, platforms }: {
       </div>
 
       {/* Ranking table */}
-      <div className="overflow-x-auto rounded-xl border border-[#27272A]/60 bg-[#18181B]/30">
+      <div className="overflow-x-auto rounded-xl border border-[#E8E5E0] bg-white shadow-sm">
         <div className="min-w-[480px]">
-        <div className="grid grid-cols-[1fr_70px_80px_70px_60px] gap-2 border-b border-[#27272A]/40 px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-[#52525B]">
+        <div className="grid grid-cols-[1fr_70px_80px_70px_60px] gap-2 border-b border-[#E8E5E0] px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-[#9B9B9B]">
           <span>Keyword</span>
           <span>Platform</span>
           <span>Position</span>
           <span>Change</span>
           <span>URL</span>
         </div>
-        <div className="divide-y divide-[#27272A]/20">
+        <div className="divide-y divide-[#E8E5E0]">
           {rankings.map((r, i) => {
             const change = r.previousPosition - r.position;
             return (
               <motion.div
                 key={`${r.keyword}-${r.platform}`}
-                className="grid grid-cols-[1fr_70px_80px_70px_60px] gap-2 px-4 py-3 text-[12px] items-center transition-colors hover:bg-[#18181B]/40"
+                className="grid grid-cols-[1fr_70px_80px_70px_60px] gap-2 px-4 py-3 text-[12px] items-center transition-colors hover:bg-[#F5F5F0]"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: i * 0.04 }}
               >
-                <span className="font-medium text-[#FAFAFA] truncate">{r.keyword}</span>
+                <span className="font-medium text-[#1A1A1A] truncate">{r.keyword}</span>
                 <span><PlatformIcon platform={r.platform} size={16} /></span>
-                <span className="text-[#FAFAFA]">#{r.position}</span>
-                <span className={change > 0 ? "text-[#6EE7B7]" : change < 0 ? "text-red-400" : "text-[#71717A]"}>
+                <span className="text-[#1A1A1A]">#{r.position}</span>
+                <span className={change > 0 ? "text-green-600" : change < 0 ? "text-red-600" : "text-[#6B6B6B]"}>
                   {change > 0 ? "+" : ""}{change}
                 </span>
-                <span className="truncate text-[#52525B]">{r.url}</span>
+                <span className="truncate text-[#9B9B9B]">{r.url}</span>
               </motion.div>
             );
           })}
@@ -860,10 +979,10 @@ function ContentSection({ siteData, keyword, onAskAI }: {
   ];
 
   const statusStyles: Record<string, string> = {
-    optimize: "text-[#6EE7B7] border-[#6EE7B7]/20 bg-[#6EE7B7]/5",
-    publish: "text-blue-400 border-blue-400/20 bg-blue-400/5",
-    update: "text-yellow-400 border-yellow-400/20 bg-yellow-400/5",
-    draft: "text-[#71717A] border-[#27272A] bg-[#18181B]/40",
+    optimize: "text-blue-600 border-blue-200 bg-blue-50",
+    publish: "text-green-600 border-green-200 bg-green-50",
+    update: "text-amber-600 border-amber-200 bg-amber-50",
+    draft: "text-[#6B6B6B] border-[#E8E5E0] bg-[#F5F5F0]",
   };
 
   const typeIcons: Record<string, string> = {
@@ -877,12 +996,12 @@ function ContentSection({ siteData, keyword, onAskAI }: {
     <div className="mx-auto max-w-4xl space-y-5 p-4 sm:p-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="font-heading text-lg font-bold text-[#FAFAFA]">Content</h2>
-          <p className="text-[12px] text-[#71717A]">Content strategy and optimization tasks</p>
+          <h2 className="font-heading text-lg font-bold text-[#1A1A1A]">Content</h2>
+          <p className="text-[12px] text-[#6B6B6B]">Content strategy and optimization tasks</p>
         </div>
         <button
           onClick={() => onAskAI("Generate a complete content calendar for my SEO campaign")}
-          className="shrink-0 rounded-lg border border-[#6EE7B7]/20 bg-[#6EE7B7]/5 px-3 py-1.5 text-[11px] font-medium text-[#6EE7B7] transition-colors hover:bg-[#6EE7B7]/10"
+          className="shrink-0 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-[11px] font-medium text-blue-600 transition-colors hover:bg-blue-100"
         >
           + Generate plan
         </button>
@@ -892,32 +1011,32 @@ function ContentSection({ siteData, keyword, onAskAI }: {
         {contentItems.map((item, i) => (
           <motion.div
             key={item.title}
-            className="flex items-center gap-4 rounded-xl border border-[#27272A]/60 bg-[#18181B]/30 px-4 py-3.5 transition-colors hover:border-[#27272A]"
+            className="flex items-center gap-4 rounded-xl border border-[#E8E5E0] bg-white px-4 py-3.5 shadow-sm transition-colors hover:border-[#9B9B9B]"
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
           >
             {/* Type badge */}
-            <span className="shrink-0 rounded-md border border-[#27272A] bg-[#18181B] px-2 py-1 text-[9px] font-semibold uppercase text-[#52525B]">
+            <span className="shrink-0 rounded-md border border-[#E8E5E0] bg-[#F5F5F0] px-2 py-1 text-[9px] font-semibold uppercase text-[#6B6B6B]">
               {typeIcons[item.type]}
             </span>
 
             {/* Title + URL */}
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[13px] font-medium text-[#FAFAFA]">{item.title}</p>
-              {item.url && <p className="text-[10px] text-[#52525B]">{siteData.domain}{item.url}</p>}
+              <p className="truncate text-[13px] font-medium text-[#1A1A1A]">{item.title}</p>
+              {item.url && <p className="text-[10px] text-[#9B9B9B]">{siteData.domain}{item.url}</p>}
             </div>
 
             {/* Score */}
             {item.score > 0 && (
               <div className="flex items-center gap-2">
-                <div className="h-1.5 w-16 rounded-full bg-[#27272A]">
+                <div className="h-1.5 w-16 rounded-full bg-[#E8E5E0]">
                   <div
-                    className={`h-1.5 rounded-full ${item.score >= 70 ? "bg-[#6EE7B7]" : item.score >= 40 ? "bg-yellow-500" : "bg-red-500"}`}
+                    className={`h-1.5 rounded-full ${item.score >= 70 ? "bg-blue-600" : item.score >= 40 ? "bg-amber-500" : "bg-red-500"}`}
                     style={{ width: `${item.score}%` }}
                   />
                 </div>
-                <span className="text-[10px] text-[#71717A]">{item.score}</span>
+                <span className="text-[10px] text-[#6B6B6B]">{item.score}</span>
               </div>
             )}
 
@@ -954,50 +1073,50 @@ function SettingsSection({ onboardingData, onUpdateData }: {
   return (
     <div className="mx-auto max-w-2xl space-y-6 p-4 sm:p-6">
       <div>
-        <h2 className="font-heading text-lg font-bold text-[#FAFAFA]">Settings</h2>
-        <p className="text-[12px] text-[#71717A]">Manage your campaign and profile</p>
+        <h2 className="font-heading text-lg font-bold text-[#1A1A1A]">Settings</h2>
+        <p className="text-[12px] text-[#6B6B6B]">Manage your campaign and profile</p>
       </div>
 
       {/* Profile */}
-      <div className="space-y-4 rounded-xl border border-[#27272A]/60 bg-[#18181B]/30 p-4">
-        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[#52525B]">Profile</h3>
+      <div className="space-y-4 rounded-xl border border-[#E8E5E0] bg-white p-4 shadow-sm">
+        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[#9B9B9B]">Profile</h3>
         <div className="space-y-2">
-          <label className="text-[10px] font-semibold uppercase tracking-wider text-[#71717A]">Name</label>
+          <label className="text-[10px] font-semibold uppercase tracking-wider text-[#6B6B6B]">Name</label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full rounded-lg border border-[#27272A] bg-[#0A0A0B] px-3 py-2.5 text-[13px] text-[#FAFAFA] outline-none transition-colors focus:border-[#6EE7B7]/30"
+            className="w-full rounded-lg border border-[#E8E5E0] bg-white px-3 py-2.5 text-[13px] text-[#1A1A1A] outline-none transition-colors focus:border-blue-300 focus:ring-1 focus:ring-blue-100"
           />
         </div>
       </div>
 
       {/* Campaign */}
-      <div className="space-y-4 rounded-xl border border-[#27272A]/60 bg-[#18181B]/30 p-4">
-        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[#52525B]">Campaign</h3>
+      <div className="space-y-4 rounded-xl border border-[#E8E5E0] bg-white p-4 shadow-sm">
+        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[#9B9B9B]">Campaign</h3>
         <div className="space-y-2">
-          <label className="text-[10px] font-semibold uppercase tracking-wider text-[#71717A]">Primary Keyword</label>
+          <label className="text-[10px] font-semibold uppercase tracking-wider text-[#6B6B6B]">Primary Keyword</label>
           <input
             type="text"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            className="w-full rounded-lg border border-[#27272A] bg-[#0A0A0B] px-3 py-2.5 text-[13px] text-[#FAFAFA] outline-none transition-colors focus:border-[#6EE7B7]/30"
+            className="w-full rounded-lg border border-[#E8E5E0] bg-white px-3 py-2.5 text-[13px] text-[#1A1A1A] outline-none transition-colors focus:border-blue-300 focus:ring-1 focus:ring-blue-100"
           />
         </div>
         <div className="space-y-2">
-          <label className="text-[10px] font-semibold uppercase tracking-wider text-[#71717A]">Website</label>
+          <label className="text-[10px] font-semibold uppercase tracking-wider text-[#6B6B6B]">Website</label>
           <input
             type="text"
             value={onboardingData.website}
             readOnly
-            className="w-full rounded-lg border border-[#27272A] bg-[#0A0A0B]/50 px-3 py-2.5 text-[13px] text-[#52525B] outline-none"
+            className="w-full rounded-lg border border-[#E8E5E0] bg-[#F5F5F0] px-3 py-2.5 text-[13px] text-[#9B9B9B] outline-none"
           />
         </div>
         <div className="space-y-2">
-          <label className="text-[10px] font-semibold uppercase tracking-wider text-[#71717A]">Platforms</label>
+          <label className="text-[10px] font-semibold uppercase tracking-wider text-[#6B6B6B]">Platforms</label>
           <div className="flex flex-wrap gap-2">
             {onboardingData.platforms.map((p) => (
-              <span key={p} className="flex items-center gap-1.5 rounded-full border border-[#27272A] bg-[#18181B] px-3 py-1 text-[11px] text-[#A1A1AA]">
+              <span key={p} className="flex items-center gap-1.5 rounded-full border border-[#E8E5E0] bg-[#F5F5F0] px-3 py-1 text-[11px] text-[#6B6B6B]">
                 <PlatformIcon platform={p} size={12} />
                 {p === "aisearch" ? "AI Search" : p.charAt(0).toUpperCase() + p.slice(1)}
               </span>
@@ -1009,21 +1128,21 @@ function SettingsSection({ onboardingData, onUpdateData }: {
       {/* Save */}
       <button
         onClick={handleSave}
-        className="w-full rounded-lg bg-[#6EE7B7] py-3 text-sm font-semibold text-[#0A0A0B] transition-all hover:bg-[#6EE7B7]/90"
+        className="w-full rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white transition-all hover:bg-blue-700"
       >
         {saved ? "Saved ✓" : "Save changes"}
       </button>
 
       {/* Danger zone */}
-      <div className="space-y-3 rounded-xl border border-red-500/20 bg-red-500/5 p-4">
-        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-red-400">Danger zone</h3>
-        <p className="text-[11px] text-[#71717A]">Reset all onboarding data and start over.</p>
+      <div className="space-y-3 rounded-xl border border-red-200 bg-red-50 p-4">
+        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-red-600">Danger zone</h3>
+        <p className="text-[11px] text-[#6B6B6B]">Reset all onboarding data and start over.</p>
         <button
           onClick={() => {
             localStorage.removeItem("rankmebaddy_onboarding");
             window.location.href = "/onboarding";
           }}
-          className="rounded-lg border border-red-500/30 px-3 py-1.5 text-[11px] text-red-400 transition-colors hover:bg-red-500/10"
+          className="rounded-lg border border-red-300 px-3 py-1.5 text-[11px] text-red-600 transition-colors hover:bg-red-100"
         >
           Reset everything
         </button>
@@ -1041,8 +1160,10 @@ export default function DashboardPage() {
   const [inputValue, setInputValue] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [mobileSidebar, setMobileSidebar] = useState(false);
+  const [agentStep, setAgentStep] = useState(0);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const agentStepIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Load onboarding data from localStorage
   useEffect(() => {
@@ -1062,25 +1183,32 @@ export default function DashboardPage() {
       const domain = onboardingData.siteData?.domain || "your site";
       const keyword = onboardingData.keyword || "your target keyword";
 
+      const welcomeActions: AgentAction[] = [
+        { type: "keyword-gap", label: "Run keyword gap analysis", prompt: "Run a detailed keyword gap analysis for my site. Show me keywords my competitors rank for that I don't." },
+        { type: "optimize-titles", label: "Optimize title tags", prompt: "Review all my page titles and suggest optimized versions with exact before/after comparisons." },
+        { type: "competitor-analysis", label: "Analyze competitors", prompt: "Analyze my top SEO competitors. What are they ranking for that I'm not?" },
+      ];
+
       const welcomeMsg: ChatMessage = {
         id: "welcome",
         role: "assistant",
-        content: `Hey ${name}! I've finished analyzing ${domain}.\n\nHere's what I found:\n\n• ${
+        content: `Hey ${name}! I've finished analyzing ${domain}.\n\nHere's what I found:\n\n1. ${
           onboardingData.siteData?.title
             ? `Your page title is "${onboardingData.siteData.title.slice(0, 60)}" — ${
                 onboardingData.siteData.title.length > 60 ? "it's a bit long, we should trim it" : "good length"
               }`
             : "No page title detected — this is critical for SEO"
-        }\n• ${
+        }\n2. ${
           onboardingData.siteData?.description ? "Meta description is set" : "No meta description — we need to add one"
-        }\n• ${
+        }\n3. ${
           onboardingData.siteData?.ogImage ? "OG image is configured for social sharing" : "Missing OG image — social shares will look bare"
-        }\n• ${
+        }\n4. ${
           onboardingData.siteData?.h1 ? `H1 tag found: "${onboardingData.siteData.h1.slice(0, 40)}"` : "No H1 tag found — search engines use this"
         }\n\nI'm ready to help you rank for "${keyword}" across ${
           onboardingData.platforms?.length || 1
         } platform${onboardingData.platforms?.length !== 1 ? "s" : ""}. What would you like to tackle first?`,
         timestamp: new Date(),
+        actions: welcomeActions,
       };
       setMessages([welcomeMsg]);
     }
@@ -1089,7 +1217,27 @@ export default function DashboardPage() {
   // Auto-scroll chat
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, isSending]);
+
+  // Agent thinking step rotation
+  useEffect(() => {
+    if (isSending) {
+      setAgentStep(0);
+      agentStepIntervalRef.current = setInterval(() => {
+        setAgentStep((prev) => prev + 1);
+      }, 1500);
+    } else {
+      if (agentStepIntervalRef.current) {
+        clearInterval(agentStepIntervalRef.current);
+        agentStepIntervalRef.current = null;
+      }
+    }
+    return () => {
+      if (agentStepIntervalRef.current) {
+        clearInterval(agentStepIntervalRef.current);
+      }
+    };
+  }, [isSending]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInputValue(e.target.value);
@@ -1137,6 +1285,8 @@ export default function DashboardPage() {
 
         if (data.error) throw new Error(data.error);
 
+        const aiActions: AgentAction[] = data.actions || [];
+
         setMessages((prev) => [
           ...prev,
           {
@@ -1144,6 +1294,7 @@ export default function DashboardPage() {
             role: "assistant",
             content: data.reply,
             timestamp: new Date(),
+            actions: aiActions.length > 0 ? aiActions : undefined,
           },
         ]);
       } catch {
@@ -1204,9 +1355,9 @@ export default function DashboardPage() {
 
   if (!onboardingData) {
     return (
-      <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: "#0A0A0B" }}>
+      <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: "#FAFAF7" }}>
         <motion.div
-          className="h-6 w-6 rounded-full border-2 border-[#27272A] border-t-[#6EE7B7]"
+          className="h-6 w-6 rounded-full border-2 border-[#E8E5E0] border-t-blue-600"
           animate={{ rotate: 360 }}
           transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
         />
@@ -1217,7 +1368,7 @@ export default function DashboardPage() {
   const siteData = onboardingData.siteData;
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ backgroundColor: "#0A0A0B" }}>
+    <div className="flex h-screen overflow-hidden" style={{ backgroundColor: "#FAFAF7" }}>
       {/* Sidebar */}
       <Sidebar
         siteData={siteData}
@@ -1232,21 +1383,21 @@ export default function DashboardPage() {
       {/* Main */}
       <main className="flex min-w-0 flex-1 flex-col">
         {/* Top Bar */}
-        <header className="flex items-center justify-between border-b border-[#27272A]/40 px-4 py-3 sm:px-6">
+        <header className="flex items-center justify-between border-b border-[#E8E5E0] bg-white px-4 py-3 sm:px-6">
           <div className="flex items-center gap-3">
             <button
-              className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#27272A] sm:hidden"
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#E8E5E0] bg-white sm:hidden"
               onClick={() => setMobileSidebar(true)}
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A1A1AA" strokeWidth="2" strokeLinecap="round">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B6B6B" strokeWidth="2" strokeLinecap="round">
                 <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" />
               </svg>
             </button>
             <div>
-              <h1 className="font-heading text-sm font-bold text-[#FAFAFA] capitalize">
+              <h1 className="font-heading text-sm font-bold text-[#1A1A1A] capitalize">
                 {activeSection === "chat" ? "Chat" : activeSection}
               </h1>
-              <p className="text-[10px] text-[#52525B]">
+              <p className="text-[10px] text-[#9B9B9B]">
                 {siteData?.domain || "No site connected"}
               </p>
             </div>
@@ -1255,7 +1406,7 @@ export default function DashboardPage() {
             {activeSection === "chat" && (
               <button
                 onClick={() => setMessages([])}
-                className="flex items-center gap-1.5 rounded-lg border border-[#27272A] px-2.5 py-1.5 text-[11px] text-[#71717A] transition-colors hover:text-[#A1A1AA]"
+                className="flex items-center gap-1.5 rounded-lg border border-[#E8E5E0] bg-white px-2.5 py-1.5 text-[11px] text-[#6B6B6B] transition-colors hover:text-[#1A1A1A] hover:border-[#9B9B9B]"
               >
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 5v14" /><path d="M5 12h14" />
@@ -1275,22 +1426,13 @@ export default function DashboardPage() {
                 <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6">
                   <div className="mx-auto max-w-2xl space-y-5">
                     {messages.map((msg) => (
-                      <ChatBubble key={msg.id} message={msg} />
+                      <ChatBubble key={msg.id} message={msg} onAction={sendMessage} />
                     ))}
                     {isSending && (
                       <motion.div className="flex gap-3" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#6EE7B7]/10 text-[10px] font-bold text-[#6EE7B7]">R</div>
-                        <div className="rounded-2xl rounded-tl-sm border border-[#27272A]/40 bg-[#0A0A0B] px-4 py-3">
-                          <div className="flex gap-1.5">
-                            {[0, 1, 2].map((i) => (
-                              <motion.div
-                                key={i}
-                                className="h-1.5 w-1.5 rounded-full bg-[#6EE7B7]/40"
-                                animate={{ opacity: [0.3, 1, 0.3], scale: [0.8, 1, 0.8] }}
-                                transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.15 }}
-                              />
-                            ))}
-                          </div>
+                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-50 text-[10px] font-bold text-blue-600">R</div>
+                        <div className="rounded-2xl rounded-tl-sm border border-[#E8E5E0] bg-white px-4 py-3 shadow-sm">
+                          <AgentStepIndicator steps={agentThinkingSteps} currentStep={agentStep} />
                         </div>
                       </motion.div>
                     )}
@@ -1300,14 +1442,14 @@ export default function DashboardPage() {
 
                 {/* Quick actions */}
                 {messages.length <= 1 && (
-                  <div className="border-t border-[#27272A]/20 px-4 py-3 sm:px-6">
+                  <div className="border-t border-[#E8E5E0] px-4 py-3 sm:px-6 bg-white">
                     <div className="mx-auto flex max-w-2xl flex-wrap gap-2">
                       {quickActions.map((action) => (
                         <button
                           key={action.label}
                           onClick={() => sendMessage(action.prompt)}
                           disabled={isSending}
-                          className="rounded-full border border-[#27272A] bg-[#18181B]/40 px-3 py-1.5 text-[11px] text-[#71717A] transition-all hover:border-[#3F3F46] hover:text-[#A1A1AA] disabled:opacity-40"
+                          className="rounded-full border border-[#E8E5E0] bg-white px-3 py-1.5 text-[11px] text-[#6B6B6B] transition-all hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50 disabled:opacity-40"
                         >
                           {action.label}
                         </button>
@@ -1317,30 +1459,30 @@ export default function DashboardPage() {
                 )}
 
                 {/* Input */}
-                <div className="border-t border-[#27272A]/40 px-4 py-3 sm:px-6">
+                <div className="border-t border-[#E8E5E0] bg-white px-4 py-3 sm:px-6">
                   <div className="mx-auto max-w-2xl">
-                    <div className="flex items-end gap-2 rounded-xl border border-[#27272A] bg-[#18181B]/60 px-4 py-2.5 transition-colors focus-within:border-[#6EE7B7]/30">
+                    <div className="flex items-end gap-2 rounded-xl border border-[#E8E5E0] bg-white px-4 py-2.5 shadow-sm transition-colors focus-within:border-blue-300 focus-within:shadow-md">
                       <textarea
                         ref={inputRef}
                         value={inputValue}
                         onChange={handleInputChange}
                         onKeyDown={handleKeyDown}
-                        placeholder={isSending ? "Thinking..." : "Ask about keywords, rankings, content..."}
+                        placeholder={isSending ? "Agent is working..." : "Ask about keywords, rankings, content..."}
                         disabled={isSending}
                         rows={1}
-                        className="max-h-[120px] min-h-[20px] flex-1 resize-none bg-transparent text-[13px] text-[#FAFAFA] placeholder:text-[#52525B] outline-none disabled:opacity-50"
+                        className="max-h-[120px] min-h-[20px] flex-1 resize-none bg-transparent text-[13px] text-[#1A1A1A] placeholder:text-[#9B9B9B] outline-none disabled:opacity-50"
                       />
                       <button
                         onClick={() => sendMessage(inputValue)}
                         disabled={!inputValue.trim() || isSending}
-                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#6EE7B7] transition-all hover:bg-[#6EE7B7]/90 disabled:opacity-30"
+                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-600 transition-all hover:bg-blue-700 disabled:opacity-30"
                       >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0A0A0B" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                           <path d="m5 12h14" /><path d="m12 5 7 7-7 7" />
                         </svg>
                       </button>
                     </div>
-                    <p className="mt-1.5 text-center text-[9px] text-[#3F3F46]">
+                    <p className="mt-1.5 text-center text-[9px] text-[#9B9B9B]">
                       RankMeBaddy may produce inaccurate info. Verify important details.
                     </p>
                   </div>
